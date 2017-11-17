@@ -1,26 +1,46 @@
-export default React.createClass({
-    getInitialState : function() {
-        return {
-            sendLabel : 'Send',
-            sendDisabled : true,
-            replying : false,
-            comments : MateCat.db.segment_translation_issue_comments.findObjects({
-                'id_issue' : this.props.issueId
-            }),
-            rebutLabel : 'Send and Rebut',
-            rebutDisabled : true,
-            rebutVisible : true,
-            undoRebutLabel : 'Undo Rebut',
-            undoRebutDisabled : false,
-            undoRebutVisible : false
+class ReviewTranslationIssueCommentsContainer extends React.Component{
+
+    constructor(props) {
+        super(props);
+        if (this.props.reviewType === "improved") {
+            this.state = {
+                sendLabel : 'Send',
+                sendDisabled : true,
+                replying : false,
+                comments : MateCat.db.segment_translation_issue_comments.findObjects({
+                    'id_issue' : this.props.issueId
+                }),
+                rebutLabel : 'Send and Rebut',
+                rebutDisabled : true,
+                rebutVisible : true,
+                undoRebutLabel : 'Undo Rebut',
+                undoRebutDisabled : false,
+                undoRebutVisible : false
+            };
+        } else if (this.props.reviewType === "extended") {
+            this.state = {
+                sendLabel : 'Send',
+                sendDisabled : true,
+                replying : false,
+                comments : [],
+                rebutLabel : 'Send and Rebut',
+                rebutDisabled : true,
+                rebutVisible : true,
+                undoRebutLabel : 'Undo Rebut',
+                undoRebutDisabled : false,
+                undoRebutVisible : false
+            };
         }
-    },
 
-    replyClick : function() {
+
+    }
+
+
+    replyClick() {
         this.setState({ replying: true });
-    },
+    }
 
-    undoRebutClick : function() {
+    undoRebutClick() {
         this.setState({ undoRebutDisabled : true, undoRebutLabel: 'Undoing' });
         ReviewImproved.undoRebutIssue( this.props.sid, this.props.issueId )
             .fail( this.handleFail )
@@ -28,9 +48,9 @@ export default React.createClass({
                 this.setState({ undoRebutDisabled : false, undoRebutLabel: this.getInitialState().undoRebutLabel });
             }.bind(this) );
 
-    },
+    }
 
-    commentsChanged : function() {
+    commentsChanged() {
         this.setState({
             comment_text: '', 
             sendLabel : 'Send',
@@ -40,15 +60,15 @@ export default React.createClass({
             }),
             rebutLabel : 'Send and Rebut'
         });
-    },
+    }
 
-    issueChanged : function( data ) {
+    issueChanged( data ) {
         if( data.id === this.props.issueId ) {
             this.checkIssue( data );
         }
-    },
+    }
 
-    checkIssue : function( issue ) {
+    checkIssue( issue ) {
         if( issue.rebutted_at ) {
             if( this.state.rebutVisible ) {
                 this.setState({
@@ -70,35 +90,42 @@ export default React.createClass({
                 });
             }
         }
-    },
+    }
 
-    componentDidMount : function() {
-        MateCat.db.addListener('segment_translation_issue_comments', 
-                               ['insert', 'delete'], this.commentsChanged);
-        ReviewImproved.loadComments(this.props.sid, this.props.issueId);
+    componentDidMount() {
+        if (this.props.reviewType === "improved") {
+            MateCat.db.addListener('segment_translation_issue_comments',
+                ['insert', 'delete'], this.commentsChanged.bind(this));
+            ReviewImproved.loadComments(this.props.sid, this.props.issueId);
 
-        var issue = MateCat.db.segment_translation_issues.by( 'id', parseInt(this.props.issueId) );
-        this.checkIssue( issue );
+            var issue = MateCat.db.segment_translation_issues.by( 'id', parseInt(this.props.issueId) );
+            this.checkIssue( issue );
 
-        MateCat.db.addListener('segment_translation_issues',
-                               ['insert', 'update', 'delete'], this.issueChanged);
-    },
-    componentWillUnmount: function() {
-        MateCat.db.removeListener('segment_translation_issue_comments', 
-                                  ['insert', 'delete'], this.commentsChanged);
+            MateCat.db.addListener('segment_translation_issues',
+                ['insert', 'update', 'delete'], this.issueChanged.bind(this));
+        } else if (this.props.reviewType === "extended") {
 
-        MateCat.db.removeListener('segment_translation_issues',
-                                  ['insert', 'update', 'delete'], this.issueChanged);
-    },
-    handleFail: function() {
+        }
+
+    }
+    componentWillUnmount() {
+        if (this.props.reviewType === "improved") {
+            MateCat.db.removeListener('segment_translation_issue_comments',
+                ['insert', 'delete'], this.commentsChanged);
+
+            MateCat.db.removeListener('segment_translation_issues',
+                ['insert', 'update', 'delete'], this.issueChanged);
+        } else if (this.props.reviewType === "extended") {
+
+        }
+
+    }
+    handleFail() {
         genericErrorAlertMessage() ;
         this.setState({ sendLabel : 'Send', sendDisabled : false });
-    },
-    handleFail: function() {
-        genericErrorAlertMessage() ;
-        this.setState({ sendLabel : 'Send', sendDisabled : false });
-    },
-    sendClick : function() {
+    }
+
+    sendClick() {
         // send action invokes ReviewImproved function
         if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
             return ;
@@ -110,13 +137,13 @@ export default React.createClass({
         };
 
         this.setState({ sendLabel : 'Sending', sendDisabled : true, rebutDisabled : true });
-        ReviewImproved
+        SegmentActions
             .submitComment( this.props.sid, this.props.issueId, data )
             .fail( this.handleFail );
 
-    },
+    }
 
-    rebutClick : function() {
+    rebutClick() {
         // send action invokes ReviewImproved function
         if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
             return ;
@@ -134,9 +161,9 @@ export default React.createClass({
             ReviewImproved.submitComment( this.props.sid, this.props.issueId, data )
         ).fail( this.handleFail );
 
-    },
+    }
 
-    handleCommentChange : function(event) {
+    handleCommentChange(event) {
         var text = event.target.value ;
         var disabled = true;
 
@@ -148,16 +175,16 @@ export default React.createClass({
             sendDisabled : disabled,
             rebutDisabled : disabled
         });
-    },
+    }
 
-    cancelClick : function() {
+    cancelClick() {
         this.setState({ replying: false });
-    },
+    }
 
-    handleRootClick : function(event) {
+    handleRootClick(event) {
         event.stopPropagation();
-    },
-    render : function() {
+    }
+    render() {
 
         var terminal ;
 
@@ -168,28 +195,30 @@ export default React.createClass({
         var commentLines = sortedComments.map(function(comment, index) {
             var source_page ; 
             if ( comment.source_page == '1' ) {
-                source_page = 'Translator' ; 
+                source_page = <strong className="review-issue-translator">Translator:</strong> ;
             } else {
-                source_page = 'Revisor'; 
+                source_page = <strong className="review-issue-revisor">Revisor:</strong>;
             }
 
             return <div key={comment.id} className="review-issue-comment-detail">
-                <strong>{source_page}:</strong> {comment.message}
+                {source_page} {comment.message}
             </div>;
         }); 
 
         if ( !this.state.replying ) {
             var undoRebutButton;
 
-            if( !config.isReview && this.state.undoRebutVisible ) {
+            if( !config.isReview && this.state.undoRebutVisible  && this.props.reviewType === "improved") {
                 var undoRebutButtonClasses = classnames({
-                    'mc-button' : true,
-                    'red-button' : true,
+                    'ui' : true,
+                    'red' : true,
+                    'button' : true,
+                    'small' : true,
                     'disabled' : this.state.undoRebutDisabled
                 });
 
                 undoRebutButton =
-                    <a onClick={this.undoRebutClick} className={undoRebutButtonClasses}>
+                    <a onClick={this.undoRebutClick.bind(this)} className={undoRebutButtonClasses}>
                         {this.state.undoRebutLabel}
                     </a>;
             }
@@ -197,28 +226,32 @@ export default React.createClass({
             terminal = <div className="review-issue-comment-buttons">
                 <div className="review-issue-comment-buttons-right">
                     {undoRebutButton}
-                    <a onClick={this.replyClick} className="mc-button blue-button">Reply</a>
+                    <a onClick={this.replyClick.bind(this)} className="ui primary button small">Reply</a>
                 </div>
             </div>;
         }
         else {
 
             var buttonClasses = classnames({
-                'mc-button' : true,
-                'blue-button' : true,
+                'ui' : true,
+                'primary' : true,
+                'button' : true,
+                'small' : true,
                 'disabled' : this.state.sendDisabled
             });
 
             var rebutButton;
 
-            if ( !config.isReview && this.state.rebutVisible ) {
+            if ( !config.isReview && this.state.rebutVisible && this.props.reviewType === "improved") {
                 var rebutButtonClasses = classnames({
-                    'mc-button' : true,
-                    'red-button' : true,
+                    'ui' : true,
+                    'red' : true,
+                    'button' : true,
+                    'small' : true,
                     'disabled' : this.state.rebutDisabled
                 });
                 rebutButton =
-                    <a onClick={this.rebutClick} className={rebutButtonClasses}>
+                    <a onClick={this.rebutClick.bind(this)} className={rebutButtonClasses}>
                         {this.state.rebutLabel}
                     </a>;
             }
@@ -226,28 +259,32 @@ export default React.createClass({
             terminal = <div className="review-issue-comment-reply">
                 <div className="review-issue-comment-reply-text">
 
-            <textarea data-minheight="40" data-maxheight="90"
-                className="mc-textinput mc-textarea mc-resizable-textarea"
-                placeholder="Write a comment..."
-                value={this.state.comment_text}
-                onChange={this.handleCommentChange} />
+                    <textarea data-minheight="40" data-maxheight="90"
+                        className=""
+                        placeholder="Write a comment..."
+                        value={this.state.comment_text}
+                        onChange={this.handleCommentChange.bind(this)} />
 
-            </div>
-            <div className="review-issue-comment-buttons">
-            <div className="review-issue-comment-buttons-right">
-            {rebutButton}
-            <a onClick={this.sendClick} className={buttonClasses}>{this.state.sendLabel}</a>
-            </div>
-            </div>
+                </div>
+
+                <div className="review-issue-comment-buttons">
+                    <div className="review-issue-comment-buttons-right">
+                        {rebutButton}
+                        <a onClick={this.sendClick.bind(this)} className={buttonClasses}>{this.state.sendLabel}</a>
+                    </div>
+                </div>
             </div>;
         }
 
         return <div onClick={this.handleRootClick} className="review-issue-comment-container" >
             <div className="review-issue-comment-entries">
-            {commentLines}
+                {commentLines}
             </div>
+            <hr/>
             {terminal}
         </div>; 
     }
 
-});
+}
+
+export default ReviewTranslationIssueCommentsContainer;

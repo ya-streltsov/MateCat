@@ -27,13 +27,11 @@ $.extend(UI, {
 		});
 	},
 	openConcordance: function() {
-		this.closeContextMenu();
 		$('.editor .submenu .tab-switcher-cc a').click();
 		$('.editor .cc-search .input').text('');
 		$('.editor .concordances .results').empty();
 		var searchField = (this.currentSearchInTarget) ? $('.editor .cc-search .search-target') : $('.editor .cc-search .search-source');
 		$(searchField).text(this.currentSelectedText);
-//		this.markTagsInSearch();
 
 		this.getConcordance(this.currentSelectedText, this.currentSearchInTarget);
 	},
@@ -112,14 +110,6 @@ $.extend(UI, {
 
 		$('.cc-search', this.currentSegment).removeClass('loading');
 		this.setDeleteSuggestion(segment);
-	},
-	markTagsInSearch: function(el) {
-		if (!this.taglockEnabled)
-			return false;
-		var elements = (typeof el == 'undefined') ? $('.editor .cc-search .input') : el;
-		elements.each(function() {
-//			UI.detectTags(this);
-		});
 	}
 });
 

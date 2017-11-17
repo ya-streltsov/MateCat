@@ -108,11 +108,6 @@ class NewController extends ajaxController {
      */
     protected $projectManager ;
 
-    /**
-     * @var FeatureSet
-     */
-    protected $systemWideFeatures ;
-
     protected $postInput ;
 
     public function __construct() {
@@ -129,10 +124,8 @@ class NewController extends ajaxController {
             return -1;
         }
 
-        $this->systemWideFeatures = new FeatureSet();
-
         if ( $this->current_user ) {
-            $this->systemWideFeatures->loadFromUserEmail( $this->current_user->email ) ;
+            $this->featureSet->loadFromUserEmail( $this->current_user->email ) ;
         }
 
         $filterArgs = [
@@ -170,7 +163,7 @@ class NewController extends ajaxController {
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
         ];
 
-        $filterArgs = $this->systemWideFeatures->filter('filterNewProjectInputFilters', $filterArgs ) ;
+        $filterArgs = $this->featureSet->filter('filterNewProjectInputFilters', $filterArgs ) ;
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -226,7 +219,9 @@ class NewController extends ajaxController {
             $this->tag_projection     = $__postInput[ 'tag_projection' ];
             $this->project_completion = $__postInput[ 'project_completion' ];
 
-            $this->validateMetadataParam( $__postInput['metadata'] );
+            $this->project_completion = $__postInput[ 'project_completion' ];
+
+            $this->validateMetadataParam( $__postInput );
 
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = 'Error evaluating metadata param';
@@ -254,11 +249,7 @@ class NewController extends ajaxController {
         }
 
         //Array_column() is not supported on PHP 5.4, so i'll rewrite it
-        if ( !function_exists( 'array_column' ) ) {
-            $subjectList = Utils::array_column( $subjectList, 'key' );
-        } else {
-            $subjectList = array_column( $subjectList, 'key' );
-        }
+        $subjectList = Utils::array_column( $subjectList, 'key' );
 
         if ( !in_array( $this->subject, $subjectList ) ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
@@ -304,7 +295,7 @@ class NewController extends ajaxController {
             $this->projectFeatures[] = $feature;
         }
 
-        $this->projectFeatures = $this->systemWideFeatures->filter(
+        $this->projectFeatures = $this->featureSet->filter(
                 'filterCreateProjectFeatures', $this->projectFeatures, $this->postInput
         ) ;
 
@@ -412,6 +403,7 @@ class NewController extends ajaxController {
             $conversionHandler->setCookieDir( $cookieDir );
             $conversionHandler->setIntDir( $intDir );
             $conversionHandler->setErrDir( $errDir );
+            $conversionHandler->setFeatures( $this->featureSet );
 
             $status = array();
 
@@ -508,6 +500,7 @@ class NewController extends ajaxController {
                 $converter->cookieDir   = $cookieDir;
                 $converter->source_lang = $this->source_lang;
                 $converter->target_lang = $this->target_lang;
+                $converter->featureSet  = $this->featureSet;
                 $converter->doAction();
 
                 $status = $errors = $converter->checkResult();
@@ -766,19 +759,20 @@ class NewController extends ajaxController {
      * Json string is expected to be flat key value, this is enforced padding 1 to json
      * conversion depth param.
      *
-     * @param $json_string
+     * @param $__postInput
      *
      * @throws Exception
      */
-    private function validateMetadataParam($json_string) {
-        if (!empty($json_string)) {
-            if ( strlen($json_string) > 2048 ) {
-                throw new Exception('metadata string is too long');
+    private function validateMetadataParam( $__postInput ) {
+
+        if ( !empty( $__postInput[ 'metadata' ] ) ) {
+            if ( strlen( $__postInput[ 'metadata' ] ) > 2048 ) {
+                throw new Exception( 'metadata string is too long' );
             }
-            $depth = 2 ; // only converts key value structures
-            $assoc = TRUE;
-            $json_string = html_entity_decode($json_string);
-            $this->metadata = json_decode( $json_string, $assoc, $depth );
+            $depth                     = 2; // only converts key value structures
+            $assoc                     = true;
+            $__postInput[ 'metadata' ] = html_entity_decode( $__postInput[ 'metadata' ] );
+            $this->metadata            = json_decode( $__postInput[ 'metadata' ], $assoc, $depth );
             Log::doLog( "Passed parameter metadata as json string." );
         }
 
@@ -798,6 +792,8 @@ class NewController extends ajaxController {
         if ( !empty( $this->project_completion ) ){
             $this->metadata[ 'project_completion' ] = $this->project_completion;
         }
+
+        $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $__postInput );
 
     }
 

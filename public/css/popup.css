@@ -25,16 +25,15 @@
     z-index:999999999;
 }
 
-.modal .popup p {
+.modal .popup p.text-container-top {
     font-size: 18px;
     margin-top: 20px;
-    padding: 0 15px;
+    padding: 0 30px;
     text-align: left;
-
 }
 
-.modal .popup {
-
+p.button-aligned-right {
+    text-align: right !important;
 }
 
 .popup h1 {
@@ -143,16 +142,20 @@
 
 
 
-.btn-ok, .btn-cancel {color:#fff;background:#09beec;border:1px solid #848689;font-weight:bold;text-decoration:none;padding:8px 18px;border-radius: 2px;border-radius: 2px;font-size:18px;
-
-background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-	background: -moz-linear-gradient(top,  #09beec,  #119ec4);
-	background: linear-gradient(top,  #09beec,  #119ec4);
-
+.btn-ok, .btn-cancel {
+    color: #fff;
+    background: #09beec;
+    border: 1px solid #797979;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 2px;
+    font-size: 18px;
+    margin-right: 3px;
 }
 .btn-cancel {color:#333;background:#f6f6f6;
 
-background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e2e3e5));
+    background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e2e3e5));
 	background: -moz-linear-gradient(top,  #f6f6f6,  #e2e3e5);
 	background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 
@@ -1922,15 +1925,18 @@ span.title-source {
 }
 
 
-.popup.popup-confirm.confirm_checkbox {
+.popup.popup-confirm.confirm_checkbox,
+.popup.popup-alert {
     text-align: right;
 }
 
-.popup.popup-confirm.confirm_checkbox p{
+.popup.popup-confirm.confirm_checkbox p.text-container-top,
+.popup.popup-alert p.text-container-top {
     text-align: left;
     padding: 20px;
 }
 
-.popup.popup-confirm.confirm_checkbox .btn-ok{
+.popup.popup-confirm.confirm_checkbox .btn-ok,
+.popup.popup-alert .btn-ok {
     margin-right: 20px;
 }

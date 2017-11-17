@@ -176,18 +176,13 @@ $.extend(UI, {
 					return false;
 				}
 				UI.unmountSegments();
-				UI.render();
+                UI.render({
+                    firstLoad: false
+                });
 			}
 		});
 	},
-	checkSearchStrings: function() {
-		s = this.searchParams.source;
-		if (s.match(/[<\>]/gi)) { // there is a tag in source
-			this.disableTagMark();
-		} else {
-			this.enableTagMark();
-		}
-	},
+
 	updateSearchDisplay: function() {
 		if ((this.searchMode == 'onlyStatus')) {
 			res = (this.numSearchResultsSegments) ? this.numSearchResultsSegments : 0;
@@ -551,6 +546,7 @@ $.extend(UI, {
 						var seg2scroll = this.nextUnloadedResultSegment();
 						UI.unmountSegments();
 						this.render({
+							firstLoad: false,
 							applySearch: true,
 							segmentToScroll: seg2scroll
 						});
@@ -594,6 +590,7 @@ $.extend(UI, {
 					seg2scroll = this.nextUnloadedResultSegment();
 					UI.unmountSegments();
 					this.render({
+						firstLoad: false,
 						applySearch: true,
 						segmentToScroll: seg2scroll
 					});

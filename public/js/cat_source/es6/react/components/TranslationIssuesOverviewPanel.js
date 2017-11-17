@@ -1,16 +1,42 @@
-export default React.createClass({
+let ReviewTranslationDiffVersion = require("./review/ReviewTranslationDiffVersion").default;
+let ReviewTranslationVersion = require("./review/ReviewTranslationVersion").default;
+class TranslationIssuesOverviewPanel extends React.Component {
+    
+    
+    constructor(props) {
+        super(props);
+        if (this.props.reviewType === "improved") {
+            this.state = this.getStateFromSid(this.props.sid);
+        } else {
+            this.state = {
+                versions: this.props.segment.versions,
+                segment: this.props.segment
+            }
+        }
 
-    getInitialState: function() {
-        return this.getStateFromSid( this.props.sid );
-    },
+    }
+    closePanelClick(e, data) {
+        this.props.closePanel();
+    }
+    // getInitialState() {
+    //     return this.getStateFromSid( this.props.sid );
+    // }
 
-    componentWillReceiveProps : function( nextProps ) {
-        this.setState( this.getStateFromSid( nextProps.sid ) );
-    }, 
+    componentWillReceiveProps ( nextProps ) {
+        if (this.props.reviewType === "improved") {
+            this.setState( this.getStateFromSid( nextProps.sid ) );
+        } else {
+            this.setState({
+                versions: nextProps.segment.versions,
+                segment: nextProps.segment
+            });
+        }
 
-    getStateFromSid : function(sid) {
-        var segment = MateCat.db.segments.by('sid', sid);
-        var original_target = this.getOriginalTarget( segment );
+    } 
+
+    getStateFromSid (sid) {
+        let segment = MateCat.db.segments.by('sid', sid);
+        let original_target = this.getOriginalTarget( segment );
 
         return {
             segment         : segment,
@@ -18,26 +44,26 @@ export default React.createClass({
             versions        : this.getVersions( sid )
         }
 
-    },
-    getVersions : function( sid ) {
-        var versions = MateCat.db.segment_versions.findObjects({
+    }
+    getVersions ( sid ) {
+        let versions = MateCat.db.segment_versions.findObjects({
             id_segment : parseInt(sid)
         });
 
-        var sorted = _.sortBy(versions, function(version) {
+        let sorted = _.sortBy(versions, function(version) {
             return parseInt(version.version_number);
         }).reverse();
         return sorted;
-    },
+    }
 
-    getOriginalTarget : function( segment ) {
-        var version_number = segment.version_number ;
+    getOriginalTarget ( segment ) {
+        let version_number = segment.version_number ;
         if ( version_number == "0" ) {
             return segment.translation ;
         }
         else {
             // query versions to find original target
-            var root_version = MateCat.db.segment_versions.findObject({
+            let root_version = MateCat.db.segment_versions.findObject({
                 id_segment : parseInt(segment.sid),
                 version_number : 0
             });
@@ -47,77 +73,120 @@ export default React.createClass({
             }
             return root_version.translation ;
         }
-    },
+    }
 
-    originalTarget : function() {
+    originalTarget () {
         return { __html : UI.decodePlaceholdersToText( this.state.original_target ) };
-    },
+    }
 
-    getTrackChangesForCurrentVersion : function() {
+    getTrackChangesForCurrentVersion () {
         if ( this.state.segment.version_number != '0' ) {
             // no track changes possibile for first version
-            var previous = this.findPreviousVersion( this.state.segment.version_number );
+            let previous = this.findPreviousVersion( this.state.segment.version_number );
             return trackChangesHTML(
                 UI.clenaupTextFromPleaceholders(previous.translation),
                 UI.clenaupTextFromPleaceholders(
                     window.cleanupSplitMarker( this.state.segment.translation )
                 ));
         }
-    },
+    }
 
-    findPreviousVersion : function( version_number ) {
-        return this.state.versions.filter(function(item) {
-            return parseInt( item.version_number ) == parseInt( version_number ) -1 ;
-        }.bind(this) )[0];
-    },
+    findPreviousVersion ( version_number ) {
+        if ( this.state.segment.version_number !== '0' && version_number !== 0) {
+            return this.state.versions.filter(function (item) {
+                return parseInt(item.version_number) === parseInt(version_number) - 1;
+            }.bind(this))[0];
+        } else return this.state.versions[this.state.versions.length - 1];
+    }
 
-    getTrackChangesForOldVersion : function(version) {
+    getTrackChangesForOldVersion (version) {
         if ( version.version_number != "0" ) {
-            var previous = this.findPreviousVersion( version.version_number );
+            let previous = this.findPreviousVersion( version.version_number );
             return trackChangesHTML(
                 UI.clenaupTextFromPleaceholders( previous.translation ),
                 UI.clenaupTextFromPleaceholders( version.translation )
             );
         }
-    },
+    }
 
-    render: function() {
-
-        var previousVersions = this.state.versions.map( function(v) {
-            var key = 'version-' + v.id + '-' + this.props.sid ;
+    getListVersionsReviewImproved() {
+        let previousVersions = this.state.versions.map( function(v) {
+            let key = 'version-' + v.id + '-' + this.props.sid ;
 
             return (
-                <ReviewTranslationVersion 
-                trackChangesMarkup={this.getTrackChangesForOldVersion( v )}
-                sid={this.state.segment.sid}
-                key={key}
-                versionNumber={v.version_number}  
-                isCurrent={false} 
-                translation={v.translation} 
+                <ReviewTranslationVersion
+                    trackChangesMarkup={this.getTrackChangesForOldVersion( v )}
+                    sid={this.state.segment.sid}
+                    key={key}
+                    versionNumber={v.version_number}
+                    isCurrent={false}
+                    translation={v.translation}
+                    reviewType={this.props.reviewType}
                 />
-            ); 
-        }.bind(this) ); 
-
-        var key = 'version-0-' + this.props.sid ;
-        var currentVersion = <ReviewTranslationVersion 
+            );
+        }.bind(this) );
+        let currentVersion = <ReviewTranslationVersion
             trackChangesMarkup={this.getTrackChangesForCurrentVersion()}
             sid={this.state.segment.sid}
             key={'version-0'}
             versionNumber={this.state.segment.version_number}
-            isCurrent={true} 
-            translation={window.cleanupSplitMarker( this.state.segment.translation ) } />
+            isCurrent={true}
+            translation={window.cleanupSplitMarker( this.state.segment.translation ) }
+            reviewType={this.props.reviewType}/>
 
-        var fullList = [currentVersion].concat(previousVersions); 
+        return [currentVersion].concat(previousVersions);
 
-        return <div className="review-issues-overview-panel"> 
+    }
 
-            <div className="review-original-target-wrapper sidebar-block">
-                <h3>Original target</h3>
-                <div className="muted-text-box" dangerouslySetInnerHTML={this.originalTarget()} />
-            </div>
+    getListVersionsReviewExtended() {
+        if (this.state.versions.length > 0) {
+
+            return this.state.versions.map( function(v) {
+                let key = 'version-' + v.id + '-' + this.props.sid ;
+
+                return (
+                    <ReviewTranslationDiffVersion
+                        diff={v.diff}
+                        sid={this.state.segment.sid}
+                        key={key}
+                        versionNumber={v.version_number}
+                        isCurrent={false}
+                        translation={v.translation}
+                        previousVersion={this.findPreviousVersion(v.version_number).translation}
+                        decodeTextFn={UI.decodeText}
+                        reviewType={this.props.reviewType}
+                        issues={v.issues}
+                        isReview={this.props.isReview}
+                    />
+                );
+            }.bind(this) );
+        } else {
+            return <h3>No version has been created for this segment</h3>;
+        }
+    }
+
+    render() {
+        let fullList = '';
+
+        if (this.props.reviewType === "improved") {
+            fullList = this.getListVersionsReviewImproved();
+        } else if (this.props.reviewType === "extended") {
+            fullList = this.getListVersionsReviewExtended();
+        }
+
+        return <div className="review-issues-overview-panel">
+                { this.props.reviewType === "improved" ? (
+                    <div className="review-original-target-wrapper sidebar-block">
+                        <h3>Original target</h3>
+                        <div className="ui ignored message" dangerouslySetInnerHTML={this.originalTarget()} />
+                        <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>
+                    </div>
+                ) : (null) }
 
             {fullList}
         </div>
         ;
     }
-});
+}
+
+export default TranslationIssuesOverviewPanel

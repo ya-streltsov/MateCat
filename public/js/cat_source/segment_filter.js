@@ -149,6 +149,7 @@ if (SegmentFilter.enabled())
                 }
 
                 return UI.render({
+                    firstLoad: false,
                     segmentToOpen: segmentToOpen
                 }).done( afterRenderCallback ) ;
             })

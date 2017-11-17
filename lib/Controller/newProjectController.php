@@ -19,14 +19,9 @@ class newProjectController extends viewController {
 
     private $keyList = array();
 
-    /**
-     * @var FeatureSet
-     */
-    private $featureSet ;
-
     public function __construct() {
 
-        parent::__construct( false );
+        parent::__construct();
         parent::makeTemplate( "upload.html" );
 
         $filterArgs = array(
@@ -40,8 +35,6 @@ class newProjectController extends viewController {
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
-
-        $this->featureSet = new FeatureSet() ;
 
     }
 
@@ -308,6 +301,9 @@ class newProjectController extends viewController {
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
 
         $this->template->additional_input_params_base_path  = \INIT::$TEMPLATE_ROOT ;
+
+        //Enable tag projection at instance level
+        $this->template->tag_projection_enabled = true;
 
         $this->featureSet->appendDecorators('NewProjectDecorator', $this, $this->template ) ;
 

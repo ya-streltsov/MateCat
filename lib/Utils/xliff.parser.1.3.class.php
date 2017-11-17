@@ -42,9 +42,18 @@
 
 class Xliff_Parser {
 
-	private static $find_xliff_tags_reg = null;
+    /**
+     * @var FeatureSet
+     */
+    protected $features;
 
-	public static function Xliff2Array($file_content) {
+    public function __construct( FeatureSet $features = null ) {
+        $this->features = $features;
+    }
+
+    private static $find_xliff_tags_reg = null;
+
+	public function Xliff2Array($file_content) {
 
 	    $xliff = [];
 
@@ -106,10 +115,18 @@ class Xliff_Parser {
 					$xliff['files'][$i]['attr']['datatype'] = "txt";
 				}
 				// Target-language
-				unset($temp);
-				preg_match('|target-language\s?=\s?["\'](.*?)["\']|si', $file_short, $temp);
-				if (isset($temp[1]))
-					$xliff['files'][$i]['attr']['target-language'] = $temp[1];
+                unset( $temp );
+                preg_match( '|target-language\s?=\s?["\'](.*?)["\']|si', $file_short, $temp );
+                if ( isset( $temp[ 1 ] ) ) {
+                    $xliff[ 'files' ][ $i ][ 'attr' ][ 'target-language' ] = $temp[ 1 ];
+                }
+
+                //Custom MateCat x-Attribute
+                unset( $temp );
+                preg_match( '|x-(.*?)=\s?["\'](.*?)["\']|si', $file_short, $temp );
+                if ( isset( $temp[ 1 ] ) ) {
+                    $xliff[ 'files' ][ $i ][ 'attr' ][ 'custom' ][ $temp[ 1 ] ] = $temp[ 2 ];
+                }
 
                 /*
                  * PHP 5.2 BUG/INCONSISTENCY vs PHP > 5.2 IN preg_match_all
@@ -168,6 +185,14 @@ class Xliff_Parser {
 						if (isset($temp[1]))
 							$xliff['files'][$i]['trans-units'][$j]['attr']['translate'] = $temp[1];
 
+                        /**
+                         * Approved
+                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                         */
+                        unset($temp);
+                        preg_match('|approved\s?=\s?["\'](.*?)["\']|si', $trans_unit, $temp);
+                        if (isset($temp[1]))
+                            $xliff['files'][$i]['trans-units'][$j]['attr']['approved'] = filter_var( $temp[1], FILTER_VALIDATE_BOOLEAN );
 
 						// Getting Source and Target raw content
 						unset($temp);
@@ -177,15 +202,15 @@ class Xliff_Parser {
 						if (!isset($temp[1])) {
 							$temp[1] = '';
 						}
-						$temp[1] = self::fix_non_well_formed_xml($temp[1]);
+						$temp[1] = $this->fix_non_well_formed_xml($temp[1]);
 						$xliff['files'][$i]['trans-units'][$j]['source']['raw-content'] = $temp[1];
 
 
 						unset($temp);
 
-						self::getTarget( $xliff, $i, $j, $trans_unit );
+						$this->getTarget( $xliff, $i, $j, $trans_unit );
 
-                        self::evalNotes($xliff, $i, $j, $trans_unit);
+                        $this->evalNotes($xliff, $i, $j, $trans_unit);
 
 						// Add here other trans-unit sub-elements you need, copying and pasting the 3 lines below
 
@@ -284,21 +309,25 @@ class Xliff_Parser {
 	}
 
 
-	/**
-	This function exists because many developers started adding html tags directly into the XLIFF source since:
-	1) XLIFF tag remapping is too complex for them
-	2) Trados does not lock Tags within the <source> that are expressed as &gt;b&lt; but is tollerant to html tags in <source>
-
-	in short people typed:
-	<source>The <b>red</d> house</source> or worst <source>5 > 3</source>
-	instead of
-	<source>The <g id="1">red</g> house.</source> and <source>5 &gt; 3</source>
-
-	This function will do the following
-	<g id="1">Hello</g>, 4 > 3 -> <g id="1">Hello</g>, 4 &gt; 3
-	<g id="1">Hello</g>, 4 > 3 &gt; -> <g id="1">Hello</g>, 4 &gt; 3 &gt; 2
-	 */
-	public static function fix_non_well_formed_xml($content) {
+    /**
+     * This function exists because many developers started adding html tags directly into the XLIFF source since:
+     * 1) XLIFF tag remapping is too complex for them
+     * 2) Trados does not lock Tags within the <source> that are expressed as &gt;b&lt; but is tolerant to html tags in <source>
+     *
+     * in short people typed:
+     * <source>The <b>red</d> house</source> or worst <source>5 > 3</source>
+     * instead of
+     * <source>The <g id="1">red</g> house.</source> and <source>5 &gt; 3</source>
+     *
+     * This function will do the following
+     * <g id="1">Hello</g>, 4 > 3 -> <g id="1">Hello</g>, 4 &gt; 3
+     * <g id="1">Hello</g>, 4 > 3 &gt; -> <g id="1">Hello</g>, 4 &gt; 3 &gt; 2
+     *
+     * @param $content string
+     *
+     * @return mixed|string
+     */
+	public static function fix_non_well_formed_xml( $content ) {
 
 		if (self::$find_xliff_tags_reg === null) {
 			// List of the tags that we don't want to escape
@@ -352,21 +381,43 @@ class Xliff_Parser {
 		
 	}
 
-    private static function evalNotes(&$xliff, $i, $j, $trans_unit) {
+    private function evalNotes(&$xliff, $i, $j, $trans_unit) {
         $temp = null;
         preg_match_all('|<note.*>(.+?)</note>|si', $trans_unit, $temp);
         $matches = array_values( $temp[1] );
         if ( count($matches) > 0 ) {
             foreach($matches as $match) {
-                $note = array(
-                    'raw-content' => self::fix_non_well_formed_xml($match)
-                );
+
+                $note = [];
+                if( $this->isJSON( $match ) ){
+                    $note[ 'json' ] = $this->cleanCDATA( $match );
+                } else {
+                    $note[ 'raw-content' ] = $this->fix_non_well_formed_xml( $match );
+                }
+
                 $xliff['files'][$i]['trans-units'][$j]['notes'][] = $note ;
+
             }
         }
     }
 
-    private static function getTarget( &$xliff, $i, $j, $trans_unit ) {
+    private function isJSON( $noteField ){
+        try {
+            $noteField = $this->cleanCDATA( $noteField );
+            json_decode( $noteField );
+            Utils::raiseJsonExceptionError();
+        } catch ( Exception $exception ){
+            return false;
+        }
+        return true;
+    }
+
+    private function cleanCDATA( $testString ){
+        $cleanXMLContent = new SimpleXMLElement( '<rootNoteNode>' . $testString . '</rootNoteNode>', LIBXML_NOCDATA );
+        return $cleanXMLContent->__toString();
+    }
+
+    private function getTarget( &$xliff, $i, $j, $trans_unit ) {
 
         preg_match( '|<target.*?>(.+?)</target>|si', $trans_unit, $temp );
         if ( isset( $temp[ 1 ] ) ) {

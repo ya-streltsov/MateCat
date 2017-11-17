@@ -62,14 +62,17 @@ class ProjectManager {
 
     protected $gdriveSession ;
 
+    /**
+     * @var FeatureSet
+     */
+    protected $features;
+
     const TRANSLATED_USER = 'translated_user';
 
     /**
      * @var Users_UserStruct ;
      */
     protected $user ;
-
-    protected $features ;
 
     public function __construct( ArrayObject $projectStructure = null ) {
 
@@ -110,7 +113,6 @@ class ProjectManager {
                             'translations'         => [],
                             'notes'                => [],
                         //one translation for every file because translations are files related
-                            'query_translations'   => [],
                             'status'               => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
                             'job_to_split'         => null,
                             'job_to_split_pass'    => null,
@@ -417,6 +419,7 @@ class ProjectManager {
         }
         //TMX Management
 
+
         /*
             loop through all input files to
             2)convert, in case, non standard XLIFF files to a format that Matecat understands
@@ -425,15 +428,17 @@ class ProjectManager {
          */
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
+            $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION );
+
             /*
                Conversion Enforce
                Checking Extension is no more sufficient, we want check content
                $enforcedConversion = true; //( if conversion is enabled )
              */
-            $isAFileToConvert = $this->isConversionToEnforce( $fileName );
+            $isAConvertedFile = $this->isAConvertedFile( $fileName, $forceXliff );
 
             //if it's one of the listed formats or conversion is not enabled in first place
-            if ( !$isAFileToConvert ) {
+            if ( !$isAConvertedFile ) {
                 /*
                    filename is already an xliff and it's in upload directory
                    we have to make a cache package from it to avoid altering the original path
@@ -631,40 +636,10 @@ class ProjectManager {
             return false;
         }
 
-        try {
-
-            Utils::deleteDir( $this->uploadDir );
-            if ( is_dir( $this->uploadDir . '_converted' ) ) {
-                Utils::deleteDir( $this->uploadDir . '_converted' );
-            }
-
-        } catch ( Exception $e ) {
-
-            $output = "<pre>\n";
-            $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
-            $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-            $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-            $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
-            $output .= "\n\t";
-            $output .= "Aborting...\n";
-            $output .= "</pre>";
-
-            Log::doLog( $output );
-
-            Utils::sendErrMailReport( $output, $e->getMessage() );
-
-        }
-
         $this->projectStructure[ 'status' ] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? Constants_ProjectStatus::STATUS_NEW : Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
 
-        $isEmptyProject = false;
-        //FIXME for project with only pre-translations this condition is not enough, because the translated segments are marked as not to be shown in cattool
-        //we need to compare the number of segments with the number of translations
         if ( $this->show_in_cattool_segs_counter == 0 ) {
             Log::doLog( "Segment Search: No segments in this project - \n" );
-            $isEmptyProject = true;
-        }
-        if ( $isEmptyProject ) {
             $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_EMPTY;
         }
 
@@ -710,6 +685,30 @@ class ProjectManager {
         Database::obtain()->commit();
 
         $this->features->run('postProjectCommit', $this->projectStructure );
+        try {
+
+            Utils::deleteDir( $this->uploadDir );
+            if ( is_dir( $this->uploadDir . '_converted' ) ) {
+                Utils::deleteDir( $this->uploadDir . '_converted' );
+            }
+
+        } catch ( Exception $e ) {
+
+            $output = "<pre>\n";
+            $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
+            $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+            $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+            $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
+            $output .= "\n\t";
+            $output .= "Aborting...\n";
+            $output .= "</pre>";
+
+            Log::doLog( $output );
+
+            Utils::sendErrMailReport( $output, $e->getMessage() );
+
+        }
+
     }
 
     private function __clearFailedProject( Exception $e ){
@@ -1096,6 +1095,7 @@ class ProjectManager {
      *
      */
     private function insertSegmentNotesForFile() {
+        $this->features->filter( 'handleJsonNotes', $this->projectStructure );
         Segments_SegmentNoteDao::bulkInsertFromProjectStructure( $this->projectStructure['notes'] )  ;
     }
 
@@ -1515,7 +1515,7 @@ class ProjectManager {
         //create Structure fro multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( array() ) );
 
-        $xliff_obj = new Xliff_Parser();
+        $xliff_obj = new Xliff_Parser( $this->features );
 
         try {
             $xliff = $xliff_obj->Xliff2Array( $xliff_file_content );
@@ -1598,15 +1598,22 @@ class ProjectManager {
 
                                     if ( $this->__isTranslated( $src, $trg ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
-                                        $target_extract_external[ 'seg' ] = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
-                                        $target                           = $this->dbHandler->escape( $target_extract_external[ 'seg' ] );
+                                        $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
 
                                         //add an empty string to avoid casting to int: 0001 -> 1
                                         //useful for idiom internal xliff id
                                         if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
                                             $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
                                         }
-                                        $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet( $seg_source[ 'mid' ], new ArrayObject( array( 2 => $target ) ) );
+
+                                        /**
+                                         * Approved Flag
+                                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                                         */
+                                        $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
+                                                $seg_source[ 'mid' ],
+                                                new ArrayObject( [ 2 => $target, 4 => @$xliff_trans_unit[ 'attr' ][ 'approved' ] ] )
+                                        );
 
                                         //seg-source and target translation can have different mrk id
                                         //override the seg-source surrounding mrk-id with them of target
@@ -1666,14 +1673,20 @@ class ProjectManager {
                                 if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ] ) ) {
 
                                     $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
-                                    $target = $this->dbHandler->escape( $target );
 
                                     //add an empty string to avoid casting to int: 0001 -> 1
                                     //useful for idiom internal xliff id
                                     if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
                                         $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
                                     }
-                                    $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append( new ArrayObject( array( 2 => $target ) ) );
+
+                                    /**
+                                     * Approved Flag
+                                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                                     */
+                                    $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append(
+                                            new ArrayObject( [ 2 => $target, 4 => @$xliff_trans_unit[ 'attr' ][ 'approved' ] ] )
+                                    );
 
                                 }
 
@@ -1869,8 +1882,12 @@ class ProjectManager {
 
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 0, $row[ 'id' ] );
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 1, $row[ 'internal_id' ] );
-                    //WARNING offset 2 are the target translations
+                    //WARNING offset 2 is the target translation
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
+                    /**
+                     * WARNING offset 4 is the Approved Flag
+                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                     */
 
                     // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
                     unset( $segments_metadata[ $k ] );
@@ -1911,7 +1928,13 @@ class ProjectManager {
         $internal_id = $row[ 'internal_id' ];
 
         if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
-            array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
+
+            if( count( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ] ) != 0 ){
+                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json_segment_ids' ], $row[ 'id' ] );
+            } else {
+                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
+            }
+
         }
 
     }
@@ -1927,6 +1950,7 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+        $query_translations_values = [];
         foreach ( $this->projectStructure[ 'translations' ] as $trans_unit_reference => $struct ) {
 
             if ( empty( $struct ) ) {
@@ -1936,39 +1960,70 @@ class ProjectManager {
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
-                $sql_values = sprintf(
-                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 0, 'ICE', '%s' )",
-                    $translation_row [ 0 ],
-                    $jid,
-                    $translation_row [ 3 ],
-                    $status,
-                    $translation_row [ 2 ],
-                    0
+                $iceLockArray = $this->features->filter( 'setICESLockFromXliffValues',
+                        [
+                                'approved'      => $translation_row [ 4 ],
+                                'locked'        => 0,
+                                'match_type'    => 'ICE',
+                                'eq_word_count' => 0,
+                                'status'        => $status
+                        ]
                 );
 
-                $this->projectStructure[ 'query_translations' ]->append( $sql_values ) ;
+                //WARNING do not change the order of the keys
+                $sql_values = [
+                        'id_segment'    => $translation_row [ 0 ],
+                        'id_job'        => $jid,
+                        'segment_hash'  => $translation_row [ 3 ],
+                        'status'        => $iceLockArray[ 'status' ],
+                        'translation'   => $translation_row [ 2 ],
+                        'locked'        => $iceLockArray[ 'locked' ],
+                        'match_type'    => $iceLockArray[ 'match_type' ],
+                        'eq_word_count' => $iceLockArray[ 'eq_word_count' ],
+                ];
+
+                $query_translations_values[] = $sql_values;
+
             }
 
         }
 
         // Executing the Query
-        if ( !empty( $this->projectStructure[ 'query_translations' ] ) ) {
+        if ( !empty( $query_translations_values ) ) {
 
-            $baseQuery = "INSERT INTO segment_translations (
-                id_segment, id_job, segment_hash, status, translation, translation_date,
-                tm_analysis_status, locked, match_type, eq_word_count )
-				values ";
+            $baseQuery = "
+                INSERT INTO segment_translations (
+                        id_segment, 
+                        id_job, 
+                        segment_hash, 
+                        status, 
+                        translation, 
+                        translation_date, /* NOW() */
+                        tm_analysis_status, /* DONE */
+                        locked, 
+                        match_type, 
+                        eq_word_count 
+                )
+                VALUES ";
 
-            Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
+            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ? )";
+
+
+            Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
+
             //split the query in to chunks if there are too much segments
-            $this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 100 ) );
+            $query_translations_values = array_chunk( $query_translations_values, 100 );
 
-            Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
+            Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $query_translations_values ) );
 
-            foreach ( $this->projectStructure[ 'query_translations' ] as $i => $chunk ) {
+            foreach ( $query_translations_values as $i => $chunk ) {
 
                 try {
-                    $this->dbHandler->query( $baseQuery . join( ",\n", $chunk ) );
+
+                    $query = $baseQuery . rtrim( str_repeat( $tuple_marks . ", ", count( $chunk ) ), ", " );
+                    $stmt = $this->dbHandler->getConnection()->prepare( $query );
+                    $stmt->execute( iterator_to_array( new RecursiveIteratorIterator( new RecursiveArrayIterator( $chunk ) ), false ) );
+
                     Log::doLog( "Pre-Translations: Executed Query " . ( $i + 1 ) );
                 } catch ( PDOException $e ) {
                     Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
@@ -1980,11 +2035,16 @@ class ProjectManager {
         }
 
         //clean translations and queries
-        $this->projectStructure[ 'query_translations' ]->exchangeArray( array() );
+        unset( $query_translations_values );
 
     }
 
     protected function _strip_external( $segment ) {
+
+        if( $this->features->filter( 'skipTagLessFeature', false ) ){
+            return array( 'prec' => null, 'seg' => $segment, 'succ' => null );
+        }
+
         // With regular expressions you can't strip a segment like this:
         //   <g>hello <g>world</g></g>
         // While keeping untouched this other:
@@ -2308,10 +2368,17 @@ class ProjectManager {
 
                 if ( !$this->projectStructure[ 'notes' ][ $internal_id ]->offsetExists( 'entries' ) ) {
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'entries', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json_segment_ids', [] );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'segment_ids', array() );
                 }
 
-                $this->projectStructure[ 'notes' ][ $internal_id ][ 'entries' ]->append( $note[ 'raw-content' ] );
+                if( isset( $note[ 'json' ] ) ){
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ]->append( $note[ 'json' ] );
+                } elseif( isset( $note[ 'raw-content' ] ) ){
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'entries' ]->append( $note[ 'raw-content' ] );
+                }
+
             }
         }
     }
@@ -2326,28 +2393,29 @@ class ProjectManager {
         return $fid . "|" . $trans_unitID;
     }
 
-    private function isConversionToEnforce( $fileName ) {
-        $isAConvertedFile = true;
+    private function isAConvertedFile( $fileName, $forceXliff ) {
 
         $fullPath = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName;
-        try {
-            $isAConvertedFile = DetectProprietaryXliff::isConversionToEnforce( $fullPath );
 
-            if ( -1 === $isAConvertedFile ) {
-                $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                        "code"    => -8,
-                        "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
-                );
-                if( PHP_SAPI != 'cli' ){
-                    setcookie( "upload_session", "", time() - 10000 );
-                }
+        $isAConvertedFile = DetectProprietaryXliff::isAConvertedFile( $fullPath, $forceXliff );
+
+        /**
+         * Application misconfiguration.
+         * upload should not be happened, but if we are here, raise an error.
+         * @see upload.class.php
+         * */
+        if ( -1 === $isAConvertedFile ) {
+            $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                    "code"    => -8,
+                    "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
+            ];
+            if ( PHP_SAPI != 'cli' ) {
+                setcookie( "upload_session", "", time() - 10000 );
             }
-
-        } catch ( Exception $e ) {
-            Log::doLog( $e->getMessage() );
         }
 
         return $isAConvertedFile;
+
     }
 
     /**

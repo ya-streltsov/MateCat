@@ -126,7 +126,6 @@ if (true)
                 },
                 success: function ( d ) {
 
-
                     if ( typeof d.errors != 'undefined' && d.errors.length ) {
                         if ( d.errors[0].code == -1 ) {
                             UI.noGlossary = true;
@@ -134,9 +133,7 @@ if (true)
                     }
                     n = this[0];
                     UI.processLoadedGlossary( d, this );
-
-                    $( n ).addClass( 'glossary-loaded' );
-
+                    SegmentActions.addClassToSegment(UI.getSegmentId(n), 'glossary-loaded');
                     // I store for the current
                     if ( this[1] == 0 ) {
                         UI.cachedGlossaryData = d;
@@ -154,7 +151,6 @@ if (true)
 
             storeGlossaryData( segment, d.data.matches ) ;
 
-            // XXX: this variable `next` was intentionally left global, changing to local breaks glossary updates
             next = context[1];
 
             // TODO: refactor this to avoid timeout check
@@ -374,13 +370,10 @@ if (true)
                             this.comment = this.source_note;
                         }
 
-                        cl_suggestion = UI.getPercentuageClass( this.match );
                         var leftTxt = this.segment;
-                        leftTxt = leftTxt.replace( /\#\{/gi, "<mark>" );
-                        leftTxt = leftTxt.replace( /\}\#/gi, "</mark>" );
+
                         var rightTxt = this.translation;
-                        rightTxt = rightTxt.replace( /\#\{/gi, "<mark>" );
-                        rightTxt = rightTxt.replace( /\}\#/gi, "</mark>" );
+
                         var commentOriginal = this.comment;
                         if (commentOriginal) {
                             commentOriginal = commentOriginal.replace(/\#\{/gi, "<mark>");
@@ -463,15 +456,14 @@ if (true)
             } );
         },
         copyGlossaryItemInEditarea: function ( item ) {
-            translation = item.find( '.translation' ).text();
+            var translation = item.find( '.translation' ).text();
             $( '.editor .editarea .focusOut' ).before( translation + '<span class="tempCopyGlossaryPlaceholder"></span>' ).remove();
-            this.lockTags( this.editarea );
-            range = window.getSelection().getRangeAt( 0 );
+            var range = window.getSelection().getRangeAt( 0 );
             var tempCopyGlossPlaceholder = $( '.editor .editarea .tempCopyGlossaryPlaceholder' );
-            node = tempCopyGlossPlaceholder[0];
+            var node = tempCopyGlossPlaceholder[0];
             setCursorAfterNode( range, node );
             tempCopyGlossPlaceholder.remove();
-            this.highlightEditarea();
+            SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         },
         updateGlossary: function (elem$) {
             var self = this;
@@ -537,10 +529,6 @@ if (true)
 
             return  APP.doRequest( {
                 data: data,
-                context: [
-                    UI.currentSegment,
-                    next
-                ],
                 error: function () {
                     UI.failedConnection( 0, 'glossary' );
                 },
