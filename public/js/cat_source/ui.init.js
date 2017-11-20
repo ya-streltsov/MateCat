@@ -118,7 +118,9 @@ $.extend(UI, {
 	 */
 	registerFooterTabs: function () {
         SegmentActions.registerTab('concordances', true, false);
-        SegmentActions.registerTab('matches', true, true);
+        if ( config.translation_matches_enabled ) {
+            SegmentActions.registerTab('matches', true, true);
+        }
         SegmentActions.registerTab('glossary', true, false);
         SegmentActions.registerTab('alternatives', false, false);
         // SegmentActions.registerTab('messages', false, false);
