@@ -65,7 +65,7 @@ class ProjectManager {
     /**
      * @var FeatureSet
      */
-    protected $features;
+    protected $featureSet;
 
     const TRANSLATED_USER = 'translated_user';
 
@@ -161,13 +161,13 @@ class ProjectManager {
             $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
         }
 
-        $this->features = new FeatureSet( $features );
+        $this->featureSet = new FeatureSet( $features );
 
         if ( !empty( $this->projectStructure['id_customer'] ) ) {
-           $this->features->loadAutoActivablesOnProject( $this->projectStructure['id_customer'] );
+           $this->featureSet->loadAutoActivablesOnProject( $this->projectStructure['id_customer'] );
         }
 
-        $this->projectStructure['array_files'] = $this->features->filter(
+        $this->projectStructure['array_files'] = $this->featureSet->filter(
                 'filter_project_manager_array_files',
                 $this->projectStructure['array_files'],
                 $this->projectStructure
@@ -227,8 +227,8 @@ class ProjectManager {
     }
 
     private function reloadFeatures() {
-        $this->features = new FeatureSet();
-        $this->features->loadForProject( $this->project ) ;
+        $this->featureSet = new FeatureSet();
+        $this->featureSet->loadForProject( $this->project ) ;
     }
 
     public function getProjectStructure() {
@@ -252,7 +252,7 @@ class ProjectManager {
          * Here we have the opportunity to add other features as dependencies of the ones
          * which are already explicitly set.
          */
-        $this->features->loadProjectDependenciesFromProjectMetadata( $options ) ;
+        $this->featureSet->loadProjectDependenciesFromProjectMetadata( $options ) ;
 
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
             $options = $this->sanitizeProjectOptions( $options ) ;
@@ -265,7 +265,7 @@ class ProjectManager {
         $dao = new Projects_MetadataDao();
         $dao->set( $this->projectStructure['id_project'],
                 Projects_MetadataDao::FEATURES_KEY,
-                implode(',', $this->features->getCodes() )
+                implode(',', $this->featureSet->getCodes() )
         );
 
         foreach( $options as $key => $value ) {
@@ -319,7 +319,7 @@ class ProjectManager {
              * Normalize ArrayObject team in TeamStruct
              */
             $this->projectStructure[ 'team' ] = new TeamStruct(
-                    $this->features->filter( 'filter_team_for_project_creation', $this->projectStructure[ 'team' ]->getArrayCopy() )
+                    $this->featureSet->filter( 'filter_team_for_project_creation', $this->projectStructure[ 'team' ]->getArrayCopy() )
             );
 
             //clean the cache for the team member list of assigned projects
@@ -344,7 +344,7 @@ class ProjectManager {
          * in the database.
          * Validations should populate the projectStructure with errors and codes.
          */
-        $this->features->run('validateProjectCreation', $this->projectStructure);
+        $this->featureSet->run('validateProjectCreation', $this->projectStructure);
 
         /**
          * @var ArrayObject $this->projectStructure['result']['errors']
@@ -428,7 +428,7 @@ class ProjectManager {
          */
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION );
+            $forceXliff = $this->featureSet->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION );
 
             /*
                Conversion Enforce
@@ -680,11 +680,11 @@ class ProjectManager {
 
         Database::obtain()->begin();
 
-        $this->features->run('postProjectCreate', $this->projectStructure );
+        $this->featureSet->run('postProjectCreate', $this->projectStructure );
 
         Database::obtain()->commit();
 
-        $this->features->run('postProjectCommit', $this->projectStructure );
+        $this->featureSet->run('postProjectCommit', $this->projectStructure );
         try {
 
             Utils::deleteDir( $this->uploadDir );
@@ -805,7 +805,7 @@ class ProjectManager {
 
                 if ( 'tmx' == $ext ) {
                     $this->tmxServiceWrapper->addTmxInMyMemory();
-                    $this->features->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ], $this->tmxServiceWrapper->getTMKey() );
+                    $this->featureSet->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ], $this->tmxServiceWrapper->getTMKey() );
                 } elseif ( 'g' == $ext ) {
                     $this->tmxServiceWrapper->addGlossaryInMyMemory();
                 } else {
@@ -1087,7 +1087,7 @@ class ProjectManager {
         //Clean Translation array
         $this->projectStructure[ 'translations' ]->exchangeArray( array() );
 
-        $this->features->run('processJobsCreated', $projectStructure );
+        $this->featureSet->run('processJobsCreated', $projectStructure );
 
     }
 
@@ -1095,7 +1095,7 @@ class ProjectManager {
      *
      */
     private function insertSegmentNotesForFile() {
-        $this->features->filter( 'handleJsonNotes', $this->projectStructure );
+        $this->featureSet->filter( 'handleJsonNotes', $this->projectStructure );
         Segments_SegmentNoteDao::bulkInsertFromProjectStructure( $this->projectStructure['notes'] )  ;
     }
 
@@ -1415,7 +1415,7 @@ class ProjectManager {
 
         \Database::obtain()->begin();
         $this->_splitJob( $projectStructure );
-        $this->features->run( 'postJobSplitted', $projectStructure );
+        $this->featureSet->run( 'postJobSplitted', $projectStructure );
         $this->dbHandler->getConnection()->commit();
 
     }
@@ -1489,7 +1489,7 @@ class ProjectManager {
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
 
         $chunk = new Chunks_ChunkStruct( $first_job->toArray() );
-        $this->features->run('postJobMerged', $projectStructure, $chunk );
+        $this->featureSet->run('postJobMerged', $projectStructure, $chunk );
 
         $this->dbHandler->getConnection()->commit();
 
@@ -1515,7 +1515,7 @@ class ProjectManager {
         //create Structure fro multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( array() ) );
 
-        $xliff_obj = new Xliff_Parser( $this->features );
+        $xliff_obj = new Xliff_Parser( $this->featureSet );
 
         try {
             $xliff = $xliff_obj->Xliff2Array( $xliff_file_content );
@@ -1945,7 +1945,7 @@ class ProjectManager {
 
         $status = Constants_TranslationStatus::STATUS_TRANSLATED;
 
-        $status = $this->features->filter('filter_status_for_pretranslated_segments',
+        $status = $this->featureSet->filter('filter_status_for_pretranslated_segments',
                 $status,
                 $this->projectStructure
         );
@@ -1960,7 +1960,7 @@ class ProjectManager {
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
-                $iceLockArray = $this->features->filter( 'setICESLockFromXliffValues',
+                $iceLockArray = $this->featureSet->filter( 'setICESLockFromXliffValues',
                         [
                                 'approved'      => $translation_row [ 4 ],
                                 'locked'        => 0,
@@ -2041,7 +2041,7 @@ class ProjectManager {
 
     protected function _strip_external( $segment ) {
 
-        if( $this->features->filter( 'skipTagLessFeature', false ) ){
+        if( $this->featureSet->filter( 'skipTagLessFeature', false ) ){
             return array( 'prec' => null, 'seg' => $segment, 'succ' => null );
         }
 
@@ -2536,7 +2536,7 @@ class ProjectManager {
             $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
         }
 
-        $this->projectStructure['private_tm_key'] = $this->features->filter('filter_project_manager_private_tm_key',
+        $this->projectStructure['private_tm_key'] = $this->featureSet->filter('filter_project_manager_private_tm_key',
                 $this->projectStructure['private_tm_key'],
                 array( 'project_structure' => $this->projectStructure )
         );
@@ -2564,7 +2564,7 @@ class ProjectManager {
         else {
             // evaluate if identical source and target should be considered non translated
             $identicalSourceAndTargetIsTranslated = false;
-            $identicalSourceAndTargetIsTranslated = $this->features->filter(
+            $identicalSourceAndTargetIsTranslated = $this->featureSet->filter(
                     'filterIdenticalSourceAndTargetIsTranslated',
                     $identicalSourceAndTargetIsTranslated, $this->projectStructure
             );
