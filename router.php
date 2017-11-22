@@ -12,6 +12,7 @@ require_once './inc/Bootstrap.php';
 require_once './lib/Model/queries.php';
 
 Bootstrap::start();
+Bootstrap::$LEGACY_ERROR_CODE = false ;
 
 $klein = new \Klein\Klein();
 

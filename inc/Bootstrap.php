@@ -13,6 +13,8 @@ class Bootstrap {
     protected static $CONFIG;
     protected static $_ROOT;
 
+    public static $LEGACY_ERROR_CODE = true ;
+
     /**
      * @var FeatureSet
      */
@@ -203,7 +205,12 @@ class Bootstrap {
                 Log::doLog( $output );
                 Utils::sendErrMailReport( $output );
 
-                header( "HTTP/1.1 200 OK" );
+                if ( self::$LEGACY_ERROR_CODE ) {
+                    header( "HTTP/1.1 200 OK" );
+                }
+                else {
+                    http_response_code( 500 ) ;
+                }
 
                 if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
