@@ -21,7 +21,7 @@ class FeatureSet {
      * @param array $features
      */
     public function __construct( array $features = array() ) {
-        $this->features = $features;
+        $this->merge( $features );
 
         $this->__loadFromMandatory();
     }
