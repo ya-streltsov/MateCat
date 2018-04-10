@@ -269,6 +269,7 @@ $.extend( UI, {
      *
      */
     editAreaClick : function(target, operation) {
+
         if (typeof operation == 'undefined') {
             operation = 'clicking';
         }

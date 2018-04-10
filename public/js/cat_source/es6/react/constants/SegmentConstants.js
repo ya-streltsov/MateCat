@@ -54,5 +54,6 @@ module.exports = keyMirror({
     DISABLE_TAG_LOCK: null,
     ENABLE_TAG_LOCK: null,
     GET_CONTRIBUTIONS: null,
-    SET_CONTRIBUTIONS_TO_CACHE: null
+    SET_CONTRIBUTIONS_TO_CACHE: null,
+    SET_OPEN_SEGMENT: null
 });

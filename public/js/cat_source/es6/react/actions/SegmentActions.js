@@ -58,6 +58,14 @@ var SegmentActions = {
 
     /********** Segment **********/
 
+    setOpenSegment: function (sid, fid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_OPEN_SEGMENT,
+            sid: sid,
+            fid: fid
+        });
+    },
+
     addClassToSegment: function (sid, newClass) {
         setTimeout(function () {
             AppDispatcher.dispatch({

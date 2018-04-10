@@ -22,7 +22,7 @@ class SegmentFooter extends React.Component {
         else {
             tMLabel = 'Translation Matches' + " (No MT) ";
         }
-        SegmentActions.getContributions(this.props.id_segment, this.props.fid, this.props.segment.segment);
+        SegmentActions.getContributions(this.props.sid, this.props.fid, this.props.segment.segment);
         this.tabs = {
             matches: {
                 label: tMLabel,
