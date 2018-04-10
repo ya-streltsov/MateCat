@@ -78,11 +78,9 @@ class SegmentBody extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentBody" + this.props.segment.sid);
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentBody" + this.props.segment.sid);
     }
 
     componentWillMount() {}

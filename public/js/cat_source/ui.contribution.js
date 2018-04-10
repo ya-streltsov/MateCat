@@ -272,7 +272,6 @@ $.extend(UI, {
             }
             else if (this.code == '-2002') {
                 console.log('WARNING -2002');
-                percentClass = "per-orange";
                 messageClass = 'warning';
                 imgClass = 'warning-img';
                 messageTypeText = 'Warning: ';
@@ -281,9 +280,6 @@ $.extend(UI, {
                 return;
             }
             $('.tab.sub-editor.matches .engine-errors', segment).show();
-            var percentText = this.created_by_type;
-            var suggestion_info = '';
-            var cb = this.created_by;
 
         $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
                 '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
@@ -314,11 +310,6 @@ $.extend(UI, {
 	setDeleteSuggestion_success: function(d) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setDeleteSuggestion');
-
-		// $(".editor .matches .graysmall").each(function(index) {
-		// 	$(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
-		// 	$(this).attr('data-item', index + 1);
-		// });
 	},
 	setChosenSuggestion: function(w, segment) {
         var currentSegment = (segment)? segment : UI.currentSegment;

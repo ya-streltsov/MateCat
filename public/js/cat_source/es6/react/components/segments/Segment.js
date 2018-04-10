@@ -242,7 +242,6 @@ class Segment extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount Segment" + this.props.segment.sid);
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
@@ -253,7 +252,6 @@ class Segment extends React.Component {
 
 
     componentWillUnmount() {
-        console.log("Unmount Segment" + this.props.segment.sid);
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
@@ -263,7 +261,6 @@ class Segment extends React.Component {
     }
 
     componentDidUpdate() {
-        console.log("Update Segment" + this.props.segment.sid);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -393,6 +390,7 @@ class Segment extends React.Component {
                     <SegmentFooter
                         segment={this.props.segment}
                         sid={this.props.segment.sid}
+                        fid={this.props.fid}
                         decodeTextFn={this.props.decodeTextFn}
                     />
                 </div>

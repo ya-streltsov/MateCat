@@ -59,7 +59,7 @@ var SegmentActions = {
     /********** Segment **********/
 
     addClassToSegment: function (sid, newClass) {
-        setTimeout( function () {
+        setTimeout(function () {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.ADD_SEGMENT_CLASS,
                 id: sid,
@@ -69,7 +69,7 @@ var SegmentActions = {
     },
 
     addClassToSegments: function (sidList, newClass) {
-        setTimeout( function () {
+        setTimeout(function () {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.ADD_SEGMENTS_CLASS,
                 sidList: sidList,
@@ -79,7 +79,7 @@ var SegmentActions = {
     },
 
     removeClassToSegment: function (sid, className) {
-        setTimeout( function () {
+        setTimeout(function () {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
                 id: sid,
@@ -89,7 +89,7 @@ var SegmentActions = {
     },
 
     setStatus: function (sid, fid, status) {
-        if ( sid && fid ) {
+        if (sid && fid) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.SET_SEGMENT_STATUS,
                 id: sid,
@@ -98,7 +98,7 @@ var SegmentActions = {
             });
         }
     },
-    
+
     setHeaderPercentage: function (sid, fid, perc, className, createdBy) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_HEADER,
@@ -128,7 +128,7 @@ var SegmentActions = {
         });
     },
 
-    replaceSourceText: function(sid, fid, text) {
+    replaceSourceText: function (sid, fid, text) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REPLACE_SOURCE,
             id: sid,
@@ -160,25 +160,25 @@ var SegmentActions = {
         });
     },
 
-    disableTagLock: function (  ) {
+    disableTagLock: function () {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.DISABLE_TAG_LOCK
         });
     },
-    enableTagLock: function (  ) {
+    enableTagLock: function () {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ENABLE_TAG_LOCK
         });
     },
     /******************* EditArea ************/
-    highlightEditarea: function(sid) {
+    highlightEditarea: function (sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.HIGHLIGHT_EDITAREA,
             id: sid
         });
     },
 
-    replaceEditAreaTextContent: function(sid, fid, text) {
+    replaceEditAreaTextContent: function (sid, fid, text) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REPLACE_TRANSLATION,
             id: sid,
@@ -187,7 +187,7 @@ var SegmentActions = {
         });
     },
 
-    addClassToEditArea: function(sid, fid, className) {
+    addClassToEditArea: function (sid, fid, className) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_EDITAREA_CLASS,
             id: sid,
@@ -233,7 +233,7 @@ var SegmentActions = {
             index: index
         });
     },
-    renderSegmentGlossary: function(sid, segment) {
+    renderSegmentGlossary: function (sid, segment) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_GLOSSARY,
             sid: sid,
@@ -248,7 +248,7 @@ var SegmentActions = {
             data: tab
         });
     },
-    closeTabs: function ( sid ) {
+    closeTabs: function (sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_TABS,
             sid: sid,
@@ -257,7 +257,7 @@ var SegmentActions = {
     },
 
 
-    renderPreview: function ( sid, data ) {
+    renderPreview: function (sid, data) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_PREVIEW,
             sid: sid,
@@ -265,42 +265,42 @@ var SegmentActions = {
         });
     },
 
-    getGlossaryMatch: function ( text ) {
+    getGlossaryMatch: function (text) {
         return API.SEGMENT.getGlossaryMatch(text)
-            .fail(function (  ) {
-                UI.failedConnection( 0, 'glossary' );
-        });
+            .fail(function () {
+                UI.failedConnection(0, 'glossary');
+            });
     },
 
-    getGlossaryForSegment: function ( text ) {
+    getGlossaryForSegment: function (text) {
         return API.SEGMENT.getGlossaryForSegment(text)
-            .fail(function (  ) {
-                UI.failedConnection( 0, 'glossary' );
+            .fail(function () {
+                UI.failedConnection(0, 'glossary');
             });
     },
 
-    deleteGlossaryItem: function ( source, target ) {
+    deleteGlossaryItem: function (source, target) {
         return API.SEGMENT.deleteGlossaryItem(source, target)
-            .fail(function (  ) {
-                UI.failedConnection( 0, 'deleteGlossaryItem' );
+            .fail(function () {
+                UI.failedConnection(0, 'deleteGlossaryItem');
             });
     },
 
-    addGlossaryItem: function ( source, target, comment ) {
+    addGlossaryItem: function (source, target, comment) {
         return API.SEGMENT.addGlossaryItem(source, target, comment)
-            .fail(function (  ) {
-                UI.failedConnection( 0, 'addGlossaryItem' );
+            .fail(function () {
+                UI.failedConnection(0, 'addGlossaryItem');
             });
     },
 
-    updateGlossaryItem: function ( idItem, source, target, newTranslation, comment, newComment ) {
+    updateGlossaryItem: function (idItem, source, target, newTranslation, comment, newComment) {
         return API.SEGMENT.updateGlossaryItem(idItem, source, target, newTranslation, comment, newComment)
-            .fail(function (  ) {
-                UI.failedConnection( 0, 'updateGlossaryItem' );
+            .fail(function () {
+                UI.failedConnection(0, 'updateGlossaryItem');
             });
     },
 
-    setTabIndex: function ( sid, tab, index ) {
+    setTabIndex: function (sid, tab, index) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_TAB_INDEX,
             sid: sid,
@@ -309,7 +309,7 @@ var SegmentActions = {
         });
     },
 
-    findConcordance: function ( sid, data ) {
+    findConcordance: function (sid, data) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.FIND_CONCORDANCE,
             sid: sid,
@@ -317,6 +317,32 @@ var SegmentActions = {
         });
     },
 
+    /**
+     *
+     * @param sid
+     * @param fid
+     * @param target
+     * @return contributions - dispatch contribution to store
+     * Check if the current sid have contribution in cache, and if it not have contributions,
+     * pull from api and store the data for it and next segment
+     */
+    getContributions: function (sid, fid, target) {
+        if (!SegmentStore.getSegmentById(sid, fid).matches || (SegmentStore.getSegmentById(sid, fid).matches && SegmentStore.getSegmentById(sid, fid).matches.length === 0)) {
+            API.SEGMENT.getContributions(sid, target)
+                .done(function (response) {
+                    AppDispatcher.dispatch({
+                        actionType: SegmentConstants.SET_CONTRIBUTIONS_TO_CACHE,
+                        sid: sid,
+                        fid: fid,
+                        matches: response.data.matches
+                    });
+                })
+                .fail(function (error) {
+                    UI.failedConnection(sid, 'getContributions');
+                });
+        }
+
+    },
     /************ Revise ***************/
     showSelection: function (sid, data) {
         AppDispatcher.dispatch({
@@ -341,7 +367,7 @@ var SegmentActions = {
         });
     },
 
-    showIssuesMessage: function ( sid ) {
+    showIssuesMessage: function (sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_ISSUE_MESSAGE,
             sid: sid,
@@ -383,7 +409,7 @@ var SegmentActions = {
         UI.deleteIssue(issue);
     },
 
-    confirmDeletedIssue: function (sid,issue_id) {
+    confirmDeletedIssue: function (sid, issue_id) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ISSUE_DELETED,
             sid: sid,
@@ -403,14 +429,14 @@ var SegmentActions = {
         });
     },
 
-    removeSegmentsOnBulk: function() {
+    removeSegmentsOnBulk: function () {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
         });
         UI.setWaypoints();
     },
 
-    setSegmentLocked( segment, fid, unlocked) {
+    setSegmentLocked(segment, fid, unlocked) {
         if (!unlocked) {
             //TODO: move this to SegmentActions
             UI.removeFromStorage('unlocked-' + segment.sid);
@@ -418,7 +444,7 @@ var SegmentActions = {
                 this.toggleSegmentOnBulk(segment.sid, fid);
             }
         } else {
-            UI.addInStorage('unlocked-'+ segment.sid, true);
+            UI.addInStorage('unlocked-' + segment.sid, true);
             UI.editAreaClick(UI.getEditAreaBySegmentId(segment.sid));
         }
         AppDispatcher.dispatch({
@@ -456,7 +482,6 @@ var SegmentActions = {
             actionType: SegmentConstants.REMOVE_MUTED_SEGMENTS
         });
     }
-
 
 
 };

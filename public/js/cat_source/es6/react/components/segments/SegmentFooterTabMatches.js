@@ -2,9 +2,11 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
+let React = require('react');
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentActions = require('../../actions/SegmentActions');
+let SegmentStore = require('../../stores/SegmentStore');
+
 class SegmentFooterTabMatches extends React.Component {
 
     constructor(props) {
@@ -18,68 +20,61 @@ class SegmentFooterTabMatches extends React.Component {
         this.chooseSuggestion = this.chooseSuggestion.bind(this);
     }
 
-    setContributions(sid, matches, fieldTest){
-        if ( this.props.id_segment == sid ) {
-            var matchesProcessed = this.processContributions(matches, fieldTest);
+    setContributions(sid, matches, fieldTest) {
+        if (this.props.id_segment == sid) {
+            let matchesProcessed = this.processContributions(matches, fieldTest);
             this.setState({
                 matches: matchesProcessed
             });
         }
     }
 
-    processContributions(matches, fieldTest) {
-        var self = this;
-        var matchesProcessed = [];
-        // SegmentActions.createFooter(this.props.id_segment);
-        $.each(matches, function(index) {
-            if ((this.segment === '') || (this.translation === '')) return false;
-            var item = {};
-            item.id = this.id;
-            item.disabled = (this.id == '0') ? true : false;
-            item.cb = this.created_by;
-            item.segment = this.segment;
-            if ("sentence_confidence" in this &&
+    processContributions(matches) {
+        let self = this;
+        let matchesProcessed = [];
+        _.each(matches, function (el, index) {
+            if ((el.segment === '') || (el.translation === '')) return false;
+            let item = {};
+            item.id = el.id;
+            item.disabled = (el.id == '0') ? true : false;
+            item.cb = el.created_by;
+            item.segment = el.segment;
+            if ("sentence_confidence" in el &&
                 (
-                    this.sentence_confidence !== "" &&
-                    this.sentence_confidence !== 0 &&
-                    this.sentence_confidence != "0" &&
-                    this.sentence_confidence !== null &&
-                    this.sentence_confidence !== false &&
-                    typeof this.sentence_confidence != 'undefined'
+                    el.sentence_confidence !== "" &&
+                    el.sentence_confidence !== 0 &&
+                    el.sentence_confidence != "0" &&
+                    el.sentence_confidence !== null &&
+                    el.sentence_confidence !== false &&
+                    typeof el.sentence_confidence != 'undefined'
                 )
             ) {
-                item.suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
-            } else if (this.match != 'MT') {
-                item.suggestion_info = this.last_update_date;
+                item.suggestion_info = "Quality: <b>" + el.sentence_confidence + "</b>";
+            } else if (el.match != 'MT') {
+                item.suggestion_info = el.last_update_date;
             } else {
                 item.suggestion_info = '';
             }
 
-
-            if (typeof fieldTest == 'undefined') {
-                item.percentClass = UI.getPercentuageClass(this.match);
-                item.percentText = this.match;
-            } else {
-                item.quality = parseInt(this.quality);
-                item.percentClass = (this.quality > 98)? 'per-green' : (this.quality == 98)? 'per-red' : 'per-gray';
-                item.percentText = 'MT';
-            }
+            item.quality = parseInt(el.quality);
+            item.percentClass = (el.quality > 98) ? 'per-green' : (el.quality == 98) ? 'per-red' : 'per-gray';
+            item.percentText = 'MT';
 
             // Attention Bug: We are mixing the view mode and the raw data mode.
             // before doing a enanched  view you will need to add a data-original tag
             //
-            item.suggestionDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText(this.segment));
-            item.translationDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText( this.translation));
+            item.suggestionDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText(el.segment));
+            item.translationDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText(el.translation));
             item.sourceDiff = item.suggestionDecodedHtml;
-            if (this.match !== "MT" && parseInt(this.match) > 74) {
-                let sourceDecoded = UI.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
-                let matchDecoded = UI.removePhTagsWithEquivTextIntoText( this.segment );
-                let diff_obj = UI.execDiff( matchDecoded, sourceDecoded );
-                item.sourceDiff =  UI.dmp.diff_prettyHtml( diff_obj ) ;
+            if (el.match !== "MT" && parseInt(el.match) > 74) {
+                let sourceDecoded = UI.removePhTagsWithEquivTextIntoText(self.props.segment.segment);
+                let matchDecoded = UI.removePhTagsWithEquivTextIntoText(el.segment);
+                let diff_obj = UI.execDiff(matchDecoded, sourceDecoded);
+                item.sourceDiff = UI.dmp.diff_prettyHtml(diff_obj);
                 item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
             }
-            if ( !_.isUndefined(this.tm_properties) ) {
-                item.tm_properties = this.tm_properties;
+            if (!_.isUndefined(el.tm_properties)) {
+                item.tm_properties = el.tm_properties;
             }
             matchesProcessed.push(item);
         });
@@ -88,13 +83,13 @@ class SegmentFooterTabMatches extends React.Component {
 
     chooseSuggestion(sid, index) {
         if (this.props.id_segment === sid) {
-            this.suggestionDblClick(this.state.matches, index);
+            this.suggestionDblClick(this.props.segment.matches, index);
         }
     }
 
     suggestionDblClick(match, index) {
-        var self = this;
-        var ulDataItem = '.editor .tab.matches ul[data-item=';
+        let self = this;
+        let ulDataItem = '.editor .tab.matches ul[data-item=';
         UI.setChosenSuggestion(index);
         UI.editarea.focus();
         UI.disableTPOnSegment();
@@ -106,12 +101,12 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     deleteSuggestion(match, index) {
-        var source, target;
-        var matches = this.state.matches;
-        source = htmlDecode( match.segment );
-        var ul = $('.suggestion-item[data-id="'+ match.id +'"]');
-        if( config.brPlaceholdEnabled ){
-            target = UI.postProcessEditarea( ul, '.translation' );
+        let source, target;
+        let matches = this.props.segment.matches;
+        source = htmlDecode(match.segment);
+        let ul = $('.suggestion-item[data-id="' + match.id + '"]');
+        if (config.brPlaceholdEnabled) {
+            target = UI.postProcessEditarea(ul, '.translation');
         } else {
             target = $('.translation', ul).text();
         }
@@ -142,47 +137,47 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentFooterMatches" + this.props.id_segment);
         SegmentStore.addListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
         SegmentStore.addListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentFooterMatches" + this.props.id_segment);
         SegmentStore.removeListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
         SegmentStore.removeListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }
 
     /**
-     * Do not delete, overwritten by plugin
+     * Do not delete, extended by plugin
      */
-    componentDidUpdate() {}
+    componentDidUpdate() {
+    }
 
     allowHTML(string) {
-        return { __html: string };
+        return {__html: string};
     }
 
     render() {
-        if ( this.state.matches.length > 0 ) {
-            var matches = [];
-            var self = this;
-            this.state.matches.forEach(function (match, index) {
-                var trashIcon = (match.disabled) ? '' : <span id={self.props.id_segment +'-tm-' + match.id + '-delete'}
-                                                           className="trash"
-                                                           title="delete this row"
-                                                           onClick = { self.deleteSuggestion.bind(self, match, index)}/>;
-                var item =
+        let matches = [];
+        if (this.props.segment.matches && this.props.segment.matches.length > 0) {
+            let tpmMatches = this.processContributions(this.props.segment.matches)
+            let self = this;
+            tpmMatches.forEach(function (match, index) {
+                let trashIcon = (match.disabled) ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'}
+                                                              className="trash"
+                                                              title="delete this row"
+                                                              onClick={self.deleteSuggestion.bind(self, match, index)}/>;
+                let item =
                     <ul key={match.id}
                         className="suggestion-item graysmall"
                         data-item={(index + 1)}
                         data-id={match.id}
-                        data-original= {match.segment}
-                        onDoubleClick = {self.suggestionDblClick.bind(self, match, index+1)}>
-                        <li className="sugg-source" >
+                        data-original={match.segment}
+                        onDoubleClick={self.suggestionDblClick.bind(self, match, index + 1)}>
+                        <li className="sugg-source">
                             <span
                                 id={self.props.id_segment + '-tm-' + match.id + '-source'}
                                 className="suggestion_source"
-                                dangerouslySetInnerHTML={ self.allowHTML(match.sourceDiff) } >
+                                dangerouslySetInnerHTML={self.allowHTML(match.sourceDiff)}>
                             </span>
                         </li>
                         <li className="b sugg-target">
@@ -191,7 +186,7 @@ class SegmentFooterTabMatches extends React.Component {
                             <span
                                 id={self.props.id_segment + '-tm-' + match.id + '-translation'}
                                 className="translation"
-                                dangerouslySetInnerHTML={ self.allowHTML(match.translationDecodedHtml) }>
+                                dangerouslySetInnerHTML={self.allowHTML(match.translationDecodedHtml)}>
                             </span>
                             {trashIcon}
                         </li>
@@ -201,15 +196,15 @@ class SegmentFooterTabMatches extends React.Component {
             });
         }
         return (
-        <div
-            key={"container_" + this.props.code}
-            className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
-            id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
-            <div className="overflow">
-                {matches}
+            <div
+                key={"container_" + this.props.code}
+                className={"tab sub-editor " + this.props.active_class + " " + this.props.tab_class}
+                id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
+                <div className="overflow">
+                    {matches}
+                </div>
+                <div className="engine-errors"></div>
             </div>
-            <div className="engine-errors"></div>
-        </div>
         )
     }
 }

@@ -336,7 +336,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
+    },
+    setContributionsToCache: function (sid,fid,contributions) {
+        let index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'matches'], contributions);
     }
+
+
 });
 
 
@@ -412,6 +418,14 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.SET_CONTRIBUTIONS:
             SegmentStore.emitChange(action.actionType, action.sid, action.matches, action.fieldTest);
+            break;
+        case SegmentConstants.SET_CONTRIBUTIONS_TO_CACHE:
+            //qui qui qi
+            //qui qui qi
+            //qui qui qi
+            //qui qui qi
+            SegmentStore.setContributionsToCache(action.sid,action.fid,action.matches);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
             SegmentStore.emitChange(action.actionType, action.sid, action.index);

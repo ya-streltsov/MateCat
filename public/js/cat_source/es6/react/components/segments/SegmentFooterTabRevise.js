@@ -12,13 +12,9 @@ class SegmentFooterTabRevise extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentFooterRevise" + this.props.id_segment);
-
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentFooterRevise" + this.props.id_segment);
-
     }
 
     componentWillMount() {

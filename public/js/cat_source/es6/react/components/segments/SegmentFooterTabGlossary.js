@@ -309,13 +309,11 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentFooterGlossary" + this.props.id_segment);
         SegmentStore.addListener(SegmentConstants.RENDER_GLOSSARY, this.checkGlossary);
 
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentFooterGlossary" + this.props.id_segment);
         SegmentStore.removeListener(SegmentConstants.RENDER_GLOSSARY, this.checkGlossary);
 
     }

@@ -52,5 +52,7 @@ module.exports = keyMirror({
     REMOVE_MUTED_SEGMENTS: null,
     FIND_CONCORDANCE: null,
     DISABLE_TAG_LOCK: null,
-    ENABLE_TAG_LOCK: null
+    ENABLE_TAG_LOCK: null,
+    GET_CONTRIBUTIONS: null,
+    SET_CONTRIBUTIONS_TO_CACHE: null
 });

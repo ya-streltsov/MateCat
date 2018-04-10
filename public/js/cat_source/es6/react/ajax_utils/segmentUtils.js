@@ -18,7 +18,7 @@ API.SEGMENT = {
             password: config.password,
             status: segment.status,
             translation: trans,
-            segment : segment.segment,
+            segment: segment.segment,
             propagate: false,
             context_before: contextBefore,
             context_after: contextAfter,
@@ -28,17 +28,17 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=setTranslation"
+            url: "/?action=setTranslation"
         });
     },
 
     getSegmentVersionsIssues: function (idSegment) {
 
-        var path  = sprintf("/api/v2/jobs/%s/%s/revise/segments/%s/translation-versions",
+        var path = sprintf("/api/v2/jobs/%s/%s/revise/segments/%s/translation-versions",
             config.id_job, config.password, idSegment);
         return $.ajax({
             type: "get",
-            url : path
+            url: path
         });
     },
 
@@ -49,7 +49,7 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : path
+            url: path
         });
     },
 
@@ -65,11 +65,11 @@ API.SEGMENT = {
         return $.ajax({
             url: replies_path,
             type: 'POST',
-            data : data
+            data: data
         })
     },
 
-    getGlossaryForSegment: function ( source) {
+    getGlossaryForSegment: function (source) {
         var data = {
             exec: 'get',
             segment: source,
@@ -81,11 +81,11 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            url: "/?action=glossary"
         });
     },
 
-    getGlossaryMatch: function ( source ) {
+    getGlossaryMatch: function (source) {
         var data = {
             action: 'glossary',
             exec: 'get',
@@ -98,11 +98,11 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            url: "/?action=glossary"
         });
     },
 
-    deleteGlossaryItem: function ( source, target ) {
+    deleteGlossaryItem: function (source, target) {
         var data = {
             exec: 'delete',
             segment: source,
@@ -113,11 +113,11 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            url: "/?action=glossary"
         });
     },
 
-    addGlossaryItem: function ( source, target, comment ) {
+    addGlossaryItem: function (source, target, comment) {
         var data = {
             exec: 'set',
             segment: source,
@@ -129,7 +129,7 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            url: "/?action=glossary"
         });
     },
 
@@ -149,10 +149,10 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            url: "/?action=glossary"
         });
     },
-    approveSegments: function ( segments ) {
+    approveSegments: function (segments) {
         var data = {
             segments_id: segments,
             status: 'approved'
@@ -161,10 +161,10 @@ API.SEGMENT = {
             async: true,
             data: data,
             type: "post",
-            url : "/api/v2/jobs/" + config.id_job + "/"+ config.password + "/segments/status"
+            url: "/api/v2/jobs/" + config.id_job + "/" + config.password + "/segments/status"
         });
     },
-    translateSegments: function ( segments ) {
+    translateSegments: function (segments) {
         var data = {
             segments_id: segments,
             status: 'translated'
@@ -173,7 +173,7 @@ API.SEGMENT = {
             async: true,
             data: data,
             type: "post",
-            url : "/api/v2/jobs/" + config.id_job + "/"+ config.password + "/segments/status"
+            url: "/api/v2/jobs/" + config.id_job + "/" + config.password + "/segments/status"
         });
     },
 
@@ -193,7 +193,37 @@ API.SEGMENT = {
             async: true,
             data: data,
             type: "post",
-            url : "/?action=getContribution"
+            url: "/?action=getContribution"
+        });
+    },
+    /**
+     * Return a list of contribution from a id_segment
+     * @param id_segment
+     * @return Contributions - Promise
+     */
+    getContributions: function (id_segment,target) {
+        let contextBefore = UI.getContextBefore(id_segment);
+        let contextAfter = UI.getContextAfter(id_segment);
+        // check if this function is ok for al cases
+        let txt = UI.prepareTextToSend(target);
+        let data = {
+            action: 'getContribution',
+            password: config.password,
+            is_concordance: 0,
+            id_segment: id_segment,
+            text: txt,
+            id_job: config.id_job,
+            num_results: UI.numContributionMatchesResults,
+            id_translator: config.id_translator,
+            context_before: contextBefore,
+            context_after: contextAfter
+        };
+
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "post",
+            url: "/?action=getContribution"
         });
     }
 
