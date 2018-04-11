@@ -57,7 +57,6 @@ if ( Review.enabled() )
                 } else {
                     alertNotTranslatedYet( sid ) ;
                 }
-                $(document).trigger('review:unopenableSegment', section);
                 return false ;
             },
         });
