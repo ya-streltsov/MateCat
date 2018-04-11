@@ -12,9 +12,9 @@
                 segment = new UI.Segment( editarea.closest('section') );
             }
 
-            if ( Review.enabled() && !Review.evalOpenableSegment( segment.el ) ) {
+           /* if ( Review.enabled() && !Review.evalOpenableSegment( segment.el ) ) {
                 return false ;
-            }
+            }*/
 
             if (UI.warningStopped) {
                 UI.warningStopped = false;

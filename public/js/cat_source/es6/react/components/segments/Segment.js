@@ -5,44 +5,45 @@
 
 
 /*
-* [] Portare la createButtons in react
-* [] Riportare tutto ciò che chiama editAreaClick in React
+* [ ] Portare la createButtons in react
+* [ ] Riportare tutto ciò che chiama editAreaClick in React
 *
 * Cose da fare con lo stato open:
-* [] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
-* [] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
-* [] Ricostruire comportamento di byButton, il significato di questa variabile è "se sto selezionando non devi aprirmi, se ho cliccato devi aprirmi"
-* [] Tenere la compatibilità con cacheObjects (ui.core.js->68)
-* [] Scrollare al segmento aperto
-* [] Portare jobMenu in React e tenerlo in ascolto sulla render dei segmenti
-* [] Svuotare gli undoStack, capire come portarli dentro react, magari su singolo componente o a livello di container
-* [] Renderizzare il footer
-* [] Creare i bottoni, bisogna portare la logica in react
-* [] Memorizzare nuovo lastSegmentId (segment_filter.js->221)
-* [] Aprire il tab review se mi trovo in review normale
-* [] Mettere nello store il prossimo elemento non tradotto e altre info utili (mi aiuta Federico)
-* [] Focus nell'editarea
-* [] Prendere le get contribution con il nuovo sistema cache fatto in react,Pensare ad una maniera per precaricare il
+* [x] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
+* [ ] Far comparire un messaggio quando di errore quando la editarea non è cliccabile (riprendere dal task precedente)
+* [ ] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
+* [ ] Ricostruire comportamento di byButton, il significato di questa variabile è "se sto selezionando non devi aprirmi, se ho cliccato devi aprirmi"
+* [ ] Tenere la compatibilità con cacheObjects (ui.core.js->68)
+* [x] Scrollare al segmento aperto
+* [ ] Portare jobMenu in React e tenerlo in ascolto sulla render dei segmenti
+* [ ] Svuotare gli undoStack, capire come portarli dentro react, magari su singolo componente o a livello di container
+* [ ] Renderizzare il footer
+* [ ] Creare i bottoni, bisogna portare la logica in react
+* [ ] Memorizzare nuovo lastSegmentId (segment_filter.js->221)
+* [ ] Aprire il tab review se mi trovo in review normale
+* [ ] Mettere nello store il prossimo elemento non tradotto e altre info utili (mi aiuta Federico)
+* [ ] Focus nell'editarea
+* [ ] Prendere le get contribution con il nuovo sistema cache fatto in react,Pensare ad una maniera per precaricare il
 *    next ed il nextuntraslated glossary e contribution. (se non readonly)
-* [] Rendere l'editarea editabile (se non è readonly)
-* [] Controllare la classe editing che viene aggiunta (per ora) all'apertura del segmento e viene tolta alla chiusura (sul body)
-* [] Tenere traccia dell'editstart (è una new Date()) da quando inizio a modificare a quando invio la translation
-* [] Aprire commenti (MBC.main.js->879)
-* [] Se mi trovo in review, review extended o review extended footer, chiamare getSegmentVersionsIssuesHandler (magari riportarlo in react)
-* [] Se attivo lo spitchToText va attivato il microfono e va chiamata Speech2Text.enableMicrophone(segment.el)
+* [ ] Rendere l'editarea editabile (se non è readonly)
+* [ ] Controllare la classe editing che viene aggiunta (per ora) all'apertura del segmento e viene tolta alla chiusura (sul body)
+* [ ] Tenere traccia dell'editstart (è una new Date()) da quando inizio a modificare a quando invio la translation
+* [ ] Aprire commenti (MBC.main.js->879)
+* [ ] Se mi trovo in review, review extended o review extended footer, chiamare getSegmentVersionsIssuesHandler (magari riportarlo in react)
+* [ ] Se attivo lo spitchToText va attivato il microfono e va chiamata Speech2Text.enableMicrophone(segment.el)
 *
 * Cose da fare con lo stato close:
-* [] Togliere l'editarea editabile
-* [] Rimuovere una serie di classi dal segmento `waiting_for_check_result opened editor split-action`
-* [] Chiudire commento corrispondente (MBC.main.js->825)
-* [] Se il segmento è stato modificato e e mi sto spostando senza salvare, devo salvare il segmento,
+* [ ] Togliere l'editarea editabile
+* [ ] Rimuovere una serie di classi dal segmento `waiting_for_check_result opened editor split-action`
+* [ ] Chiudire commento corrispondente (MBC.main.js->825)
+* [ ] Se il segmento è stato modificato e e mi sto spostando senza salvare, devo salvare il segmento,
      a meno che non mi trovo in review (UI.saveSegment).
-* [] Non renderizzare i bottoni
-* [] Se non sto andando ad un segmento successivo, disabilitare la `disableContinuousRecognizing`
-* [] Disabilitare il microfono sul segmento corrente (ui.core.js->578)
-* [] Controllare che venga rimosso il mark del glossario dal source
-* [] Investigare sulla classe `justDone` aggiunto dalla funzione checkIfFinished (ui.core.js->241)
-* [] Chiudere lo split se aperto.
+* [ ] Non renderizzare i bottoni
+* [ ] Se non sto andando ad un segmento successivo, disabilitare la `disableContinuousRecognizing`
+* [ ] Disabilitare il microfono sul segmento corrente (ui.core.js->578)
+* [ ] Controllare che venga rimosso il mark del glossario dal source
+* [ ] Investigare sulla classe `justDone` aggiunto dalla funzione checkIfFinished (ui.core.js->241)
+* [ ] Chiudere lo split se aperto.
 * */
 
 
@@ -317,7 +318,10 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
     }
 
-    componentDidUpdate() {
+    componentWillReceiveProps(nextProps){
+        if(!this.props.segment.opened && nextProps.segment.opened){
+            UI.scrollSegment($(this.section),this.props.segment.sid);
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -331,7 +335,6 @@ class Segment extends React.Component {
             (nextState.readonly !== this.state.readonly)
         );
     }
-
     render() {
 
         let job_marker = "",
