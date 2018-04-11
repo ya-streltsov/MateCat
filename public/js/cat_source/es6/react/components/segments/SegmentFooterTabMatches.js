@@ -15,19 +15,10 @@ class SegmentFooterTabMatches extends React.Component {
             matches: []
         };
         this.suggestionShortcutLabel = 'CTRL+';
-        this.setContributions = this.setContributions.bind(this);
         this.processContributions = this.processContributions.bind(this);
         this.chooseSuggestion = this.chooseSuggestion.bind(this);
     }
 
-    setContributions(sid, matches, fieldTest) {
-        if (this.props.id_segment == sid) {
-            let matchesProcessed = this.processContributions(matches, fieldTest);
-            this.setState({
-                matches: matchesProcessed
-            });
-        }
-    }
 
     processContributions(matches) {
         let self = this;
@@ -56,9 +47,8 @@ class SegmentFooterTabMatches extends React.Component {
                 item.suggestion_info = '';
             }
 
-            item.quality = parseInt(el.quality);
-            item.percentClass = (el.quality > 98) ? 'per-green' : (el.quality == 98) ? 'per-red' : 'per-gray';
-            item.percentText = 'MT';
+            item.percentClass = UI.getPercentuageClass(el.match);
+            item.percentText = el.match;
 
             // Attention Bug: We are mixing the view mode and the raw data mode.
             // before doing a enanched  view you will need to add a data-original tag
@@ -137,12 +127,10 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
         SegmentStore.addListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
         SegmentStore.removeListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }
 

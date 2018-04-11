@@ -221,14 +221,6 @@ var SegmentActions = {
         });
     },
 
-    setSegmentContributions: function (sid, contributions, fieldTest) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.SET_CONTRIBUTIONS,
-            sid: sid,
-            matches: contributions,
-            fieldTest: fieldTest
-        });
-    },
     chooseContribution: function (sid, index) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CHOOSE_CONTRIBUTION,

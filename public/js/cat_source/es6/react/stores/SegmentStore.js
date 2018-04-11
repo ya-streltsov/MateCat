@@ -433,9 +433,6 @@ AppDispatcher.register(function (action) {
             SegmentStore.setConfigTabs( action.tab, action.visible, action.open);
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
             break;
-        case SegmentConstants.SET_CONTRIBUTIONS:
-            SegmentStore.emitChange(action.actionType, action.sid, action.matches, action.fieldTest);
-            break;
         case SegmentConstants.SET_CONTRIBUTIONS_TO_CACHE:
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
