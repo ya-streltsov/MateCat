@@ -1484,10 +1484,6 @@ section.editor .body > .text {
     width: 100%;
 }
 
-.submenu {
-    display: none;
-}
-
 .popup .submenu {
     display: block;
     padding-top: 20px;
@@ -1499,14 +1495,6 @@ section.editor .body > .text {
     height: 0;
     clear: both;
     visibility: hidden;
-}
-
-section.loaded .submenu {
-    display: block;
-}
-
-.loaded {
-    overflow: visible !important
 }
 
 .submenu li {
@@ -5029,11 +5017,8 @@ body.cattool .mgmt-table-mt .activemt {
  * Ensure all tabbed content in the footer is only visible when
  * the segment completed loading.
  */
-section .footer .tab.open {
-    display: none;
-}
 
-section.loaded .footer .tab.open {
+section .footer .tab.open {
     display: block;
     z-index: 0;
     position: relative;

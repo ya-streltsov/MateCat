@@ -361,27 +361,6 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
-
-        // This is where we decide if a segment is to close or not.
-        // Beware that closeSegment is also called on openSegment
-        // ( other segments are closed when a new one is opened ).
-        //
-        $('#outer').click(function(e) {
-
-             var close = function() {
-                UI.setEditingSegment( null );
-                UI.closeSegment(UI.currentSegment, 1);
-            };
-
-            if ( $(e.target).parents('body') ) return ; // detatched from DOM
-            if ( eventFromReact(e) ) return;
-
-            if ( $(e.target).closest('section .sid').length ) close()  ;
-            if ( $(e.target).closest('section .segment-side-buttons').length ) close();
-
-            if ( !$(e.target).closest('section').length ) close();
-        });
-
 		$('html').on('click', 'section .actions', function(e){
             e.stopPropagation();
         }).on('click', '#quality-report', function(e){

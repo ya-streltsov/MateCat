@@ -220,12 +220,7 @@ var SegmentActions = {
             open: open
         });
     },
-    createFooter: function (sid) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.CREATE_FOOTER,
-            sid: sid
-        });
-    },
+
     setSegmentContributions: function (sid, contributions, fieldTest) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_CONTRIBUTIONS,

@@ -6,12 +6,14 @@
 
 /*
 * [] Portare la createButtons in react
+* [] Riportare tutto ciò che chiama editAreaClick in React
 *
 * Cose da fare con lo stato open:
 * [] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
 * [] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
 * [] Ricostruire comportamento di byButton, il significato di questa variabile è "se sto selezionando non devi aprirmi, se ho cliccato devi aprirmi"
 * [] Tenere la compatibilità con cacheObjects (ui.core.js->68)
+* [] Scrollare al segmento aperto
 * [] Portare jobMenu in React e tenerlo in ascolto sulla render dei segmenti
 * [] Svuotare gli undoStack, capire come portarli dentro react, magari su singolo componente o a livello di container
 * [] Renderizzare il footer
@@ -70,6 +72,7 @@ class Segment extends React.Component {
         this.setSegmentStatus = this.setSegmentStatus.bind(this);
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
         this.handleChangeBulk = this.handleChangeBulk.bind(this);
+        this.openSegment = this.openSegment.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
 
@@ -85,6 +88,16 @@ class Segment extends React.Component {
             tagProjectionEnabled: this.props.enableTagProjection && (this.props.segment.status.toLowerCase() === 'draft' || this.props.segment.status.toLowerCase() === 'new')
             && !UI.checkXliffTagsInText(this.props.segment.translation)
         }
+    }
+
+    openSegment() {
+        console.log('Open segment');
+        SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
+        SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
+    }
+
+    closeSegment() {
+
     }
 
     createSegmentClasses() {
@@ -320,22 +333,29 @@ class Segment extends React.Component {
     }
 
     render() {
-        let job_marker = "";
-        let timeToEdit = "";
 
-        let readonly = this.state.readonly;
-        let segment_classes = this.checkSegmentClasses();
-        let split_group = this.props.segment.split_group || [];
-        let autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
-        let originalId = this.props.segment.sid.split('-')[0];
+        let job_marker = "",
+            timeToEdit = "",
+            readonly = this.state.readonly,
+            segment_classes = this.checkSegmentClasses(),
+            split_group = this.props.segment.split_group || [],
+            autoPropagable = (this.props.segment.repetitions_in_chunk != "1"),
+            originalId = this.props.segment.sid.split('-')[0],
+            start_job_marker = this.props.segment.sid == config.first_job_segment,
+            end_job_marker = this.props.segment.sid == config.last_job_segment,
+            canBeOpened = true;
+
+        //check if the segment can be opened
+        if (Review.enabled() && this.props.segment.status !== 'TRANSLATED' && this.props.segment.status !== 'APPROVED') {
+            canBeOpened = false;
+        }
+
 
         if (this.props.timeToEdit) {
             this.segment_edit_min = this.props.segment.parsed_time_to_edit[1];
             this.segment_edit_sec = this.props.segment.parsed_time_to_edit[2];
         }
 
-        let start_job_marker = this.props.segment.sid == config.first_job_segment;
-        let end_job_marker = this.props.segment.sid == config.last_job_segment;
         if (start_job_marker) {
             job_marker = <span className={"start-job-marker"}/>;
         } else if (end_job_marker) {
@@ -419,6 +439,8 @@ class Segment extends React.Component {
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
                         locked={!this.props.segment.unlocked && this.props.segment.ice_locked === '1'}
+                        openSegment={this.openSegment}
+                        canBeOpened={canBeOpened}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
@@ -435,12 +457,12 @@ class Segment extends React.Component {
                         />
                     ) : (null)}
 
-                    <SegmentFooter
+                    {this.props.segment.opened ? (<SegmentFooter
                         segment={this.props.segment}
                         sid={this.props.segment.sid}
                         fid={this.props.fid}
                         decodeTextFn={this.props.decodeTextFn}
-                    />
+                    />) : (null)}
                 </div>
 
 

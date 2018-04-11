@@ -23,7 +23,6 @@ module.exports = keyMirror({
     ADD_EDITAREA_CLASS: null,
     TRANSLATION_EDITED: null,
     UPDATE_ALL_SEGMENTS:null,
-    CREATE_FOOTER: null,
     REGISTER_TAB: null,
     CLOSE_TABS: null,
     SET_CONTRIBUTIONS: null,

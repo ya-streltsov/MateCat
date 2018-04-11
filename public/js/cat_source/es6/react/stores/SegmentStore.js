@@ -43,6 +43,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     _segments: {},
     segmentsInBulk: [],
+    _footerTabsConfig: {},
     /**
      * Update all
      */
@@ -347,6 +348,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     setContributionsToCache: function (sid, fid, contributions) {
         let index = this.getSegmentIndex(sid, fid);
         this._segments[fid] = this._segments[fid].setIn([index, 'matches'], contributions);
+    },
+    setConfigTabs: function ( tabName, visible, open) {
+        this._footerTabsConfig[tabName] = {
+            visible: visible,
+            open: open,
+            enabled: true
+        }
     }
 
 
@@ -422,10 +430,8 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.REGISTER_TAB:
+            SegmentStore.setConfigTabs( action.tab, action.visible, action.open);
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
-            break;
-        case SegmentConstants.CREATE_FOOTER:
-            SegmentStore.emitChange(action.actionType, action.sid);
             break;
         case SegmentConstants.SET_CONTRIBUTIONS:
             SegmentStore.emitChange(action.actionType, action.sid, action.matches, action.fieldTest);
