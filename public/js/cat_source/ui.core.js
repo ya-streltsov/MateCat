@@ -262,8 +262,6 @@ UI = {
                 segment: segment
             });
 
-            clearTimeout(this.liveConcordanceSearchReq);
-
             var saveBehaviour = true;
             if (operation != 'noSave') {
                 if ((operation == 'translated') || (operation == 'Save'))
@@ -573,11 +571,6 @@ UI = {
 	},
 	deActivateSegment: function(byButton, segment) {
 		UI.removeButtons(byButton, segment);
-
-        $(document).trigger('segment:deactivate', {
-            deactivated_segment : UI.lastOpenedSegment,
-            current_segment : UI.currentSegment
-        });
 
         if( !this.opening && UI.currentSegmentId == segment.data('splitOriginalId') ) {
             Speech2Text.enabled() && Speech2Text.disableContinuousRecognizing();

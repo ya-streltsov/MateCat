@@ -5,6 +5,8 @@
 
 
 /*
+* [] Portare la createButtons in react
+*
 * Cose da fare con lo stato open:
 * [] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
 * [] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
@@ -26,6 +28,19 @@
 * [] Aprire commenti (MBC.main.js->879)
 * [] Se mi trovo in review, review extended o review extended footer, chiamare getSegmentVersionsIssuesHandler (magari riportarlo in react)
 * [] Se attivo lo spitchToText va attivato il microfono e va chiamata Speech2Text.enableMicrophone(segment.el)
+*
+* Cose da fare con lo stato close:
+* [] Togliere l'editarea editabile
+* [] Rimuovere una serie di classi dal segmento `waiting_for_check_result opened editor split-action`
+* [] Chiudire commento corrispondente (MBC.main.js->825)
+* [] Se il segmento è stato modificato e e mi sto spostando senza salvare, devo salvare il segmento,
+     a meno che non mi trovo in review (UI.saveSegment).
+* [] Non renderizzare i bottoni
+* [] Se non sto andando ad un segmento successivo, disabilitare la `disableContinuousRecognizing`
+* [] Disabilitare il microfono sul segmento corrente (ui.core.js->578)
+* [] Controllare che venga rimosso il mark del glossario dal source
+* [] Investigare sulla classe `justDone` aggiunto dalla funzione checkIfFinished (ui.core.js->241)
+* [] Chiudere lo split se aperto.
 * */
 
 
