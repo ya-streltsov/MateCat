@@ -339,15 +339,6 @@ var SegmentActions = {
             });
     },
 
-    setTabIndex: function (sid, tab, index) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.ADD_TAB_INDEX,
-            sid: sid,
-            tab: tab,
-            data: index
-        });
-    },
-
     findConcordance: function (sid, data) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.FIND_CONCORDANCE,

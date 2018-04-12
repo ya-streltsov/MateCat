@@ -23,9 +23,12 @@
 * [ ] Aprire il tab review se mi trovo in review normale
 * [ ] Mettere nello store il prossimo elemento non tradotto e altre info utili (mi aiuta Federico)
 * [ ] Focus nell'editarea
+* [ ] Far disegnare i Marker del glossario direttamente dal componente source, così da evitare l'UI, ora se usiamo UI dispatcha troppi eventi e muore. UI.markGlossaryItemsInSource
 * [ ] Glossario, controllare all'apertura della ricerca che vengano tolti i mark e rimessi alla chiusura ( cacheGlossaryData ui.glossary.js->68)
 * [x] Prendere le get contribution con il nuovo sistema cache fatto in react,Pensare ad una maniera per precaricare il
-*    next ed il nextuntraslated glossary e contribution. (se non readonly)
+*     next ed il nextuntraslated glossary e contribution. (se non readonly)
+* [ ] Se l'editarea non ha contenuto e ci sono contributions al 100% bisogna inserire la contribution dentro la
+*     editarea e fare anche qualche altra cosa (vedi renderContributions
 * [ ] Rendere l'editarea editabile (se non è readonly)
 * [ ] Controllare la classe editing che viene aggiunta (per ora) all'apertura del segmento e viene tolta alla chiusura (sul body)
 * [ ] Tenere traccia dell'editstart (è una new Date()) da quando inizio a modificare a quando invio la translation
