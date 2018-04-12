@@ -129,6 +129,12 @@ class Editarea extends React.Component {
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
+        /*
+        *Todo: remove UI.editarea from Editarea.js
+         */
+        if(this.props.segment.opened){
+            UI.editarea = $(this.editAreaRef);
+        }
     }
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);

@@ -93,6 +93,9 @@ class Segment extends React.Component {
 
     openSegment() {
         console.log('Open segment');
+        /*
+        * Todo: remove UI.currentSegment and UI.currentSegmentId from openSegment()
+        * */
         UI.currentSegment = $(this.section);
         UI.currentSegmentId = this.props.segment.sid;
         SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
