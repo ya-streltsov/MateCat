@@ -23,14 +23,6 @@ class SegmentFooterTabGlossary extends React.Component {
     checkGlossary() {
         this.storeGlossaryData(this.props.segment.glossary);
         SegmentActions.addClassToSegment(this.props.id_segment, 'glossary-loaded');
-        this.setTotalMatchesInTab(this.props.segment.glossary);
-    }
-
-    setTotalMatchesInTab(matches) {
-        let totalMatches = Object.size(matches);
-        if (totalMatches > 0) {
-            SegmentActions.setTabIndex(this.props.id_segment, "glossary", totalMatches);
-        }
     }
 
     searchInGlossary(e) {
@@ -54,7 +46,6 @@ class SegmentFooterTabGlossary extends React.Component {
                         self.storeGlossaryData(response.data.matches);
                         self.processLoadedGlossary(response.data.matches);
                         SegmentActions.addClassToSegment(self.props.id_segment, 'glossary-loaded');
-                        self.setTotalMatchesInTab(response.data.matches);
                         // Todo: refactor
                         UI.markGlossaryItemsInSource(response);
                     });
@@ -327,7 +318,9 @@ class SegmentFooterTabGlossary extends React.Component {
             matches= this.renderMatches();
         }
 
-
+        /*if(this.props.segment.opened){
+            UI.markGlossaryItemsInSource(this.props.segment.glossary);
+        }*/
         let html = '';
         let loading = classnames({
             'gl-search': true,

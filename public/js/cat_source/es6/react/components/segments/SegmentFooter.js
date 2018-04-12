@@ -26,7 +26,7 @@ class SegmentFooter extends React.Component {
 
         let hideMatches = this.getHideMatchesCookie();
         let tabs = {
-            matches: {
+            contributions: {
                 label: tMLabel,
                 code: 'tm',
                 tab_class: 'matches',
@@ -90,7 +90,6 @@ class SegmentFooter extends React.Component {
         this.getTabContainer = this.getTabContainer.bind(this);
         this.changeTab = this.changeTab.bind(this);
         this.openTab = this.openTab.bind(this);
-        this.addTabIndex = this.addTabIndex.bind(this);
     }
 
     registerTab(tabs,configs) {
@@ -227,14 +226,12 @@ class SegmentFooter extends React.Component {
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
-        SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
         SegmentStore.addListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);
-        SegmentStore.removeListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
         SegmentStore.removeListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
     }
 
@@ -246,17 +243,6 @@ class SegmentFooter extends React.Component {
         return {__html: string};
     }
 
-    addTabIndex(sid, tab, index) {
-        if (this.props.sid == sid) {
-            let tabs = $.extend(true, {}, this.state.tabs);
-            if (tabs[tab]) {
-                tabs[tab].index = index;
-                this.setState({
-                    tabs: tabs
-                })
-            }
-        }
-    }
 
     render() {
         let labels = [];
@@ -265,6 +251,18 @@ class SegmentFooter extends React.Component {
         for (let key in this.state.tabs) {
             let tab = this.state.tabs[key];
             if (tab.enabled) {
+                /**
+                 * Todo: this is a object, we can't count it.
+                 */
+                if(key === 'glossary' && this.props.segment[key]){
+                    let count = 0;
+                    for(let x in this.props.segment[key]){
+                        count ++;
+                    }
+                    tab.index  = count;
+                }else if(this.props.segment[key] && this.props.segment[key].length > 0){
+                    tab.index  = this.props.segment[key].length;
+                }
                 let hidden_class = (tab.visible) ? '' : 'hide';
                 let active_class = (tab.open && !this.state.hideMatches) ? 'active' : '';
                 let label = <li

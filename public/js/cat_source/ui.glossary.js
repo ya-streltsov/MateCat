@@ -30,47 +30,6 @@ if (true)
     }
 
     $.extend( UI, {
-        /**
-         * To retrieve the glossary matches in the segment and add them to the footer
-         * @param segment
-         * @param entireSegment
-         * @param next
-         * @returns {boolean}
-         */
-        getGlossary: function ( segment, entireSegment, next ) {
-            var txt;
-            if ( !_.isUndefined(next) ) {
-                var segmentToLookForGlossary ;
-                if ( next === 0 ) {
-                    segmentToLookForGlossary = new UI.Segment( segment ) ;
-                }
-                else if ( next == 1 ) {
-                    segmentToLookForGlossary = UI.Segment.find( this.nextSegmentId ) ;
-                }
-                else if ( next == 2 && this.nextUntranslatedSegmentId != 0 && this.nextUntranslatedSegmentId != this.nextSegmentId ) {
-                    segmentToLookForGlossary = UI.Segment.find( this.nextUntranslatedSegmentId ) ;
-                }
-
-                if ( !segmentToLookForGlossary ) {
-                    return ; // for whatever reason, the segment to get the glossay for was not found.
-                }
-
-                segment = segmentToLookForGlossary.el ;
-            }
-
-            txt = htmlDecode( $( '.text .source', segment ).attr( 'data-original' ) );
-            if ( _.isUndefined(txt) || (txt === '') ) return false;
-            setTimeout(function (  ) {
-                SegmentActions.renderSegmentGlossary(UI.getSegmentId(segment), txt);
-            });
-        },
-
-        cacheGlossaryData: function ( data, sid ) {
-
-            if ( UI.currentSegmentId == sid ) {
-                UI.cachedGlossaryData = data;
-            }
-        },
 
         /**
          * Mark the glossary matches in the source

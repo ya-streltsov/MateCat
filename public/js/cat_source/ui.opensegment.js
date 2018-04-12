@@ -55,27 +55,6 @@
 
             this.opening = false;
 
-            /*SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'editor opened');*/
-
-            if (!this.readonly) {
-                var self = this;
-                this.getContribution(segment.el, 0).done(function() {
-                    self.setCurrentSegment();
-                });
-            } else {
-                this.setCurrentSegment();
-            }
-
-
-            /*this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));*/
-
-            this.focusEditarea = setTimeout(function() {
-                UI.editarea.focus();
-                clearTimeout(UI.focusEditarea);
-                /*UI.currentSegment.trigger('EditAreaFocused');*/
-            }, 100);
-
-            if(!this.noGlossary) this.getGlossary(segment.el, true, 0);
 
             UI.setEditingSegment( segment.el );
 
@@ -89,12 +68,6 @@
                 } else {
                     UI.editarea.attr('contenteditable', 'true');
                 }
-
-                this.getContribution(segment.el, 1);
-                this.getContribution(segment.el, 2);
-
-                if(!this.noGlossary) this.getGlossary(segment.el, true, 1);
-                if(!this.noGlossary) this.getGlossary(segment.el, true, 2);
             }
 
             this.editStart = new Date();
