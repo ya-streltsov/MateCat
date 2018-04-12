@@ -320,21 +320,45 @@ var SegmentActions = {
      * @return contributions - dispatch contribution to store
      * Check if the current sid have contribution in cache, and if it not have contributions,
      * pull from api and store the data for it and next segment
+     * After me, the action get the next segment and the next untranslated segment end get matches
      */
     getContributions: function (sid, fid, target) {
-        if (!SegmentStore.getSegmentById(sid, fid).matches || (SegmentStore.getSegmentById(sid, fid).matches && SegmentStore.getSegmentById(sid, fid).matches.length === 0)) {
-            API.SEGMENT.getContributions(sid, target)
-                .done(function (response) {
-                    AppDispatcher.dispatch({
-                        actionType: SegmentConstants.SET_CONTRIBUTIONS_TO_CACHE,
-                        sid: sid,
-                        fid: fid,
-                        matches: response.data.matches
+        let requestes = [{
+            sid: sid,
+            fid: fid,
+            target: target
+        }];
+        let nextSegment = SegmentStore.getNextSegment(sid,fid);
+        requestes.push({
+            sid: nextSegment.sid,
+            fid: nextSegment.fid,
+            target: nextSegment.segment
+        });
+        let nextSegmentUntranslated = SegmentStore.getNextSegment(sid,fid,8);
+        if(requestes[1].sid != nextSegmentUntranslated.sid){
+            requestes.push({
+                sid: nextSegmentUntranslated.sid,
+                fid: nextSegmentUntranslated.fid,
+                target: nextSegmentUntranslated.segment
+            });
+        }
+        for(let index = 0; index < requestes.length; index ++){
+            let request = requestes[index];
+            let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);
+            if (!segment.matches || (segment.matches && segment.matches.length === 0)) {
+                API.SEGMENT.getContributions(request.sid, request.target)
+                    .done(function (response) {
+                        AppDispatcher.dispatch({
+                            actionType: SegmentConstants.SET_CONTRIBUTIONS_TO_CACHE,
+                            sid: request.sid,
+                            fid: request.fid,
+                            matches: response.data.matches
+                        });
+                    })
+                    .fail(function (error) {
+                        UI.failedConnection(sid, 'getContributions');
                     });
-                })
-                .fail(function (error) {
-                    UI.failedConnection(sid, 'getContributions');
-                });
+            }
         }
 
     },

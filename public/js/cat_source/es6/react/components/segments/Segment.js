@@ -93,6 +93,8 @@ class Segment extends React.Component {
 
     openSegment() {
         console.log('Open segment');
+        UI.currentSegment = $(this.section);
+        UI.currentSegmentId = this.props.segment.sid;
         SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
         SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
     }
