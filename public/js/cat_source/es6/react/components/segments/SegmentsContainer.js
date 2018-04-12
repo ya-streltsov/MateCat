@@ -109,6 +109,7 @@ class SegmentsContainer extends React.Component {
                 timeToEdit={self.state.timeToEdit}
                 fid={self.props.fid}
                 isReviewImproved={isReviewImproved}
+                isReview={self.props.isReview}
                 enableTagProjection={self.props.enableTagProjection}
                 decodeTextFn={self.props.decodeTextFn}
                 tagLockEnabled={self.state.tagLockEnabled}

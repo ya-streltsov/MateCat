@@ -96,7 +96,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         warning: "0",
                         tagged: false,
                         unlocked: false,
-                        fid: fid
+                        fid: fid,
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -199,6 +199,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
      * 8 UNTRANSLATED | is draft or new
      */
     getNextSegment(current_sid, current_fid, status) {
+
         let allStatus = {
             1: "APPROVED",
             2: "DRAFT",
@@ -213,7 +214,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             result,
             currentFind = false;
         _.forEach(this._segments, function (item, index) {
-            if (index >= current_fid || !result) {
+            if (parseInt(index) >= parseInt(current_fid) && _.isUndefined(result) ) {
                 self._segments[index].forEach((segment, key) => {
                     if (currentFind) {
                         if (status === 8 && (segment.get('status') == allStatus[2] || segment.get('status') == allStatus[4])){

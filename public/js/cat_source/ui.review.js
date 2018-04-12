@@ -170,8 +170,6 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
         if($(this).hasClass('opened')) {
             $(this).find('.tab-switcher-review').click();
         }
-    }).on('buttonsCreation', 'section', function() {
-            UI.overrideButtonsForRevision();
     }).on('afterFormatSelection', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {

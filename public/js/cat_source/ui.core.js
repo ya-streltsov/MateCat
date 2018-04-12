@@ -58,8 +58,8 @@ UI = {
 	},
 
     activateSegment: function(segment) {
-        SegmentActions.createFooter(UI.getSegmentId(segment));
-		this.createButtons(segment);
+        // SegmentActions.createFooter(UI.getSegmentId(segment));
+        // this.createButtons(segment);
 
         $(document).trigger('segment:activate', { segment: segment } );
 	},
@@ -426,49 +426,6 @@ UI = {
 			}
 		}
 	},
-	createButtons: function() {
-
-        var button_label = config.status_labels.TRANSLATED ;
-        var label_first_letter = button_label[0];
-        var nextUntranslated, currentButton;
-
-        //Tag Projection: Identify if is enabled in the current segment
-        this.currentSegmentTPEnabled = this.checkCurrentSegmentTPEnabled();
-
-		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-        var nextSegment = this.currentSegment.next();
-        var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
-        if (this.currentSegmentTPEnabled) {
-            nextUntranslated = "";
-            currentButton = '<li><a id="segment-' + this.currentSegmentId +
-                '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
-                '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
-                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-        } else {
-            nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
-                '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
-                this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
-                ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-            currentButton = '<li><a id="segment-' + this.currentSegmentId +
-                '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
-                '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
-                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-        }
-
-        UI.segmentButtons = nextUntranslated + currentButton;
-
-		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
-
-        UI.currentSegment.trigger('buttonsCreation');
-
-        buttonsOb.empty().append(UI.segmentButtons);
-        buttonsOb.before('<p class="warnings"></p>');
-
-        UI.segmentButtons = null;
-
-	},
-
-
 	createJobMenu: function() {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
 				'    <ul>';
@@ -1041,6 +998,7 @@ UI = {
                     fid: fid,
                     isReviewImproved: ReviewImproved.enabled() && Review.enabled(),
                     isReviewExtended: ReviewExtended.enabled() && Review.enabled(),
+                    isReview: Review.enabled(),
                     reviewType: Review.type,
                     enableTagProjection: UI.enableTagProjection,
                     decodeTextFn: UI.decodeText,

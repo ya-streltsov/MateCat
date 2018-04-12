@@ -99,6 +99,8 @@ class Segment extends React.Component {
         * */
         UI.currentSegment = $(this.section);
         UI.currentSegmentId = this.props.segment.sid;
+        // TODO Remove
+        UI.evalCurrentSegmentTranslationAndSourceTags( $(this.section) );
         SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
         SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
         SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
@@ -441,9 +443,12 @@ class Segment extends React.Component {
                 <div className="body">
                     <SegmentHeader sid={this.props.segment.sid} autopropagated={this.state.autopropagated}/>
                     <SegmentBody
+                        reviewType={this.props.reviewType}
                         segment={this.props.segment}
+                        fid={this.props.fid}
                         readonly={this.state.readonly}
                         isReviewImproved={this.props.isReviewImproved}
+                        isReview={this.props.isReview}
                         decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}

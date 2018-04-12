@@ -3,10 +3,11 @@
  * React Component .
 
  */
-var React = require('react');
-var EditArea = require('./Editarea').default;
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
+let React = require('react');
+let EditArea = require('./Editarea').default;
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
+let SegmentButtons = require('./SegmentButtons').default;
 
 
 class SegmentTarget extends React.Component {
@@ -47,14 +48,14 @@ class SegmentTarget extends React.Component {
     }
     beforeRenderActions() {
         if (!this.props.isReviewImproved) {
-            var area = $("#segment-" + this.props.segment.sid + " .targetarea");
+            let area = $("#segment-" + this.props.segment.sid + " .targetarea");
             this.props.beforeRenderOrUpdate(area);
         }
     }
 
     afterRenderActions() {
         if (!this.props.isReviewImproved) {
-            var area = $("#segment-" + this.props.segment.sid + " .targetarea");
+            let area = $("#segment-" + this.props.segment.sid + " .targetarea");
             this.props.afterRenderOrUpdate(area);
         }
     }
@@ -62,12 +63,15 @@ class SegmentTarget extends React.Component {
     onClickEvent(event) {
         if (this.props.readonly) {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
+        } else {
+            this.props.openSegment();
         }
     }
 
     decodeTranslation(segment, translation) {
         return this.props.decodeTextFn(segment, translation);
     }
+
 
     allowHTML(string) {
         return { __html: string };
@@ -100,7 +104,7 @@ class SegmentTarget extends React.Component {
     }
 
     render() {
-        var textAreaContainer = "";
+        let textAreaContainer = "";
         let translation = this.state.translation.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );
 
         if (this.props.isReviewImproved) {
@@ -111,18 +115,18 @@ class SegmentTarget extends React.Component {
                                 </div>
 
         } else {
-            var s2tMicro = "";
-            var tagModeButton = "";
-            var tagCopyButton = "";
-            var tagLockCustomizable;
+            let s2tMicro = "";
+            let tagModeButton = "";
+            let tagCopyButton = "";
+            let tagLockCustomizable;
             if ( (this.props.segment.segment.match( /\&lt;.*?\&gt;/gi ) && config.tagLockCustomizable ) ) {
-                var tagLockCustomizable = (UI.tagLockEnabled  ? <a href="#" className="tagLockCustomize icon-lock" title="Toggle Tag Lock"/> :
+                let tagLockCustomizable = (UI.tagLockEnabled  ? <a href="#" className="tagLockCustomize icon-lock" title="Toggle Tag Lock"/> :
                     <a href="#" className="tagLockCustomize icon-unlocked3" title="Toggle Tag Lock"/>);
             }
 
 
             //Speeche2Text
-            var s2t_enabled = this.props.speech2textEnabledFn();
+            let s2t_enabled = this.props.speech2textEnabledFn();
             if (s2t_enabled) {
                 s2tMicro = <div className="micSpeech" title="Activate voice input" data-segment-id="{{originalId}}">
                     <div className="micBg"></div>
@@ -144,7 +148,7 @@ class SegmentTarget extends React.Component {
             //Tag Mode Buttons
 
             if (this.props.tagModesEnabled && !this.props.enableTagProjection && UI.tagLockEnabled) {
-                var buttonClass = ($('body').hasClass("tagmode-default-extended")) ? "active" : "";
+                let buttonClass = ($('body').hasClass("tagmode-default-extended")) ? "active" : "";
                 tagModeButton =
                     <a href="#" className={"tagModeToggle " + buttonClass} alt="Display full/short tags" title="Display full/short tags">
                         <span className="icon-chevron-left"/>
@@ -188,7 +192,10 @@ class SegmentTarget extends React.Component {
                 {textAreaContainer}
                 <p className="warnings"/>
 
-                <ul className="buttons toggle" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}/>
+                <SegmentButtons
+                    {...this.props}
+                />
+
             </div>
         )
     }

@@ -140,7 +140,10 @@ class SegmentBody extends React.Component {
                             <p>{copySourceShortcuts.toUpperCase()}</p>
                         </div>
                         <SegmentTarget
+                            fid={this.props.fid}
                             segment={this.props.segment}
+                            reviewType={this.props.reviewType}
+                            isReview={this.props.isReview}
                             isReviewImproved={this.props.isReviewImproved}
                             enableTagProjection={this.props.enableTagProjection}
                             decodeTextFn={this.props.decodeTextFn}
@@ -180,11 +183,11 @@ class SegmentBody extends React.Component {
                             </a>
                         </li>
 
-                        {!this.props.isReviewImproved && config.reviewType !== 'improved' ? (
+                        {!this.props.isReviewImproved && this.props.reviewType !== 'improved' ? (
                             <li><a className="approvedStatusMenu" data-sid={"segment-"+ this.props.segment.sid} title="set approved as status"
                                    onClick={this.changeStatus.bind(this, 'approved')}>APPROVED</a></li>
                         ) : (null) }
-                            {!this.props.isReviewImproved && config.reviewType !== 'improved' ? (
+                            {!this.props.isReviewImproved && this.props.reviewType !== 'improved' ? (
                             <li>
                                 <a className="rejectedStatusMenu" data-sid={"segment-"+ this.props.segment.sid} title="set rejected as status"
                                    onClick={this.changeStatus.bind(this, 'rejected')}>
@@ -193,7 +196,7 @@ class SegmentBody extends React.Component {
                             </li>
                         ) : (null) }
 
-                        {this.props.isReviewImproved || config.reviewType == 'improved' ? (
+                        {this.props.isReviewImproved || config.reviewType === 'improved' ? (
                             <li>
                                 <a className="fx" data-sid={"segment-"+ this.props.segment.sid} title="set fixed as status"
                                    onClick={this.changeStatus.bind(this, 'fixed')}>

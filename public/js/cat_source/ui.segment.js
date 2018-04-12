@@ -62,7 +62,6 @@
                 UI.setSegmentAsTagged();
                 UI.editarea.focus();
                 SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
-                UI.createButtons();
                 UI.registerQACheck();
             });
         },
@@ -148,7 +147,7 @@
                 SegmentActions.setSegmentAsTagged(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
                 currentSegment.data('tagprojection', 'tagged');
                 this.copySourcefromDataAttribute(segment);
-                UI.createButtons();
+                // UI.createButtons();
             }
         },
         /**

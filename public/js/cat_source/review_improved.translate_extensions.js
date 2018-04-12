@@ -7,8 +7,6 @@ if ( ReviewImproved.enabled() && !config.isReview)
         ReactDOM.unmountComponentAtNode( mountpoint );
     };
 
-    var original_createButtons = UI.createButtons ;
-
     var originalBindShortcuts = UI.bindShortcuts ;
 
     var clickOnRebutted = function(sid) {
@@ -72,7 +70,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
         },
         /**
          * Here we create new buttons via react components
-         * alongside the legacy buttons hadled with jquery.
+         * alongside the legacy buttons handled with jquery.
          */
         createButtons: function(segment) {
             if ( typeof segment == 'undefined' ) {
