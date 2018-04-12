@@ -267,11 +267,55 @@ var SegmentActions = {
             });
     },
 
-    getGlossaryForSegment: function (text) {
+    /*getGlossaryForSegment: function (text) {
         return API.SEGMENT.getGlossaryForSegment(text)
             .fail(function () {
                 UI.failedConnection(0, 'glossary');
             });
+    },*/
+
+    getGlossaryForSegment: function (sid, fid, text) {
+        let requestes = [{
+            sid: sid,
+            fid: fid,
+            text: text
+        }];
+        let nextSegment = SegmentStore.getNextSegment(sid,fid);
+        if(nextSegment){
+            requestes.push({
+                sid: nextSegment.sid,
+                fid: nextSegment.fid,
+                text: nextSegment.segment
+            });
+            let nextSegmentUntranslated = SegmentStore.getNextSegment(sid,fid,8);
+            if(nextSegmentUntranslated && requestes[1].sid != nextSegmentUntranslated.sid){
+                requestes.push({
+                    sid: nextSegmentUntranslated.sid,
+                    fid: nextSegmentUntranslated.fid,
+                    text: nextSegmentUntranslated.segment
+                });
+            }
+        }
+
+        for(let index = 0; index < requestes.length; index ++){
+            let request = requestes[index];
+            let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);
+            if (typeof segment.glossary === 'undefined') {
+                API.SEGMENT.getGlossaryForSegment(request.text)
+                    .done(function (response) {
+                        AppDispatcher.dispatch({
+                            actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
+                            sid: request.sid,
+                            fid: request.fid,
+                            glossary: response.data.matches ? response.data.matches : []
+                        });
+                    })
+                    .fail(function (error) {
+                        UI.failedConnection(sid, 'getContributions');
+                    });
+            }
+        }
+
     },
 
     deleteGlossaryItem: function (source, target) {
@@ -329,23 +373,26 @@ var SegmentActions = {
             target: target
         }];
         let nextSegment = SegmentStore.getNextSegment(sid,fid);
-        requestes.push({
-            sid: nextSegment.sid,
-            fid: nextSegment.fid,
-            target: nextSegment.segment
-        });
-        let nextSegmentUntranslated = SegmentStore.getNextSegment(sid,fid,8);
-        if(requestes[1].sid != nextSegmentUntranslated.sid){
+        if(nextSegment){
             requestes.push({
-                sid: nextSegmentUntranslated.sid,
-                fid: nextSegmentUntranslated.fid,
-                target: nextSegmentUntranslated.segment
+                sid: nextSegment.sid,
+                fid: nextSegment.fid,
+                target: nextSegment.segment
             });
+            let nextSegmentUntranslated = SegmentStore.getNextSegment(sid,fid,8);
+            if(nextSegmentUntranslated && requestes[1].sid != nextSegmentUntranslated.sid){
+                requestes.push({
+                    sid: nextSegmentUntranslated.sid,
+                    fid: nextSegmentUntranslated.fid,
+                    target: nextSegmentUntranslated.segment
+                });
+            }
         }
+
         for(let index = 0; index < requestes.length; index ++){
             let request = requestes[index];
             let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);
-            if (!segment.matches || (segment.matches && segment.matches.length === 0)) {
+            if (!segment.contributions || (segment.contributions && segment.contributions.length === 0)) {
                 API.SEGMENT.getContributions(request.sid, request.target)
                     .done(function (response) {
                         AppDispatcher.dispatch({

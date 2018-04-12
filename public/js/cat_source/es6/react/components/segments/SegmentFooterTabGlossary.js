@@ -6,6 +6,7 @@ var React = require('react');
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
 var SegmentActions = require('../../actions/SegmentActions');
+
 class SegmentFooterTabGlossary extends React.Component {
 
     constructor(props) {
@@ -19,39 +20,21 @@ class SegmentFooterTabGlossary extends React.Component {
         this.checkGlossary = this.checkGlossary.bind(this);
     }
 
-    checkGlossary(sid, txt) {
-        if ( parseInt(this.props.id_segment) === parseInt(sid) ) {
-            let self = this;
-            SegmentActions.getGlossaryForSegment(txt)
-                .done(function ( response ) {
-                    //Todo: remove this if??
-                    if ( !_.isUndefined(response) && response.errors.length ) {
-                        if ( response.errors[0].code === -1 ) {
-                            UI.noGlossary = true;
-                        }
-                    }
-                    self.storeGlossaryData( response.data.matches );
-                    self.processLoadedGlossary( response.data.matches );
-                    SegmentActions.addClassToSegment( self.props.id_segment, 'glossary-loaded' );
-                    self.setTotalMatchesInTab( response.data.matches );
-                    UI.cacheGlossaryData( response, self.props.id_segment );
-                    // Todo: refactor
-                    if ( !UI.body.hasClass( 'searchActive' )) {
-                        UI.markGlossaryItemsInSource( response );
-                    }
-                });
-        }
+    checkGlossary() {
+        this.storeGlossaryData(this.props.segment.glossary);
+        SegmentActions.addClassToSegment(this.props.id_segment, 'glossary-loaded');
+        this.setTotalMatchesInTab(this.props.segment.glossary);
     }
 
     setTotalMatchesInTab(matches) {
-        let totalMatches = Object.size( matches );
-        if ( totalMatches > 0 ) {
-            SegmentActions.setTabIndex(this.props.id_segment, "glossary" , totalMatches);
+        let totalMatches = Object.size(matches);
+        if (totalMatches > 0) {
+            SegmentActions.setTabIndex(this.props.id_segment, "glossary", totalMatches);
         }
     }
 
     searchInGlossary(e) {
-        if ( e.key === 'Enter' ) {
+        if (e.key === 'Enter') {
             let self = this;
             e.preventDefault();
             let txt = this.source.textContent;
@@ -61,83 +44,85 @@ class SegmentFooterTabGlossary extends React.Component {
                     loading: true
                 });
                 SegmentActions.getGlossaryMatch(txt)
-                    .done(function ( response ) {
+                    .done(function (response) {
                         //Todo: remove this if??
-                        if ( !_.isUndefined(response) && response.errors.length ) {
-                            if ( response.errors[0].code === -1 ) {
+                        if (!_.isUndefined(response) && response.errors.length) {
+                            if (response.errors[0].code === -1) {
                                 UI.noGlossary = true;
                             }
                         }
-                        self.storeGlossaryData( response.data.matches );
-                        self.processLoadedGlossary( response.data.matches );
+                        self.storeGlossaryData(response.data.matches);
+                        self.processLoadedGlossary(response.data.matches);
                         SegmentActions.addClassToSegment(self.props.id_segment, 'glossary-loaded');
-                        self.setTotalMatchesInTab( response.data.matches );
+                        self.setTotalMatchesInTab(response.data.matches);
                         // Todo: refactor
-                        UI.markGlossaryItemsInSource( response );
+                        UI.markGlossaryItemsInSource(response);
                     });
-            } else if (txt && target){
+            } else if (txt && target) {
                 this.setGlossaryItem();
             }
         }
     }
 
-    processLoadedGlossary( matches ) {
+    processLoadedGlossary(matches) {
         this.setState({
             loading: false,
             matches: matches
         });
     }
 
-    storeGlossaryData( data ) {
+    storeGlossaryData(data) {
         // before we can store this data we need to transpose this into a flat array
-        var matches = _.chain( Object.keys( data ) ).map( function(item) {
-            return  data[ item ]  ;
+        var matches = _.chain(Object.keys(data)).map(function (item) {
+            return data[item];
         }).flatten().value();
 
         // find current segment record
-        let record = MateCat.db.segments.by('sid', this.props.id_segment );
+        let record = MateCat.db.segments.by('sid', this.props.id_segment);
         if (record) {
-            record.glossary_matches = matches ;
-            MateCat.db.segments.update( record ) ;
+            record.glossary_matches = matches;
+            MateCat.db.segments.update(record);
         }
     }
 
     deleteMatch(name, idMatch, event) {
         event.preventDefault();
         let self = this;
-        let source = UI.decodePlaceholdersToText(this.state.matches[name][0].segment);
-        let target = UI.decodePlaceholdersToText(this.state.matches[name][0].translation);
+        let source = UI.decodePlaceholdersToText(this.props.segment.glossary[name][0].segment);
+        let target = UI.decodePlaceholdersToText(this.props.segment.glossary[name][0].translation);
         SegmentActions.deleteGlossaryItem(source, target)
-            .done(function ( data ) {
-                UI.footerMessage( 'A glossary item has been deleted', UI.getSegmentById(self.props.id_segment) );
+            .done(function (data) {
+                UI.footerMessage('A glossary item has been deleted', UI.getSegmentById(self.props.id_segment));
             });
-        let matches = $.extend(true, {}, this.state.matches);
-        matches = _.remove(matches, function(n) { return n===name });
+        let matches = $.extend(true, {}, this.props.segment.glossary);
+        matches = _.remove(matches, function (n) {
+            return n === name
+        });
         this.setState({
             matches: matches
         });
-        self.setTotalMatchesInTab( matches );
+        self.setTotalMatchesInTab(matches);
     }
 
     updateGlossaryItem(source, e) {
-        if ( e.key === 'Enter' ) {
+        if (e.key === 'Enter') {
             e.preventDefault();
             let self = this;
-            let target = $( this[source] ).find( '.sugg-target span' ).text();
-            let comment = ($( this[source] ).find( '.details .comment' ).length > 0) ? $( this[source] ).find( '.details .comment' ).text():
-                $( this[source] ).find( '.glossary-add-comment .gl-comment' ).text();
-            let matches = $.extend(true, {}, this.state.matches);
-            SegmentActions.updateGlossaryItem( matches[source][0].id, matches[source][0].segment, matches[source][0].translation, target, comment )
-                .done( function ( response ) {
-                    UI.footerMessage( 'A glossary item has been updated', UI.getSegmentById( self.props.id_segment ) );
-                } );
-            $( this[source] ).find( '.sugg-target span, .details .comment' ).removeClass( 'editing' );
-            $( this[source] ).find('.sugg-target span, .details .comment').removeAttr('contenteditable');
+            let target = $(this[source]).find('.sugg-target span').text();
+            let comment = ($(this[source]).find('.details .comment').length > 0) ? $(this[source]).find('.details .comment').text() :
+                $(this[source]).find('.glossary-add-comment .gl-comment').text();
+            let matches = $.extend(true, {}, this.props.segment.glossary);
+            SegmentActions.updateGlossaryItem(matches[source][0].id, matches[source][0].segment, matches[source][0].translation, target, comment)
+                .done(function (response) {
+                    UI.footerMessage('A glossary item has been updated', UI.getSegmentById(self.props.id_segment));
+                });
+            $(this[source]).find('.sugg-target span, .details .comment').removeClass('editing');
+            $(this[source]).find('.sugg-target span, .details .comment').removeAttr('contenteditable');
             matches[source][0].comment = comment;
             matches[source][0].target_note = comment;
             matches[source][0].translation = target;
             this.setState({
-                matches : matches
+                matches: matches
             });
         }
     }
@@ -157,7 +142,7 @@ class SegmentFooterTabGlossary extends React.Component {
     editExistingMatch(match, e) {
         e.preventDefault();
         $(this[match]).find('.sugg-target span, .details .comment').toggleClass('editing');
-        if ( $(this[match]).find('.sugg-target span').attr('contenteditable') ) {
+        if ($(this[match]).find('.sugg-target span').attr('contenteditable')) {
             $(this[match]).find('.sugg-target span, .details .comment').removeAttr('contenteditable');
         } else {
             $(this[match]).find('.sugg-target span, .details .comment').attr('contenteditable', true);
@@ -168,7 +153,7 @@ class SegmentFooterTabGlossary extends React.Component {
         let source = this.source.textContent;
         let target = this.target.textContent;
         this.setState({
-                enableAddButton: this.checkAddItemButton(source, target)
+            enableAddButton: this.checkAddItemButton(source, target)
         });
     }
 
@@ -186,32 +171,32 @@ class SegmentFooterTabGlossary extends React.Component {
     setGlossaryItem() {
         let source = this.source.textContent;
         let target = this.target.textContent;
-        if ( this.checkAddItemButton(source, target) ) {
+        if (this.checkAddItemButton(source, target)) {
             let self = this;
-            let comment = (this.comment)? this.comment.textContent : null;
+            let comment = (this.comment) ? this.comment.textContent : null;
             this.setState({
                 loading: true
             });
             SegmentActions.addGlossaryItem(source, target, comment)
-                .done(function ( response ) {
-                    if ( response.data.created_tm_key ) {
-                        UI.footerMessage( 'A Private TM Key has been created for this job', UI.getSegmentById( self.props.id_segment ) );
+                .done(function (response) {
+                    if (response.data.created_tm_key) {
+                        UI.footerMessage('A Private TM Key has been created for this job', UI.getSegmentById(self.props.id_segment));
                         UI.noGlossary = false;
                     } else {
                         let msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
-                        UI.footerMessage( msg, UI.getSegmentById( self.props.id_segment ) );
+                        UI.footerMessage(msg, UI.getSegmentById(self.props.id_segment));
                     }
                     self.source.textContent = '';
                     self.target.textContent = '';
 
-                    let matches = $.extend(true, response.data.matches, self.state.matches);
+                    let matches = $.extend(true, response.data.matches, self.props.segment.glossary);
                     self.setState({
                         loading: false,
                         openComment: false,
                         enableAddButton: false,
                         matches: matches
                     });
-                    self.setTotalMatchesInTab( response.data.matches );
+                    self.setTotalMatchesInTab(response.data.matches);
                     UI.markGlossaryItemsInSource(response);
                 });
 
@@ -233,25 +218,25 @@ class SegmentFooterTabGlossary extends React.Component {
 
     renderMatches() {
         let htmlResults = [];
-        if ( Object.size( this.state.matches ) ) {
+        if (Object.size(this.props.segment.glossary)) {
 
             let self = this;
-            $.each( this.state.matches, function ( name, value ) {
+            $.each(this.props.segment.glossary, function (name, value) {
                 let match = value[0];
-                if ( (match.segment === '') || (match.translation === '') )
+                if ((match.segment === '') || (match.translation === ''))
                     return;
                 let cb = match.created_by;
                 let disabled = (match.id == '0') ? true : false;
                 let sourceNoteEmpty = (_.isUndefined(match.source_note) || match.source_note === '');
                 let targetNoteEmpty = (_.isUndefined(match.target_note) || match.target_note === '');
 
-                if ( sourceNoteEmpty && targetNoteEmpty ) {
+                if (sourceNoteEmpty && targetNoteEmpty) {
                     match.comment = '';
                 }
-                else if ( !targetNoteEmpty ) {
+                else if (!targetNoteEmpty) {
                     match.comment = match.target_note;
                 }
-                else if ( !sourceNoteEmpty ) {
+                else if (!sourceNoteEmpty) {
                     match.comment = match.source_note;
                 }
 
@@ -264,33 +249,38 @@ class SegmentFooterTabGlossary extends React.Component {
                 }
 
                 let addCommentHtml = <div className="glossary-add-comment">
-                            <a href="#" onClick={self.openAddCommentExistingMatch.bind(self, name)}>Add a Comment</a>
-                            <div className="input gl-comment" contentEditable="true" style={{display: 'none'}}
-                                 onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
-                        </div>;
+                    <a href="#" onClick={self.openAddCommentExistingMatch.bind(self, name)}>Add a Comment</a>
+                    <div className="input gl-comment" contentEditable="true" style={{display: 'none'}}
+                         onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
+                </div>;
 
-                let html = <div key={name} ref={(match)=>self[name] = match}>
+                let html = <div key={name} ref={(match) => self[name] = match}>
                     <div className="glossary-item"><span>{name}</span></div>
                     <ul className="graysmall" data-id={match.id}>
                         <li className="sugg-source">
-                            <div id={self.props.id_segment + '-tm-' + match.id + '-edit'} className="switch-editing icon-edit" title="Edit"
+                            <div id={self.props.id_segment + '-tm-' + match.id + '-edit'}
+                                 className="switch-editing icon-edit" title="Edit"
                                  onClick={self.editExistingMatch.bind(self, name)}/>
-                            { disabled ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'} className="trash" title="delete this row"
-                                                 onClick={self.deleteMatch.bind(self, name, match.id)}/>}
-                            <span id={self.props.id_segment + '-tm-' + match.id + '-source'} className="suggestion_source"
-                                  dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText( leftTxt, true ))}/>
+                            {disabled ? '' :
+                                <span id={self.props.id_segment + '-tm-' + match.id + '-delete'} className="trash"
+                                      title="delete this row"
+                                      onClick={self.deleteMatch.bind(self, name, match.id)}/>}
+                            <span id={self.props.id_segment + '-tm-' + match.id + '-source'}
+                                  className="suggestion_source"
+                                  dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText(leftTxt, true))}/>
                         </li>
                         <li className="b sugg-target" onDoubleClick={self.copyItemInEditArea.bind(this, rightTxt)}>
-                            <span id={self.props.id_segment + '-tm-' + match.id + '-translation'} className="translation"
-                                  data-original={UI.decodePlaceholdersToText( rightTxt, true )}
+                            <span id={self.props.id_segment + '-tm-' + match.id + '-translation'}
+                                  className="translation"
+                                  data-original={UI.decodePlaceholdersToText(rightTxt, true)}
                                   dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText(rightTxt, true))}
                                   onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
                         </li>
                         <li className="details">
-                            { ( !match.comment || match.comment === '') ? addCommentHtml :
+                            {(!match.comment || match.comment === '') ? addCommentHtml :
                                 <div className="comment"
-                                    data-original={UI.decodePlaceholdersToText( commentOriginal, true )}
-                                     dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText(commentOriginal, true ))}
+                                     data-original={UI.decodePlaceholdersToText(commentOriginal, true)}
+                                     dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText(commentOriginal, true))}
                                      onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
                             }
                             <ul className="graysmall-details">
@@ -303,7 +293,7 @@ class SegmentFooterTabGlossary extends React.Component {
                     </ul>
                 </div>;
                 htmlResults.push(html);
-            } );
+            });
         }
         return htmlResults;
     }
@@ -319,36 +309,47 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if ( prevState.openComment !== this.state.openComment && this.state.openComment ) {
+        if (prevState.openComment !== this.state.openComment && this.state.openComment) {
             this.comment.focus();
         }
     }
+    componentWillReceiveProps(next){
 
+    }
     allowHTML(string) {
-        return { __html: string };
+        return {__html: string};
     }
 
     render() {
-        let matches = this.renderMatches();
+        let matches
+        if(this.props.segment && this.props.segment.glossary){
+            this.checkGlossary();
+            matches= this.renderMatches();
+        }
+
+
         let html = '';
         let loading = classnames({
-            'gl-search' : true,
-            'loading' : this.state.loading,
+            'gl-search': true,
+            'loading': this.state.loading,
         });
-        if ( config.tms_enabled ) {
+        if (config.tms_enabled) {
             html = <div className={loading}>
-                <div ref={(source)=>this.source=source} className="input search-source" contentEditable="true" onKeyPress={this.searchInGlossary.bind(this)}/>
-                <div ref={(target)=>this.target=target} className="input search-target" contentEditable="true" onKeyDown={this.onEnterSetItem.bind(this)}
-                    onKeyUp={this.onKeyUpSetItem.bind(this)}/>
+                <div ref={(source) => this.source = source} className="input search-source" contentEditable="true"
+                     onKeyPress={this.searchInGlossary.bind(this)}/>
+                <div ref={(target) => this.target = target} className="input search-target" contentEditable="true"
+                     onKeyDown={this.onEnterSetItem.bind(this)}
+                     onKeyUp={this.onKeyUpSetItem.bind(this)}/>
                 {this.state.enableAddButton ? (
                     <span className="set-glossary" onClick={this.onClickSetItem.bind(this)}/>
                 ) : (
-                    <span className="set-glossary disabled" />
+                    <span className="set-glossary disabled"/>
                 )}
                 <div className="comment">
                     <a href="#" onClick={this.openAddComment.bind(this)}>(+) Comment</a>
                     {this.state.openComment ? (
-                        <div ref={(comment)=>this.comment = comment} className="input gl-comment" contentEditable="true"
+                        <div ref={(comment) => this.comment = comment} className="input gl-comment"
+                             contentEditable="true"
                              onKeyDown={this.onEnterSetItem.bind(this)}/>
                     ) : (null)}
 
@@ -364,7 +365,8 @@ class SegmentFooterTabGlossary extends React.Component {
         }
         return (
 
-            <div key={"container_" + this.props.code} className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
+            <div key={"container_" + this.props.code}
+                 className={"tab sub-editor " + this.props.active_class + " " + this.props.tab_class}
                  id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
                 <div className="overflow">
                     {html}

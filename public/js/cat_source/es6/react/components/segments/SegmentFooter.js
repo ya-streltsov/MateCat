@@ -131,6 +131,7 @@ class SegmentFooter extends React.Component {
                     code={tab.code}
                     active_class={open_class}
                     tab_class={tab.tab_class}
+                    segment={this.props.segment}
                     id_segment={this.props.sid}/>;
                 break;
             case 'al':

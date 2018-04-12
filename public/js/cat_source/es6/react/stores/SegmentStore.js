@@ -402,7 +402,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setContributionsToCache: function (sid, fid, contributions) {
         let index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'matches'], contributions);
+        this._segments[fid] = this._segments[fid].setIn([index, 'contributions'], contributions);
+    },
+
+    setGlossaryToCache: function (sid, fid, glossary) {
+        let index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'glossary'], glossary);
     },
     setConfigTabs: function (tabName, visible, open) {
         this._footerTabsConfig[tabName] = {
@@ -490,6 +495,10 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_CONTRIBUTIONS_TO_CACHE:
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            break;
+        case SegmentConstants.SET_GLOSSARY_TO_CACHE:
+            SegmentStore.setGlossaryToCache(action.sid, action.fid, action.glossary);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:

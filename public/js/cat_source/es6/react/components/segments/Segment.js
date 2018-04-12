@@ -17,13 +17,14 @@
 * [x] Scrollare al segmento aperto
 * [ ] Portare jobMenu in React e tenerlo in ascolto sulla render dei segmenti
 * [ ] Svuotare gli undoStack, capire come portarli dentro react, magari su singolo componente o a livello di container
-* [ ] Renderizzare il footer
+* [x] Renderizzare il footer
 * [ ] Creare i bottoni, bisogna portare la logica in react
 * [ ] Memorizzare nuovo lastSegmentId (segment_filter.js->221)
 * [ ] Aprire il tab review se mi trovo in review normale
 * [ ] Mettere nello store il prossimo elemento non tradotto e altre info utili (mi aiuta Federico)
 * [ ] Focus nell'editarea
-* [ ] Prendere le get contribution con il nuovo sistema cache fatto in react,Pensare ad una maniera per precaricare il
+* [ ] Glossario, controllare all'apertura della ricerca che vengano tolti i mark e rimessi alla chiusura ( cacheGlossaryData ui.glossary.js->68)
+* [x] Prendere le get contribution con il nuovo sistema cache fatto in react,Pensare ad una maniera per precaricare il
 *    next ed il nextuntraslated glossary e contribution. (se non readonly)
 * [ ] Rendere l'editarea editabile (se non è readonly)
 * [ ] Controllare la classe editing che viene aggiunta (per ora) all'apertura del segmento e viene tolta alla chiusura (sul body)
@@ -100,6 +101,7 @@ class Segment extends React.Component {
         UI.currentSegmentId = this.props.segment.sid;
         SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
         SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
+        SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
     }
 
     closeSegment() {

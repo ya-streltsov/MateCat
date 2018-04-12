@@ -73,7 +73,7 @@ class SegmentFooterTabMatches extends React.Component {
 
     chooseSuggestion(sid, index) {
         if (this.props.id_segment === sid) {
-            this.suggestionDblClick(this.props.segment.matches, index);
+            this.suggestionDblClick(this.props.segment.contributions, index);
         }
     }
 
@@ -92,7 +92,7 @@ class SegmentFooterTabMatches extends React.Component {
 
     deleteSuggestion(match, index) {
         let source, target;
-        let matches = this.props.segment.matches;
+        let matches = this.props.segment.contributions;
         source = htmlDecode(match.segment);
         let ul = $('.suggestion-item[data-id="' + match.id + '"]');
         if (config.brPlaceholdEnabled) {
@@ -146,8 +146,8 @@ class SegmentFooterTabMatches extends React.Component {
 
     render() {
         let matches = [];
-        if (this.props.segment.matches && this.props.segment.matches.length > 0) {
-            let tpmMatches = this.processContributions(this.props.segment.matches)
+        if (this.props.segment.contributions && this.props.segment.contributions.length > 0) {
+            let tpmMatches = this.processContributions(this.props.segment.contributions)
             let self = this;
             tpmMatches.forEach(function (match, index) {
                 let trashIcon = (match.disabled) ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'}
