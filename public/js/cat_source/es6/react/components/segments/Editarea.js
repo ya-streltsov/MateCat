@@ -139,7 +139,9 @@ class Editarea extends React.Component {
     }
     shouldComponentUpdate(nextProps, nextState) {
         return (!Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
-            nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation)
+            nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation ||
+            !Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment))
+        )
     }
     componentDidUpdate() {
         let self = this;

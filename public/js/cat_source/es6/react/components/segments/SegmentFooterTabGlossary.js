@@ -18,6 +18,7 @@ class SegmentFooterTabGlossary extends React.Component {
             enableAddButton: false
         };
         this.checkGlossary = this.checkGlossary.bind(this);
+        this.copyItemInEditArea = this.copyItemInEditArea.bind(this);
     }
 
     checkGlossary() {
@@ -187,8 +188,10 @@ class SegmentFooterTabGlossary extends React.Component {
                         enableAddButton: false,
                         matches: matches
                     });
-                    self.setTotalMatchesInTab(response.data.matches);
-                    UI.markGlossaryItemsInSource(response);
+                    /*
+                    * Todo: not work
+                    * */
+                    /*UI.markGlossaryItemsInSource(response);*/
                 });
 
         } else {
@@ -204,7 +207,8 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     copyItemInEditArea(translation) {
-        UI.copyGlossaryItemInEditarea(UI.decodePlaceholdersToText(translation, true))
+        SegmentActions.replaceEditAreaTextContent(this.props.segment.sid,this.props.segment.fid,translation)
+        /*UI.copyGlossaryItemInEditarea(UI.decodePlaceholdersToText(translation, true))*/
     }
 
     renderMatches() {
