@@ -103,16 +103,20 @@ class Segment extends React.Component {
         * */
         UI.currentSegment = $(this.section);
         UI.currentSegmentId = this.props.segment.sid;
+
         // TODO Remove
-        UI.evalCurrentSegmentTranslationAndSourceTags( $(this.section) );
+        UI.cacheObjects( $(this.section) );
         UI.evalNextSegment($(this.section), 'untranslated');
-        SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
-        SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
-        SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
         $(window).trigger({
             type: "segmentOpened",
             segment: new UI.Segment( $(this.section) )
         });
+        /************/
+
+        SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
+        SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
+        SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
+
     }
 
     closeSegment() {
