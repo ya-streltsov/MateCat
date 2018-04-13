@@ -92,6 +92,8 @@ class Editarea extends React.Component {
             //UI.editAreaClick(event.currentTarget);
             if(this.props.canBeOpened){
                 this.props.openSegment();
+            }else{
+                console.log('Errore');
             }
         }
 

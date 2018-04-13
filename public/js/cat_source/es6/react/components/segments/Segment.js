@@ -10,8 +10,9 @@
 *
 * Cose da fare con lo stato open:
 * [x] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
-* [ ] Far comparire un messaggio quando di errore quando la editarea non è cliccabile (riprendere dal task precedente)
+* [ ] Far comparire un messaggio di errore quando la editarea non è cliccabile (riprendere dal task precedente)
 * [ ] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
+* [ ] Messaggio di errore se sono in review e non c'è nemmeno un segmento tradotto
 * [ ] Ricostruire comportamento di byButton, il significato di questa variabile è "se sto selezionando non devi aprirmi, se ho cliccato devi aprirmi"
 * [ ] Tenere la compatibilità con cacheObjects (ui.core.js->68)
 * [x] Scrollare al segmento aperto
@@ -78,6 +79,7 @@ class Segment extends React.Component {
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
         this.handleChangeBulk = this.handleChangeBulk.bind(this);
         this.openSegment = this.openSegment.bind(this);
+        this.checkIfCanOpenSegment = this.checkIfCanOpenSegment.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
 
@@ -96,14 +98,14 @@ class Segment extends React.Component {
     }
 
     openSegment() {
-        console.log('Open segment');
+        //controllare se sono nella review e se il segmento è tradotto altrimenti messaggio di errore poichè non posso aprire un segmento non tradotto nella review
         /*
-        * Todo: remove UI.currentSegment and UI.currentSegmentId from openSegment()
-        * */
+           * Todo: remove UI.currentSegment and UI.currentSegmentId from openSegment()
+           * */
         UI.currentSegment = $(this.section);
         UI.currentSegmentId = this.props.segment.sid;
         // TODO Remove
-        UI.evalCurrentSegmentTranslationAndSourceTags( $(this.section) );
+        UI.evalCurrentSegmentTranslationAndSourceTags($(this.section));
         SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
         SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
         SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
@@ -330,10 +332,15 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
     }
 
-    componentWillReceiveProps(nextProps){
-        if(!this.props.segment.opened && nextProps.segment.opened){
-            UI.scrollSegment($(this.section),this.props.segment.sid);
+    componentWillReceiveProps(nextProps) {
+        if (!this.props.segment.opened && nextProps.segment.opened) {
+            UI.scrollSegment($(this.section), this.props.segment.sid);
         }
+    }
+
+    checkIfCanOpenSegment() {
+        return (this.props.isReview && !this.props.segment.status == 'NEW' && !this.props.segment.status == 'DRAFT') || !this.props.isReview
+
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -347,6 +354,7 @@ class Segment extends React.Component {
             (nextState.readonly !== this.state.readonly)
         );
     }
+
     render() {
 
         let job_marker = "",
@@ -357,14 +365,7 @@ class Segment extends React.Component {
             autoPropagable = (this.props.segment.repetitions_in_chunk != "1"),
             originalId = this.props.segment.sid.split('-')[0],
             start_job_marker = this.props.segment.sid == config.first_job_segment,
-            end_job_marker = this.props.segment.sid == config.last_job_segment,
-            canBeOpened = true;
-
-        //check if the segment can be opened
-        if (Review.enabled() && this.props.segment.status !== 'TRANSLATED' && this.props.segment.status !== 'APPROVED') {
-            canBeOpened = false;
-        }
-
+            end_job_marker = this.props.segment.sid == config.last_job_segment;
 
         if (this.props.timeToEdit) {
             this.segment_edit_min = this.props.segment.parsed_time_to_edit[1];
@@ -458,7 +459,7 @@ class Segment extends React.Component {
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
                         locked={!this.props.segment.unlocked && this.props.segment.ice_locked === '1'}
                         openSegment={this.openSegment}
-                        canBeOpened={canBeOpened}
+                        canBeOpened={this.checkIfCanOpenSegment()}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
