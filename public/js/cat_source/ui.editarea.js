@@ -289,8 +289,7 @@ $.extend( UI, {
             }
 
             UI.lastOperation = operation;
-
-            UI.openSegment(target, operation);
+            SegmentActions.openSegment(UI.getSegmentId(target));
 
             if (operation != 'moving') {
                 var segment = $(target).closest('section');

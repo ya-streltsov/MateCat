@@ -543,7 +543,8 @@
         focusSegment: function(segment) {
             var clickableEditArea = segment.find('.editarea:not(.opened)');
             if ( clickableEditArea.length == 0 || ( Review.enabled() && !isTranslated( segment ) ) ) {
-                UI.openSegment( segment );
+                // UI.openSegment( segment );
+                SegmentActions.openSegment(UI.getSegmentId(segment));
             }
             else {
                 clickableEditArea.trigger('click');

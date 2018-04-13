@@ -3,8 +3,6 @@
     $.extend(UI, {
         openSegment: function(editarea_or_segment, operation) {
 
-
-
             var editarea, segment;
             if ( editarea_or_segment instanceof UI.Segment ) {
                 editarea = $('.editarea', editarea_or_segment.el);
@@ -14,9 +12,6 @@
                 editarea = $(editarea_or_segment) ;
                 segment = new UI.Segment( editarea.closest('section') );
             }
-
-            //TODO remove it
-            SegmentActions.setOpenSegment(UI.getSegmentId(editarea_or_segment), UI.getSegmentFileId(editarea_or_segment));
 
             /* if ( Review.enabled() && !Review.evalOpenableSegment( segment.el ) ) {
                  return false ;
@@ -31,7 +26,7 @@
                     return;
             }
 
-            this.numOpenedSegments++;
+            // this.numOpenedSegments++; // not used
             this.byButton = false;
 
             this.cacheObjects( segment );
@@ -42,7 +37,7 @@
 
             if ( editarea.length > 0 ) this.saveInUndoStack('open');
 
-            // this.activateSegment(segment);
+            this.activateSegment(segment);
 
             segment.el.trigger('open');
             
@@ -53,16 +48,17 @@
             // }
             this.opening = true;
 
-            if (!(this.currentSegment.is(this.lastOpenedSegment))) {
-                var lastOpened = $(this.lastOpenedSegment).attr('id');
-                if (lastOpened != 'segment-' + this.currentSegmentId)
-                    this.closeSegment(this.lastOpenedSegment, 0, operation);
-            }
+            // Not necessary with react
+            // if (!(this.currentSegment.is(this.lastOpenedSegment))) {
+            //     var lastOpened = $(this.lastOpenedSegment).attr('id');
+            //     if (lastOpened != 'segment-' + this.currentSegmentId)
+            //         this.closeSegment(this.lastOpenedSegment, 0, operation);
+            // }
 
             this.opening = false;
 
 
-            UI.setEditingSegment( segment.el );
+            UI.setEditingSegment( segment.el ); // set Class editing to the body
 
             if (!this.readonly) {
                 /* Check if is right-to-left language, because there is a bug that make

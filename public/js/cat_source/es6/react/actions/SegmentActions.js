@@ -66,6 +66,13 @@ var SegmentActions = {
         });
     },
 
+    openSegment: function (sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_SEGMENT,
+            sid: sid
+        });
+    },
+
     addClassToSegment: function (sid, newClass) {
         setTimeout(function () {
             AppDispatcher.dispatch({

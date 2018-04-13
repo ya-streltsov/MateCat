@@ -136,7 +136,7 @@ if (SegmentFilter.enabled())
                     segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
                     var segment$ = UI.getSegmentById(segmentToOpen);
                     if (segment$.length) {
-                        UI.openSegment(segment$)
+                        SegmentActions.openSegment(segmentToOpen);
                     } else {
                         UI.scrollSegment(segment$, segmentToOpen);
                     }
@@ -147,7 +147,7 @@ if (SegmentFilter.enabled())
                     segmentToOpen = wantedSegment ;
                     var segment$ = UI.getSegmentById(segmentToOpen);
                     if (segment$) {
-                        UI.openSegment(segment$)
+                        SegmentActions.openSegment(segmentToOpen);
                     } else {
                         UI.scrollSegment(segment$, segmentToOpen);
                     }

@@ -747,9 +747,9 @@ UI = {
 			}
 
 			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
-			    var segToScrollElem = $('#segment-' + options.segmentToScroll);
-				this.scrollSegment(segToScrollElem, options.segmentToScroll, options.highlight );
-				UI.openSegment(segToScrollElem);
+
+                SegmentActions.openSegment(options.segmentToScroll);
+
 			} else if (options.segmentToOpen) {
                 $('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
             }

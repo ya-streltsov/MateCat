@@ -10,6 +10,7 @@
 *
 * Cose da fare con lo stato open:
 * [x] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
+* [ ] Spostare eventi click bottoni Translate/Revise
 * [ ] Far comparire un messaggio quando di errore quando la editarea non è cliccabile (riprendere dal task precedente)
 * [ ] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
 * [ ] Ricostruire comportamento di byButton, il significato di questa variabile è "se sto selezionando non devi aprirmi, se ho cliccato devi aprirmi"
@@ -79,6 +80,7 @@ class Segment extends React.Component {
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
         this.handleChangeBulk = this.handleChangeBulk.bind(this);
         this.openSegment = this.openSegment.bind(this);
+        this.openSegmentFromAction = this.openSegmentFromAction.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
 
@@ -104,19 +106,38 @@ class Segment extends React.Component {
         UI.currentSegment = $(this.section);
         UI.currentSegmentId = this.props.segment.sid;
 
-        // TODO Remove
+        // TODO Remove this block
+        /**************************/
+        if (UI.warningStopped) {
+            UI.warningStopped = false;
+            UI.checkWarnings(false);
+        }
         UI.cacheObjects( $(this.section) );
         UI.evalNextSegment($(this.section), 'untranslated');
+        UI.updateJobMenu();
+        UI.clearUndoStack();
+        $(document).trigger('segment:activate', { segment: new UI.Segment( $(this.section) ) } );  //Used by Segment Filter
+        UI.getNextSegment(UI.currentSegment, 'untranslated');
+        UI.setEditingSegment( $(this.section));  //TODO Remove: set Class editing to the body and trigger event used by review improved
+        $('html').trigger('open'); // used by ui.review to open tab Revise in the footer
         $(window).trigger({
             type: "segmentOpened",
             segment: new UI.Segment( $(this.section) )
         });
-        /************/
 
+        Speech2Text.enabled() && Speech2Text.enableMicrophone($(this.section));
+        /************/
+        this.editStart = new Date();
         SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
         SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
         SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
 
+    }
+
+    openSegmentFromAction(sid) {
+        if ( parseInt(sid) === parseInt(this.props.segment.sid) ) {
+            this.openSegment();
+        }
     }
 
     closeSegment() {
@@ -328,6 +349,7 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.addListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
+        SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
     }
 
 
@@ -338,6 +360,7 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
+        SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
     }
 
     componentWillReceiveProps(nextProps){
