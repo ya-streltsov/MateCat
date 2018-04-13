@@ -137,8 +137,11 @@ class Segment extends React.Component {
     }
 
     openSegmentFromAction(sid) {
+        let self = this;
         if ( parseInt(sid) === parseInt(this.props.segment.sid) ) {
-            this.openSegment();
+            setTimeout(function (  ) {
+                self.openSegment();
+            });
         }
     }
 
