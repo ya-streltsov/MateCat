@@ -2,6 +2,9 @@
 
     $.extend(UI, {
         openSegment: function(editarea_or_segment, operation) {
+
+
+
             var editarea, segment;
             if ( editarea_or_segment instanceof UI.Segment ) {
                 editarea = $('.editarea', editarea_or_segment.el);
@@ -12,9 +15,12 @@
                 segment = new UI.Segment( editarea.closest('section') );
             }
 
-           /* if ( Review.enabled() && !Review.evalOpenableSegment( segment.el ) ) {
-                return false ;
-            }*/
+            //TODO remove it
+            SegmentActions.setOpenSegment(UI.getSegmentId(editarea_or_segment), UI.getSegmentFileId(editarea_or_segment));
+
+            /* if ( Review.enabled() && !Review.evalOpenableSegment( segment.el ) ) {
+                 return false ;
+             }*/
 
             if (UI.warningStopped) {
                 UI.warningStopped = false;

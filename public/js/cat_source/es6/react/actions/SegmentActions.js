@@ -379,7 +379,7 @@ var SegmentActions = {
                 });
             }
         }
-
+        this.blockButtons = false;  //Used for offline mode TODO Remove it ??
         for(let index = 0; index < requestes.length; index ++){
             let request = requestes[index];
             let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);

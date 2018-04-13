@@ -63,41 +63,11 @@ if ( ReviewImproved.enabled() && !config.isReview)
             buttonsOb.empty();
             $('p.warnings', segObj.el).empty();
         },
-
-        removeButtons : function(byButton, segment) {
-            unmountReactButtons( segment );
-            UI.cleanupLegacyButtons( segment );
-        },
-        /**
-         * Here we create new buttons via react components
-         * alongside the legacy buttons handled with jquery.
-         */
-        createButtons: function(segment) {
-            if ( typeof segment == 'undefined' ) {
-                segment  = new UI.Segment( UI.currentSegment );
-            }
-
-            var data = MateCat.db.segments.by('sid', segment.absId );
-
-            if ( showFixedAndRebuttedButtons( data.status ) ) {
-                var mountpoint = segment.el.find('[data-mount="main-buttons"]')[0];
-
-                ReactDOM.render( React.createElement( MC.SegmentMainButtons, {
-                    status: data.status,
-                    sid : data.sid
-                } ), mountpoint );
-
-            } else {
-                unmountReactButtons( segment.el );
-                UI.cleanupLegacyButtons( segment.el );
-                original_createButtons.apply(this, segment) ;
-            }
+        showFixedAndRebuttedButtons: function ( status ) {
+            status = status.toLowerCase();
+            return status == 'rejected' || status == 'fixed' || status == 'rebutted' ;
         }
     })
 
-    var showFixedAndRebuttedButtons = function ( status ) {
-        status = status.toLowerCase();
-        return status == 'rejected' || status == 'fixed' || status == 'rebutted' ;
-    }
 
 })(jQuery, window);

@@ -22,7 +22,11 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     checkGlossary() {
-        this.storeGlossaryData(this.props.segment.glossary);
+        let self = this;
+        setTimeout(function (  ) {
+            self.storeGlossaryData(self.props.segment.glossary);
+        });
+
         SegmentActions.addClassToSegment(this.props.id_segment, 'glossary-loaded');
     }
 

@@ -79,7 +79,6 @@ UI = {
                                                       // seems to be the previous current segment
 
 		this.currentSegmentId    = segment.id ;
-        this.lastOpenedSegmentId = segment.id ;
 		this.currentSegment      = segment.el ;
 		this.currentFile         = segment.el.closest("article");
 		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
@@ -508,7 +507,6 @@ UI = {
         return c;
     },
 	deActivateSegment: function(byButton, segment) {
-		UI.removeButtons(byButton, segment);
 
         if( !this.opening && UI.currentSegmentId == segment.data('splitOriginalId') ) {
             Speech2Text.enabled() && Speech2Text.disableContinuousRecognizing();
