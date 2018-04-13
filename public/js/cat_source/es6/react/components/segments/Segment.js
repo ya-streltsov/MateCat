@@ -5,7 +5,7 @@
 
 
 /*
-* [ ] Portare la createButtons in react
+* [x] Portare la createButtons in react
 * [ ] Riportare tutto ciò che chiama editAreaClick in React
 *
 * Cose da fare con lo stato open:
@@ -35,6 +35,7 @@
 * [ ] Aprire commenti (MBC.main.js->879)
 * [ ] Se mi trovo in review, review extended o review extended footer, chiamare getSegmentVersionsIssuesHandler (magari riportarlo in react)
 * [ ] Se attivo lo spitchToText va attivato il microfono e va chiamata Speech2Text.enableMicrophone(segment.el)
+* [ ] 'ESC' deve chiudere tutti i segmenti
 *
 * Cose da fare con lo stato close:
 * [ ] Togliere l'editarea editabile
@@ -107,6 +108,10 @@ class Segment extends React.Component {
         SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
         SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
         SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
+        $(window).trigger({
+            type: "segmentOpened",
+            segment: new UI.Segment( $(this.section) )
+        });
     }
 
     closeSegment() {

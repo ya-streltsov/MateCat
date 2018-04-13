@@ -508,7 +508,6 @@ UI = {
         return c;
     },
 	deActivateSegment: function(byButton, segment) {
-		UI.removeButtons(byButton, segment);
 
         if( !this.opening && UI.currentSegmentId == segment.data('splitOriginalId') ) {
             Speech2Text.enabled() && Speech2Text.disableContinuousRecognizing();

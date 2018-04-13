@@ -2,9 +2,9 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentStore = require('../../stores/SegmentStore');
-
+let React = require('react');
+let SegmentStore = require('../../stores/SegmentStore');
+let SegmentMainButtons = require('../SegmentMainButtons').default;
 
 class SegmentButton extends React.Component {
 
@@ -18,7 +18,7 @@ class SegmentButton extends React.Component {
         if (this.props.isReviewImproved && this.props.isReview) {
             //Revise of Review Improved
             html = this.getReviewImprovedButtons()
-        } else if (this.props.isReviewImproved){
+        } else if (this.props.reviewType === 'improved'){
             //Translate of Review Improved
             html = this.getReviewImprovedTranslateButtons()
         } else if (this.props.isReview){
@@ -53,7 +53,18 @@ class SegmentButton extends React.Component {
         </ul>
     }
     getReviewImprovedTranslateButtons(){
-
+        //TODO Remove lokiJs
+        let data = MateCat.db.segments.by('sid', this.props.segment.sid );
+        if ( UI.showFixedAndRebuttedButtons( data.status ) ) {
+            return <ul className="buttons toggle" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}>
+                    <SegmentMainButtons
+                    status={data.status}
+                    sid={data.sid}
+                />
+            </ul>
+        } else {
+            return this.getTranslateButtons()
+        }
     }
 
     getReviewButtons(){

@@ -1379,11 +1379,11 @@ body.cattool {
     padding: unset;
 }
 
-body.cattool.editing {
+body.cattool {
     background: #f2f4f7;
 }
 
-body.editing section:not(.editor) .text {
+body section:not(.editor) .text {
     background: #dcdfe4;
 }
 

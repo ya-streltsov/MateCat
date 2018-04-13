@@ -25,7 +25,7 @@ section {
 }
 
 
-body.cattool.editing {
+body.cattool {
     section {
         &:not(.editor).segment-selected-inBulk .text:hover {
             background: #edf4fd !important;
