@@ -76,7 +76,6 @@ $.extend(UI, {
             SegmentActions.addClassToSegment(UI.getSegmentId(current), 'loaded');
             var deferred = new jQuery.Deferred() ;
             return deferred.resolve();
-            return;
         }
 
         /* If the segment just translated is equal or similar (Levenshtein distance) to the
