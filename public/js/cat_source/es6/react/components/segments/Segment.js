@@ -11,9 +11,9 @@
 * Cose da fare con lo stato open:
 * [ ] Metodo getContribution si può rimuovere (???)
 * [x] Rimuovere metodo editAreaClick
+* [x] Riportare comportamento metodo EditAreaClick (UI.editarea ->271)
 * [x] Cambiare goToNextSegment/gotoNextUntranslatedSegment con azione openSegment
 * [x] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
-* [x] Riportare comportamento metodo EditAreaClick (UI.editarea ->271)
 * [ ] Far comparire un messaggio quando di errore quando la editarea non è cliccabile (riprendere dal task precedente)
 * [ ] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
 * [ ] Messaggio di errore se sono in review e non c'è nemmeno un segmento tradotto
