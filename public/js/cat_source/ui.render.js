@@ -22,7 +22,7 @@ $.extend(UI, {
 		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;
 		this.noMoreSegmentsBefore = false;
-		this.blockButtons = false;
+		// this.blockButtons = false;
 		this.dmp = new diff_match_patch();
 		this.undoStack = [];
 		this.undoStackPosition = 0;

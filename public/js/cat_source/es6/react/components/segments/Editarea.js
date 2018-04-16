@@ -88,8 +88,9 @@ class Editarea extends React.Component {
     onClickEvent(event) {
         if (this.props.readonly || this.props.locked) {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
+        } else if (this.props.segment.muted) {
+            return;
         } else {
-            //UI.editAreaClick(event.currentTarget);
             if(this.props.canBeOpened){
                 this.props.openSegment();
             }else{
@@ -155,6 +156,7 @@ class Editarea extends React.Component {
          */
         if(this.props.segment.opened){
             UI.editarea = $(this.editAreaRef);
+            this.editAreaRef.focus();
         }
     }
     render() {
@@ -162,10 +164,10 @@ class Editarea extends React.Component {
         let readonly = false;
         if (this.props.segment){
             lang = config.target_rfc.toLowerCase();
-            readonly = ((this.props.readonly) || this.props.locked);
+            readonly = (this.props.readonly || this.props.locked || this.props.segment.muted || !this.props.segment.opened);
         }
         let classes = this.state.editAreaClasses.slice();
-        if (this.props.locked || this.props.readonly) {
+        if (readonly || !this.props.segment.opened) {
             classes.push('area')
         } else {
             classes.push('editarea')

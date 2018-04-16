@@ -432,8 +432,9 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_OPEN_SEGMENT:
             SegmentStore.openSegment(action.sid, action.fid);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
-            break;
+            _.forEach(SegmentStore._segments, function (item, index) {
+                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
+            });            break;
         case SegmentConstants.ADD_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.fid, action.where);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);

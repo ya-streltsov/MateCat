@@ -386,7 +386,6 @@ var SegmentActions = {
                 });
             }
         }
-        this.blockButtons = false;  //Used for offline mode TODO Remove it ??
         for(let index = 0; index < requestes.length; index ++){
             let request = requestes[index];
             let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);
@@ -509,7 +508,7 @@ var SegmentActions = {
             }
         } else {
             UI.addInStorage('unlocked-' + segment.sid, true);
-            UI.editAreaClick(UI.getEditAreaBySegmentId(segment.sid));
+            SegmentActions.openSegment(segment.sid);
         }
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_UNLOCKED_SEGMENT,

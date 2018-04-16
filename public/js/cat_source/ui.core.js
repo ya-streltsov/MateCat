@@ -1355,7 +1355,6 @@ UI = {
 		statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
 
 		var nextUntranslatedSegment = $('#segment-' + this.nextUntranslatedSegmentId);
-		this.nextUntranslatedSegment = nextUntranslatedSegment;
 		if ((!isTranslatedButton) && (!nextUntranslatedSegment.length)) {
 			$(".editor:visible").find(".close").trigger('click', 'Save');
 			$('.downloadtr-button').focus();
@@ -1978,7 +1977,7 @@ UI = {
      * @param next
      */
     getContribution : function(segment, next) {
-        UI.blockButtons = false ;
+        // UI.blockButtons = false ;
         $( segment ).addClass('loaded');
         this.segmentQA(segment);
         var deferred = new jQuery.Deferred() ;
@@ -2424,17 +2423,17 @@ UI = {
             return ;
         }
 
-        if ( UI.blockButtons ) {
-            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
-            } else {
-
-                if (!UI.noMoreSegmentsAfter) {
-                    UI.reloadWarning();
-                }
-            }
-            return;
-        }
-        if(!UI.offline) UI.blockButtons = true;
+        // if ( UI.blockButtons ) {
+        //     if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
+        //     } else {
+        //
+        //         if (!UI.noMoreSegmentsAfter) {
+        //             UI.reloadWarning();
+        //         }
+        //     }
+        //     return;
+        // }
+        // if(!UI.offline) UI.blockButtons = true;
 
         UI.setStatusButtons(button);
 
@@ -2443,11 +2442,9 @@ UI = {
         }
 
         if (buttonValue == 'translated') {
-            UI.gotoNextSegment();
+            SegmentActions.openSegment(UI.nextSegmentId);
         } else {
-            // TODO: investigate why this trigger click is necessary.
-            // See function closeSegment (line 271) ??
-            $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
+            SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
         }
 
         UI.changeStatusStop = new Date();

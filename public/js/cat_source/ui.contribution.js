@@ -72,7 +72,7 @@ $.extend(UI, {
         }
         var segmentUnlocked = !!(UI.getFromStorage('unlocked-' + currentSegment.absId));
         if (currentSegment.isReadonly() && !segmentUnlocked) {
-            UI.blockButtons = false ;
+            // UI.blockButtons = false ;
             SegmentActions.addClassToSegment(UI.getSegmentId(current), 'loaded');
             var deferred = new jQuery.Deferred() ;
             return deferred.resolve();
@@ -92,11 +92,11 @@ $.extend(UI, {
             SegmentActions.addClassToSegment(UI.getSegmentId(current), 'loaded');
             $(".loader", current).removeClass('loader_on');
             if (!next) {
-                this.blockButtons = false;
+                // this.blockButtons = false;
                 this.segmentQA(segment);
             }
             if (this.currentSegmentId == this.nextUntranslatedSegmentId)
-                this.blockButtons = false;
+                // this.blockButtons = false;
             return $.Deferred().resolve();
 		}
         $(".loader", current).addClass('loader_on');
@@ -174,7 +174,7 @@ $.extend(UI, {
 		if(!d) return true;
 		this.renderContributions(d, segment);
 		this.saveInUndoStack();
-		this.blockButtons = false;  //Used for offline mode
+		// this.blockButtons = false;  //Used for offline mode
 
         // TODO Move to SegmentFooter Component
 		if (d.data.matches && d.data.matches.length > 0) {

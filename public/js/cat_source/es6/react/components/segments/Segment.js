@@ -9,8 +9,11 @@
 * [ ] Riportare tutto ciò che chiama editAreaClick in React
 *
 * Cose da fare con lo stato open:
+* [ ] Metodo getContribution si può rimuovere (???)
+* [x] Rimuovere metodo editAreaClick
+* [x] Cambiare goToNextSegment/gotoNextUntranslatedSegment con azione openSegment
 * [x] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
-* [ ] Spostare eventi click bottoni Translate/Revise
+* [x] Riportare comportamento metodo EditAreaClick (UI.editarea ->271)
 * [ ] Far comparire un messaggio quando di errore quando la editarea non è cliccabile (riprendere dal task precedente)
 * [ ] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
 * [ ] Messaggio di errore se sono in review e non c'è nemmeno un segmento tradotto
@@ -20,10 +23,11 @@
 * [ ] Portare jobMenu in React e tenerlo in ascolto sulla render dei segmenti
 * [ ] Svuotare gli undoStack, capire come portarli dentro react, magari su singolo componente o a livello di container
 * [x] Renderizzare il footer
-* [ ] Creare i bottoni, bisogna portare la logica in react
+* [x] Creare i bottoni, bisogna portare la logica in react
+* [ ] Spostare eventi click bottoni Translate/Revise
 * [ ] Memorizzare nuovo lastSegmentId (segment_filter.js->221)
 * [ ] Aprire il tab review se mi trovo in review normale
-* [ ] Mettere nello store il prossimo elemento non tradotto e altre info utili (mi aiuta Federico)
+* [ ] Mettere nello store o nel Segment il prossimo elemento non tradotto e altre info utili (mi aiuta Federico)
 * [ ] Focus nell'editarea
 * [ ] Far disegnare i Marker del glossario direttamente dal componente source, così da evitare l'UI, ora se usiamo UI dispatcha troppi eventi e muore. UI.markGlossaryItemsInSource
 * [ ] Glossario, controllare all'apertura della ricerca che vengano tolti i mark e rimessi alla chiusura ( cacheGlossaryData ui.glossary.js->68)
@@ -36,8 +40,11 @@
 * [ ] Tenere traccia dell'editstart (è una new Date()) da quando inizio a modificare a quando invio la translation
 * [ ] Aprire commenti (MBC.main.js->879)
 * [ ] Se mi trovo in review, review extended o review extended footer, chiamare getSegmentVersionsIssuesHandler (magari riportarlo in react)
-* [ ] Se attivo lo spitchToText va attivato il microfono e va chiamata Speech2Text.enableMicrophone(segment.el)
+* [ ] Se attivo lo speechToText va attivato il microfono e va chiamata Speech2Text.enableMicrophone(segment.el)
 * [ ] 'ESC' deve chiudere tutti i segmenti
+* [ ] All'apertura del segmento modificare url con idSegment (UI.detectStartSegment)
+* [ ] Diff del tab Revise impazzisce, ricontrollare anche revise ebay/paypal
+* [ ] Check change status dal menu laterale segmento
 *
 * Cose da fare con lo stato close:
 * [ ] Togliere l'editarea editabile
@@ -45,7 +52,7 @@
 * [ ] Chiudire commento corrispondente (MBC.main.js->825)
 * [ ] Se il segmento è stato modificato e e mi sto spostando senza salvare, devo salvare il segmento,
      a meno che non mi trovo in review (UI.saveSegment).
-* [ ] Non renderizzare i bottoni
+* [x] Non renderizzare i bottoni
 * [ ] Se non sto andando ad un segmento successivo, disabilitare la `disableContinuousRecognizing`
 * [ ] Disabilitare il microfono sul segmento corrente (ui.core.js->578)
 * [ ] Controllare che venga rimosso il mark del glossario dal source
@@ -102,14 +109,13 @@ class Segment extends React.Component {
 
     openSegment() {
         //controllare se sono nella review e se il segmento è tradotto altrimenti messaggio di errore poichè non posso aprire un segmento non tradotto nella review
-        /*
-           * Todo: remove UI.currentSegment and UI.currentSegmentId from openSegment()
-           * */
-        UI.currentSegment = $(this.section);
-        UI.currentSegmentId = this.props.segment.sid;
 
         // TODO Remove this block
         /**************************/
+
+        //From EditAreaClick
+        UI.closeTagAutocompletePanel();
+        UI.removeHighlightCorrespondingTags();
         if (UI.warningStopped) {
             UI.warningStopped = false;
             UI.checkWarnings(false);
@@ -121,7 +127,7 @@ class Segment extends React.Component {
         $(document).trigger('segment:activate', { segment: new UI.Segment( $(this.section) ) } );  //Used by Segment Filter
         UI.getNextSegment(UI.currentSegment, 'untranslated');
         UI.setEditingSegment( $(this.section));  //TODO Remove: set Class editing to the body and trigger event used by review improved
-        $('html').trigger('open'); // used by ui.review to open tab Revise in the footer
+        $('html').trigger('open'); // used by ui.review to open tab Revise in the footernext-unapproved
         $(window).trigger({
             type: "segmentOpened",
             segment: new UI.Segment( $(this.section) )
@@ -129,10 +135,14 @@ class Segment extends React.Component {
 
         Speech2Text.enabled() && Speech2Text.enableMicrophone($(this.section));
         /************/
-        this.editStart = new Date();
+        UI.editStart = new Date();
         SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
         SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
         SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
+
+        //From EditAreaClick
+        UI.checkTagProximity();
+
 
     }
 
@@ -196,6 +206,10 @@ class Segment extends React.Component {
         }
         if (this.props.segment.muted) {
             classes.push('muted');
+        }
+        if (this.props.segment.opened) {
+            classes.push('editor');
+            classes.push('opened');
         }
         return classes;
     }
@@ -322,17 +336,6 @@ class Segment extends React.Component {
         SegmentActions.setSegmentLocked(this.props.segment, this.props.fid, !this.props.segment.unlocked);
     }
 
-    checkSegmentClasses() {
-        let classes = this.state.segment_classes.concat(this.createSegmentClasses());
-        if (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1) {
-            let indexEditor = classes.indexOf("editor");
-            classes.splice(indexEditor, 1);
-            let indexOpened = classes.indexOf("opened");
-            classes.splice(indexOpened, 1);
-        }
-        return classes;
-    }
-
     handleChangeBulk(event) {
         if (event.shiftKey) {
             this.props.setBulkSelection(this.props.segment.sid, this.props.fid);
@@ -375,8 +378,8 @@ class Segment extends React.Component {
     }
 
     checkIfCanOpenSegment() {
-        return (this.props.isReview && !this.props.segment.status == 'NEW' && !this.props.segment.status == 'DRAFT') || !this.props.isReview
-
+        return ( this.props.isReview && !(this.props.segment.status == 'NEW') && !(this.props.segment.status == 'DRAFT') )
+            || !this.props.isReview;
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -396,7 +399,7 @@ class Segment extends React.Component {
         let job_marker = "",
             timeToEdit = "",
             readonly = this.state.readonly,
-            segment_classes = this.checkSegmentClasses(),
+            segment_classes = this.state.segment_classes.concat(this.createSegmentClasses()),
             split_group = this.props.segment.split_group || [],
             autoPropagable = (this.props.segment.repetitions_in_chunk != "1"),
             originalId = this.props.segment.sid.split('-')[0],
@@ -420,10 +423,6 @@ class Segment extends React.Component {
         }
 
         let translationIssues = this.getTranslationIssues();
-
-        if (this.props.segment.opened) segment_classes.push('editor', 'opened');
-
-
         return (
             <section
                 ref={(section) => this.section = section}

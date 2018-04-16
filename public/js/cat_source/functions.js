@@ -402,7 +402,7 @@ SegmentActivator.registry.push(function( sid ) {
     var el = $("section:not(.opened) #segment-" + sid + "-target").find(".editarea");
     $(el).click();
     var fid = UI.getSegmentFileId(UI.getSegmentById(sid));
-    SegmentActions.setOpenSegment(sid,fid)
+    SegmentActions.openSegment(sid)
 });
 
 function ParsedHash( hash ) {

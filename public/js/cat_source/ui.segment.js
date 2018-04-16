@@ -323,7 +323,7 @@
             var n = $(section).nextAll(selector).first();
 
             if (!n.length) {
-                n = $(section).parents('article').next().find(selector).first();
+                n = $(section).parents('article').nextAll().find(selector).first();
             }
 
             if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
@@ -343,35 +343,13 @@
             }
         },
         gotoNextSegment: function() {
-            var selector = UI.selectorForNextSegment() ;
-            var next = $('.editor').nextAll( selector  ).first();
-
-            if (next.is('section')) {
-                UI.scrollSegment(next);
-                UI.editAreaClick($(UI.targetContainerSelector(), next), 'moving');
-                // $(UI.targetContainerSelector(), next).trigger("click", "moving");
-            } else {
-                next = UI.currentFile.next().find( selector ).first();
-                if (next.length) {
-                    UI.scrollSegment(next);
-                    UI.editAreaClick($(UI.targetContainerSelector(), next), 'moving');
-                    // $(UI.targetContainerSelector(), next).trigger("click", "moving");
-                } else {
-                    UI.closeSegment(UI.currentSegment, 1, 'save');
-                }
-            }
+            SegmentActions.openSegment(UI.nextSegmentId);
         },
         gotoNextUntranslatedSegment: function() {
-            console.log('gotoNextUntranslatedSegment');
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
-                if (!UI.nextUntranslatedSegmentId) {
-                    UI.closeSegment(UI.currentSegment);
-                } else {
-                    UI.reloadWarning();
-                }
+                UI.reloadWarning();
             } else {
-                $("#segment-" + UI.nextUntranslatedSegmentId +
-                    " " + UI.targetContainerSelector() ).trigger("click");
+                SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
             }
         },
 

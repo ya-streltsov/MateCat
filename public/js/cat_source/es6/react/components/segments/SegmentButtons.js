@@ -76,7 +76,7 @@ class SegmentButton extends React.Component {
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}
                        href="#" className="btn next-unapproved" data-segmentid={'segment-' + this.props.segment.sid}
-                       title="Revise and go to next translated"> A++
+                       title="Revise and go to next translated"> A+>>
                     </a>
                     <p>
                         {(UI.isMac) ? ('CMD') : ('CTRL')}
@@ -119,7 +119,7 @@ class SegmentButton extends React.Component {
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nextuntranslated'}
                        href="#" className="btn next-untranslated" data-segmentid={'segment-' + this.props.segment.sid}
-                       title="Translate and go to next untranslated"> T++
+                       title="Translate and go to next untranslated"> T+>>
                     </a>
                     <p>
                         {(UI.isMac) ? ('CMD') : ('CTRL')}

@@ -104,16 +104,10 @@ if ( Review.enabled() )
                         translatedList.first().find(UI.targetContainerSelector()).click();
                     }
                     // find in next segments in the next files
-                } else if(el.parents('article').nextAll('section.status-translated').length) {
+                } else if(el.parents('article').nextAll().find('section.status-translated').length) {
+                    var segment = $(section).parents('article').nextAll().find('section.status-translated').first();
+                    SegmentActions.openSegment(UI.getSegmentId(segment));
 
-                    file = el.parents('article');
-                    file.nextAll('section.status-translated').each(function () {
-                        if (!$(this).is(UI.currentSegment)) {
-                            translatedList = $(this);
-                            translatedList.first().find(UI.targetContainerSelector()).click();
-                            return false;
-                        }
-                    });
                     // else find from the beginning of the currently loaded segments in all files
                 } else if ($('section.status-translated').length) {
                     $('section.status-translated').each(function () {

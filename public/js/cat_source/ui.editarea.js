@@ -258,55 +258,6 @@ $.extend( UI, {
             }
         }
     },
-    /**
-     * Edit area click
-     *
-     * This function can be extended in order for other modules
-     * to change the behaviour of segment activation.
-     *
-     * TODO: .editarea class is bound to presentation and logic
-     * and should be decoupled in future refactorings.
-     *
-     */
-    editAreaClick : function(target, operation) {
-
-        if (typeof operation == 'undefined') {
-            operation = 'clicking';
-        }
-
-        UI.closeTagAutocompletePanel();
-        UI.removeHighlightCorrespondingTags();
-
-        var segmentNotYetOpened = ($(target).is(UI.editarea) && !$(target).closest('section').hasClass("opened"));
-
-        if ( !$(target).is(UI.editarea) || !UI.body.hasClass('editing') || segmentNotYetOpened) {
-            if (operation == 'moving') {
-                UI.recentMoving = true;
-                clearTimeout(UI.recentMovingTimeout);
-                UI.recentMovingTimeout = setTimeout(function() {
-                    UI.recentMoving = false;
-                }, 1000);
-            }
-
-            UI.lastOperation = operation;
-            SegmentActions.openSegment(UI.getSegmentId(target));
-
-            if (operation != 'moving') {
-                var segment = $(target).closest('section');
-                if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
-                    setTimeout(function () {
-                        UI.scrollSegment(segment);
-                    }, 50);
-                }
-            }
-        }
-
-        UI.checkTagProximity();
-
-
-        // if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
-
-    },
     keyPressEditAreaEventHandler: function (e) {
         // if (e.ctrlKey || e.shiftKey){
         //     return;
