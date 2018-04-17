@@ -7,9 +7,12 @@
 /*
 * [x] Portare la createButtons in react
 * [ ] Riportare tutto ciò che chiama editAreaClick in React
+* [ ] FARE ALLA FINE: CERCARE ###REMOVE### NEI COMMENTI E CANCELLARE LA FUNZIONE SUCCESSIVA
+* [ ] autoCopySuggestionEnabled (funzione usata in getContribution) viene sovrascritta dentro ebay-cat, fare un check
+* [ ] Non gestiamo il render degli errori delle contributions (renderContributionErrors)
 *
 * Cose da fare con lo stato open:
-* [ ] Metodo getContribution si può rimuovere (???)
+* [x] Metodo getContribution si può rimuovere (???)
 * [x] Rimuovere metodo editAreaClick
 * [x] Cambiare goToNextSegment/gotoNextUntranslatedSegment con azione openSegment
 * [x] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
@@ -42,7 +45,7 @@
 * [ ] Se mi trovo in review, review extended o review extended footer, chiamare getSegmentVersionsIssuesHandler (magari riportarlo in react)
 * [ ] Se attivo lo speechToText va attivato il microfono e va chiamata Speech2Text.enableMicrophone(segment.el)
 * [ ] 'ESC' deve chiudere tutti i segmenti
-* [ ] All'apertura del segmento modificare url con idSegment (UI.detectStartSegment)
+* [x] All'apertura del segmento modificare url con idSegment (UI.detectStartSegment)
 * [ ] Diff del tab Revise impazzisce, ricontrollare anche revise ebay/paypal
 * [ ] Check change status dal menu laterale segmento
 *
@@ -142,6 +145,10 @@ class Segment extends React.Component {
 
         //From EditAreaClick
         UI.checkTagProximity();
+
+        setTimeout(() => {
+            window.location.hash = this.props.segment.sid
+        }, 300);
 
 
     }

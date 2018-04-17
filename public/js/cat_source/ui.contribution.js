@@ -4,10 +4,6 @@
 
 if (config.translation_matches_enabled) {
 
-    $('html').on('copySourceToTarget', 'section', function () {
-        UI.setChosenSuggestion(0);
-    });
-
 $.extend(UI, {
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
 		if (typeof (decode) == "undefined") {
@@ -61,7 +57,10 @@ $.extend(UI, {
 			translation: translation
 		});
 	},
-	getContribution: function(segment, next) {
+    /*
+    * TODO: ###REMOVE###
+    * */
+	/*getContribution: function(segment, next) {
         var txt;
         var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
         try {
@@ -78,9 +77,9 @@ $.extend(UI, {
             return deferred.resolve();
         }
 
-        /* If the segment just translated is equal or similar (Levenshtein distance) to the
+        /!* If the segment just translated is equal or similar (Levenshtein distance) to the
          * current segment force to reload the matches
-        **/
+        **!/
         var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
         var s2 = $('.source', current).text();
         var areSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 < 50;
@@ -181,9 +180,9 @@ $.extend(UI, {
 			$('.submenu li.tab-switcher-tm a span', segment).text(' (' + d.data.matches.length + ')');
 		}
 		this.renderContributionErrors(d.errors, segment);
-    },
+    },*/
 
-    renderContributions: function(d, segment) {
+    /*renderContributions: function(d, segment) {
         if(!d) return true;
 
         var editarea = $('.editarea', segment);
@@ -210,9 +209,9 @@ $.extend(UI, {
                 UI.setChosenSuggestion(1, segment);
 
                 translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
-                /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
+                /!*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
                  * the source with the text with tags, the segment is tagged
-                 */
+                 *!/
                 if (UI.checkCurrentSegmentTPEnabled(segment)) {
                     var currentContribution = this.getCurrentSegmentContribution(segment);
                     if (parseInt(currentContribution.match) !== 100) {
@@ -250,11 +249,11 @@ $.extend(UI, {
             }
         }
         SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
-    },
-    autoCopySuggestionEnabled: function () {
+    },*/
+    /*autoCopySuggestionEnabled: function () {
         return true;
-    },
-    renderContributionErrors: function(errors, segment) {
+    },*/
+    /*renderContributionErrors: function(errors, segment) {
         $('.tab.sub-editor.matches .engine-errors', segment).empty();
         $('.tab.sub-editor.matches .engine-errors', segment).hide();
         $.each(errors, function(){
@@ -284,7 +283,7 @@ $.extend(UI, {
                 '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
                 '</span></li></ul>');
         });
-    },
+    },*/
 	setDeleteSuggestion: function(source, target) {
 
         return APP.doRequest({
@@ -314,7 +313,7 @@ $.extend(UI, {
         var currentSegment = (segment)? segment : UI.currentSegment;
         currentSegment.find('.editarea').data('lastChosenSuggestion', w);
 	},
-    setContributionSourceDiff: function (segment) {
+    /*setContributionSourceDiff: function (segment) {
         var sourceText = '';
         var suggestionSourceText = '';
         var html = $(segment).find('.source').html();
@@ -355,7 +354,7 @@ $.extend(UI, {
 
 
         });
-    },
+    },*/
 
 
     });
