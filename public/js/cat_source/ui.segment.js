@@ -435,7 +435,10 @@
             });
             SegmentActions.addClassToSegment(UI.getSegmentId( segment ), 'saved');
         },
-        setCurrentSegment: function(closed) {
+        /**
+         * TODO: ###REMOVE###
+         */
+        /*setCurrentSegment: function(closed) {
             var reqArguments = arguments;
             var id_segment = this.currentSegmentId;
             if (closed) {
@@ -477,7 +480,7 @@
                 this.getTranslationMismatches(id_segment);
             }
             $('html').trigger('setCurrentSegment_success', [d, id_segment]);
-        },
+        },*/
         /**
          * setStatus
          *
