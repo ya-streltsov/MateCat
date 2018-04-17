@@ -119,9 +119,7 @@ class SegmentFooterTabMatches extends React.Component {
             </li>
             <li className="graydesc">
                 Source:
-                <span className="bold">
-                    {match.cb}
-                </span>
+                <span className="bold"> {match.cb}</span>
             </li>
         </ul>;
     }
