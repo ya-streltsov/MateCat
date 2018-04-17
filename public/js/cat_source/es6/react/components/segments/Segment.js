@@ -7,7 +7,7 @@
 /*
 * [x] Portare la createButtons in react
 * [ ] Riportare tutto ciò che chiama editAreaClick in React
-* [ ] FARE ALLA FINE: CERCARE ###REMOVE### NEI COMMENTI E CANCELLARE LA FUNZIONE SUCCESSIVA
+* [ ] FARE ALLA FINE: CERCARE ###REMOVE### NEI COMMENTI E CANCELLARE LA FUNZIONI SUCCESSIVE
 * [ ] autoCopySuggestionEnabled (funzione usata in getContribution) viene sovrascritta dentro ebay-cat, fare un check
 * [ ] Non gestiamo il render degli errori delle contributions (renderContributionErrors)
 *
@@ -17,7 +17,7 @@
 * [x] Riportare comportamento metodo EditAreaClick (UI.editarea ->271)
 * [x] Cambiare goToNextSegment/gotoNextUntranslatedSegment con azione openSegment
 * [x] Controllare se l'elemento è clicckabile (ui.opensegments.js->15)
-* [ ] Far comparire un messaggio quando di errore quando la editarea non è cliccabile (riprendere dal task precedente)
+* [x] Far comparire un messaggio quando di errore quando la editarea non è cliccabile (riprendere dal task precedente)
 * [ ] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
 * [ ] Messaggio di errore se sono in review e non c'è nemmeno un segmento tradotto
 * [ ] Ricostruire comportamento di byButton, il significato di questa variabile è "se sto selezionando non devi aprirmi, se ho cliccato devi aprirmi"
@@ -111,52 +111,58 @@ class Segment extends React.Component {
     }
 
     openSegment() {
-        //controllare se sono nella review e se il segmento è tradotto altrimenti messaggio di errore poichè non posso aprire un segmento non tradotto nella review
+        if (!this.checkIfCanOpenSegment()) {
+            if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0 ) {
+                alertNoTranslatedSegments();
+            }else{
+                alertNotTranslatedYet(this.props.segment.sid);
+            }
+        } else {
 
-        // TODO Remove this block
-        /**************************/
+            // TODO Remove this block
+            /**************************/
 
-        //From EditAreaClick
-        UI.closeTagAutocompletePanel();
-        UI.removeHighlightCorrespondingTags();
-        if (UI.warningStopped) {
-            UI.warningStopped = false;
-            UI.checkWarnings(false);
+            //From EditAreaClick
+            UI.closeTagAutocompletePanel();
+            UI.removeHighlightCorrespondingTags();
+            if (UI.warningStopped) {
+                UI.warningStopped = false;
+                UI.checkWarnings(false);
+            }
+            UI.cacheObjects($(this.section));
+            UI.evalNextSegment($(this.section), 'untranslated');
+            UI.updateJobMenu();
+            UI.clearUndoStack();
+            $(document).trigger('segment:activate', {segment: new UI.Segment($(this.section))});  //Used by Segment Filter
+            UI.getNextSegment(UI.currentSegment, 'untranslated');
+            UI.setEditingSegment($(this.section));  //TODO Remove: set Class editing to the body and trigger event used by review improved
+            $('html').trigger('open'); // used by ui.review to open tab Revise in the footernext-unapproved
+            $(window).trigger({
+                type: "segmentOpened",
+                segment: new UI.Segment($(this.section))
+            });
+
+            Speech2Text.enabled() && Speech2Text.enableMicrophone($(this.section));
+            /************/
+            UI.editStart = new Date();
+            SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
+            SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
+            SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
+
+            //From EditAreaClick
+            UI.checkTagProximity();
+
+            setTimeout(() => {
+                window.location.hash = this.props.segment.sid
+            }, 300);
+
         }
-        UI.cacheObjects( $(this.section) );
-        UI.evalNextSegment($(this.section), 'untranslated');
-        UI.updateJobMenu();
-        UI.clearUndoStack();
-        $(document).trigger('segment:activate', { segment: new UI.Segment( $(this.section) ) } );  //Used by Segment Filter
-        UI.getNextSegment(UI.currentSegment, 'untranslated');
-        UI.setEditingSegment( $(this.section));  //TODO Remove: set Class editing to the body and trigger event used by review improved
-        $('html').trigger('open'); // used by ui.review to open tab Revise in the footernext-unapproved
-        $(window).trigger({
-            type: "segmentOpened",
-            segment: new UI.Segment( $(this.section) )
-        });
-
-        Speech2Text.enabled() && Speech2Text.enableMicrophone($(this.section));
-        /************/
-        UI.editStart = new Date();
-        SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
-        SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
-        SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
-
-        //From EditAreaClick
-        UI.checkTagProximity();
-
-        setTimeout(() => {
-            window.location.hash = this.props.segment.sid
-        }, 300);
-
-
     }
 
     openSegmentFromAction(sid) {
         let self = this;
-        if ( parseInt(sid) === parseInt(this.props.segment.sid) ) {
-            setTimeout(function (  ) {
+        if (parseInt(sid) === parseInt(this.props.segment.sid)) {
+            setTimeout(function () {
                 self.openSegment();
             });
         }
@@ -385,7 +391,7 @@ class Segment extends React.Component {
     }
 
     checkIfCanOpenSegment() {
-        return ( this.props.isReview && !(this.props.segment.status == 'NEW') && !(this.props.segment.status == 'DRAFT') )
+        return (this.props.isReview && !(this.props.segment.status == 'NEW') && !(this.props.segment.status == 'DRAFT'))
             || !this.props.isReview;
     }
 
@@ -501,7 +507,6 @@ class Segment extends React.Component {
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
                         locked={!this.props.segment.unlocked && this.props.segment.ice_locked === '1'}
                         openSegment={this.openSegment}
-                        canBeOpened={this.checkIfCanOpenSegment()}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>

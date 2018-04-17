@@ -154,7 +154,6 @@ class SegmentBody extends React.Component {
                             locked={this.props.locked}
                             readonly={this.props.readonly}
                             openSegment={this.props.openSegment}
-                            canBeOpened={this.props.canBeOpened}
                         />
 
                     </div>

@@ -91,11 +91,7 @@ class Editarea extends React.Component {
         } else if (this.props.segment.muted) {
             return;
         } else {
-            if(this.props.canBeOpened){
-                this.props.openSegment();
-            }else{
-                console.log('Errore');
-            }
+            this.props.openSegment();
         }
 
 

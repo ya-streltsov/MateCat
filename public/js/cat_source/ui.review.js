@@ -47,8 +47,11 @@ if ( Review.enabled() )
 
 
     (function(Review, $, undefined) {
+        /**
+         * TODO: ###REMOVE###
+         */
+        /*$.extend(Review, {
 
-        $.extend(Review, {
             evalOpenableSegment : function(section) {
                 if ( isTranslated(section) ) return true ;
                 var sid = UI.getSegmentId( section );
@@ -59,7 +62,7 @@ if ( Review.enabled() )
                 }
                 return false ;
             },
-        });
+        });*/
 
         $.extend(UI, {
 
