@@ -21,7 +21,7 @@
 * [ ] Ricostruire la logica del checkWarnings, ora viene chiamata anche all'apertura del segment, capire il perchè e riscrivere il comportamento
 * [ ] Messaggio di errore se sono in review e non c'è nemmeno un segmento tradotto
 * [ ] Ricostruire comportamento di byButton, il significato di questa variabile è "se sto selezionando non devi aprirmi, se ho cliccato devi aprirmi"
-* [ ] Tenere la compatibilità con cacheObjects (ui.core.js->68)
+* [x] Tenere la compatibilità con cacheObjects (ui.core.js->68)
 * [x] Scrollare al segmento aperto
 * [ ] Portare jobMenu in React e tenerlo in ascolto sulla render dei segmenti
 * [ ] Svuotare gli undoStack, capire come portarli dentro react, magari su singolo componente o a livello di container
@@ -129,7 +129,18 @@ class Segment extends React.Component {
                 UI.warningStopped = false;
                 UI.checkWarnings(false);
             }
-            UI.cacheObjects($(this.section));
+            // start old cache
+            UI.currentSegmentId = this.props.segment.sid;
+            UI.currentSegment = $(this.section);
+            let sourceTags = this.props.segment.segment
+                .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+            UI.sourceTags = sourceTags || [];
+            UI.currentSegmentTranslation =  $(this.section).find( UI.targetContainerSelector() ).text();
+            UI.currentFile = $(this.section).closest("article");
+            UI.currentFileId = this.props.segment.fid;
+
+            //end old cache
+
             UI.evalNextSegment($(this.section), 'untranslated');
             UI.updateJobMenu();
             UI.clearUndoStack();

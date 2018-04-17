@@ -63,8 +63,8 @@ UI = {
 
         $(document).trigger('segment:activate', { segment: segment } );
 	},
-
-	cacheObjects: function( editarea_or_segment ) {
+    //todo: ###REMOVE###
+	/*cacheObjects: function( editarea_or_segment ) {
         var segment;
         if ( editarea_or_segment instanceof UI.Segment ) {
             segment = editarea_or_segment ;
@@ -75,17 +75,14 @@ UI = {
             segment = new UI.Segment( $(editarea_or_segment).closest('section') );
         }
 
-		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
-                                                      // seems to be the previous current segment
-
-		this.currentSegmentId    = segment.id ;
-		this.currentSegment      = segment.el ;
+		/!*this.currentSegmentId    = segment.id ;
+		this.currentSegment      = segment.el ;*!/
 		this.currentFile         = segment.el.closest("article");
 		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
 
         this.evalCurrentSegmentTranslationAndSourceTags( segment.el );
     },
-
+*/
 
     /**
      * shouldSegmentAutoPropagate
@@ -906,11 +903,14 @@ UI = {
         quick = quick || false;
         this.gotoOpenSegment(quick);
 	},
-	removeButtons: function(byButton) {
+    /**
+     * todo: ###REMOVE###
+     */
+	/*removeButtons: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).empty();
-	},
+	},*/
 	renderFiles: function(files, where, starting) {
         // If we are going to re-render the articles first we remove them
         if (where === "center" && !starting) {

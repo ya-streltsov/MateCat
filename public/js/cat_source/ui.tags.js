@@ -172,15 +172,17 @@ $.extend(UI, {
             console.error("Error parsing tag ph in removePhTagsWithEquivTextIntoText function");
         }
     },
-
-    evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
+    /*
+    * Todo: ###REMOVE###
+    * */
+    /*evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
         if ( segment.length == 0 ) return ;
 
         var sourceTags = htmlDecode($('.source', segment).data('original'))
-            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+            .match(/(&lt;\s*\/!*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
         this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
-    },
+    },*/
 
     detectTagType: function (area) {
         if (!this.tagLockEnabled || config.tagLockCustomizable ) {
