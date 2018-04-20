@@ -50,7 +50,7 @@
 * [ ] Check change status dal menu laterale segmento
 *
 * Cose da fare con lo stato close:
-* [ ] Togliere l'editarea editabile
+* [x] Togliere l'editarea editabile
 * [ ] Rimuovere una serie di classi dal segmento `waiting_for_check_result opened editor split-action`
 * [ ] Chiudire commento corrispondente (MBC.main.js->825)
 * [ ] Se il segmento è stato modificato e e mi sto spostando senza salvare, devo salvare il segmento,
@@ -399,6 +399,10 @@ class Segment extends React.Component {
         if (!this.props.segment.opened && nextProps.segment.opened) {
             UI.scrollSegment($(this.section), this.props.segment.sid);
         }
+
+        if (this.props.segment.opened && !nextProps.segment.opened) {
+            console.log('Chiudo un segmento *******');
+        }
     }
 
     checkIfCanOpenSegment() {
@@ -417,7 +421,6 @@ class Segment extends React.Component {
             (nextState.readonly !== this.state.readonly)
         );
     }
-
     render() {
 
         let job_marker = "",
