@@ -464,10 +464,10 @@ class ProjectManager {
                Checking Extension is no more sufficient, we want check content
                $enforcedConversion = true; //( if conversion is enabled )
              */
-            $isAConvertedFile = $this->isAConvertedFile( $fileName, $forceXliff );
+            $mustBeConverted = $this->fileMustBeConverted( $fileName, $forceXliff );
 
             //if it's one of the listed formats or conversion is not enabled in first place
-            if ( !$isAConvertedFile ) {
+            if ( !$mustBeConverted ) {
                 /*
                    filename is already an xliff and it's in upload directory
                    we have to make a cache package from it to avoid altering the original path
@@ -491,7 +491,8 @@ class ProjectManager {
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][]                                                                    = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+
                 $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . "|" . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
@@ -1999,24 +2000,26 @@ class ProjectManager {
 
                 $iceLockArray = $this->features->filter( 'setICESLockFromXliffValues',
                         [
-                                'approved'      => $translation_row [ 4 ],
-                                'locked'        => 0,
-                                'match_type'    => 'ICE',
-                                'eq_word_count' => 0,
-                                'status'        => $status
+                                'approved'         => $translation_row [ 4 ],
+                                'locked'           => 0,
+                                'match_type'       => 'ICE',
+                                'eq_word_count'    => 0,
+                                'status'           => $status,
+                                'suggestion_match' => null
                         ]
                 );
 
                 //WARNING do not change the order of the keys
                 $sql_values = [
-                        'id_segment'    => $translation_row [ 0 ],
-                        'id_job'        => $jid,
-                        'segment_hash'  => $translation_row [ 3 ],
-                        'status'        => $iceLockArray[ 'status' ],
-                        'translation'   => $translation_row [ 2 ],
-                        'locked'        => $iceLockArray[ 'locked' ],
-                        'match_type'    => $iceLockArray[ 'match_type' ],
-                        'eq_word_count' => $iceLockArray[ 'eq_word_count' ],
+                        'id_segment'       => $translation_row [ 0 ],
+                        'id_job'           => $jid,
+                        'segment_hash'     => $translation_row [ 3 ],
+                        'status'           => $iceLockArray[ 'status' ],
+                        'translation'      => $translation_row [ 2 ],
+                        'locked'           => $iceLockArray[ 'locked' ],
+                        'match_type'       => $iceLockArray[ 'match_type' ],
+                        'eq_word_count'    => $iceLockArray[ 'eq_word_count' ],
+                        'suggestion_match' => $iceLockArray[ 'suggestion_match' ],
                 ];
 
                 $query_translations_values[] = $sql_values;
@@ -2039,11 +2042,12 @@ class ProjectManager {
                         tm_analysis_status, /* DONE */
                         locked, 
                         match_type, 
-                        eq_word_count 
+                        eq_word_count,
+                        suggestion_match
                 )
                 VALUES ";
 
-            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ? )";
+            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ? )";
 
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
@@ -2078,7 +2082,7 @@ class ProjectManager {
 
     protected function _strip_external( $segment ) {
 
-        if ( $this->features->filter( 'skipTagLessFeature', false ) ) {
+        if ( $this->features->filter( 'skipTagLessFeature', false, $segment ) ) {
             return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
         }
 
@@ -2099,6 +2103,10 @@ class ProjectManager {
         // of all tags openings/closures. In the second step the function checks
         // all the tags opened or closed between the first and last letter, and
         // ensures that closures and openings of those tags are not stripped out.
+
+        //TODO IMPROVEMENT:
+        // - Why scan entire string if the fist char is not a less-than sign? We can't strip nothing
+        // - Why continue if the first char is a less-than sign but we realize that it is not a tag?
 
         $segmentLength = strlen( $segment );
 
@@ -2431,18 +2439,18 @@ class ProjectManager {
         return $fid . "|" . $trans_unitID;
     }
 
-    private function isAConvertedFile( $fileName, $forceXliff ) {
+    private function fileMustBeConverted( $fileName, $forceXliff ) {
 
         $fullPath = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName;
 
-        $isAConvertedFile = DetectProprietaryXliff::isAConvertedFile( $fullPath, $forceXliff );
+        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $fullPath, $forceXliff );
 
         /**
          * Application misconfiguration.
          * upload should not be happened, but if we are here, raise an error.
          * @see upload.class.php
          * */
-        if ( -1 === $isAConvertedFile ) {
+        if ( -1 === $mustBeConverted ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code"    => -8,
                     "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
@@ -2452,7 +2460,7 @@ class ProjectManager {
             }
         }
 
-        return $isAConvertedFile;
+        return $mustBeConverted;
 
     }
 
