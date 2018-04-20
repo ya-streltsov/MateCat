@@ -103,12 +103,16 @@ class Editarea extends React.Component {
 		if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' ) || ReviewExtendedFooter.enabled()){
 			UI.trackChanges(this.editAreaRef);
 		}
-		const value = $(this.editAreaRef).text();
-		if(value !== this.props.segment.translation){
-		    console.log('ho modificato il segmento');
-        }else{
-            console.log('non ho modificato il segmento');
+
+		//check if the translation is changed
+		const   value = htmlEncode(UI.prepareTextToSend($(this.editAreaRef).html())),
+                status = (value !== this.props.segment.translation);
+		if(this.props.segment.modified != status){
+            SegmentActions.modifiedTranslation(this.props.segment.sid,this.props.segment.fid,status);
         }
+
+
+
 	}
 
     onInputEvent(e) {

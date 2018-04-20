@@ -50,11 +50,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     updateAll: function (segments, fid, where) {
         console.time("Time: updateAll segments" + fid);
         if (this._segments[fid] && where === "before") {
-            this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments,fid)));
+            this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
         } else if (this._segments[fid] && where === "after") {
-            this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments,fid)));
+            this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
         } else {
-            this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments,fid));
+            this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments, fid));
         }
 
         if (this.segmentsInBulk.length > 0) {
@@ -63,7 +63,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         // console.timeEnd("Time: updateAll segments"+fid);
     },
 
-    normalizeSplittedSegments: function (segments,fid) {
+    normalizeSplittedSegments: function (segments, fid) {
         var newSegments = [];
         $.each(segments, function (index) {
             var splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
@@ -182,6 +182,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                     segment.set('opened', true) : segment.set('opened', false))
         });
     },
+
+
+    modifiedTranslation(sid, fid, status) {
+        const index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'modified'], status);
+    },
+
     /**
      *
      * @param current_sid
@@ -214,10 +221,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             result,
             currentFind = false;
         _.forEach(this._segments, function (item, index) {
-            if (parseInt(index) >= parseInt(current_fid) && _.isUndefined(result) ) {
+            if (parseInt(index) >= parseInt(current_fid) && _.isUndefined(result)) {
                 self._segments[index].forEach((segment, key) => {
                     if (currentFind) {
-                        if (status === 8 && (segment.get('status') == allStatus[2] || segment.get('status') == allStatus[4])){
+                        if (status === 8 && (segment.get('status') == allStatus[2] || segment.get('status') == allStatus[4])) {
                             result = segment.toJS();
                             return false;
                         } else if ((status && segment.get('status') == allStatus[status]) || !status) {
@@ -434,7 +441,8 @@ AppDispatcher.register(function (action) {
             SegmentStore.openSegment(action.sid, action.fid);
             _.forEach(SegmentStore._segments, function (item, index) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });            break;
+            });
+            break;
         case SegmentConstants.ADD_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.fid, action.where);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
@@ -486,6 +494,10 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
+            break;
+        case SegmentConstants.MODIFIED_TRANSLATION:
+            SegmentStore.modifiedTranslation(action.sid, action.fid, action.status);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.TRANSLATION_EDITED:
             let translation = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
