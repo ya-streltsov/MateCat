@@ -465,7 +465,8 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_SEGMENT_STATUS:
             SegmentStore.setStatus(action.id, action.fid, action.status);
-            SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_STATUS, action.id, action.status);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            //SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_STATUS, action.id, action.status);
             break;
         case SegmentConstants.UPDATE_ALL_SEGMENTS:
             SegmentStore.emitChange(SegmentConstants.UPDATE_ALL_SEGMENTS);

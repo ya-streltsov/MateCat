@@ -289,7 +289,6 @@ $.extend( UI, {
         }, 50);
     },
     inputEditAreaEventHandler: function (e) {
-        SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'waiting_for_check_result');
         SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
         UI.currentSegment.data('modified', true);
         UI.currentSegment.trigger('modified');

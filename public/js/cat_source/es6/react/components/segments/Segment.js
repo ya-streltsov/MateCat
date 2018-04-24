@@ -90,7 +90,6 @@ class Segment extends React.Component {
         this.addClass = this.addClass.bind(this);
         this.removeClass = this.removeClass.bind(this);
         this.setAsAutopropagated = this.setAsAutopropagated.bind(this);
-        this.setSegmentStatus = this.setSegmentStatus.bind(this);
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
         this.handleChangeBulk = this.handleChangeBulk.bind(this);
         this.openSegment = this.openSegment.bind(this);
@@ -103,7 +102,6 @@ class Segment extends React.Component {
             segment_classes: [],
             modified: false,
             autopropagated: this.props.segment.autopropagated_from != 0,
-            status: this.props.segment.status,
             showTranslationIssues: false,
             unlocked: UI.isUnlockedSegment(this.props.segment),
             readonly: readonly,
@@ -199,8 +197,8 @@ class Segment extends React.Component {
             }
         }
 
-        if (this.state.status) {
-            classes.push('status-' + this.state.status.toLowerCase());
+        if (this.props.segment.status) {
+            classes.push('status-' + this.props.segment.status.toLowerCase());
         }
         else {
             classes.push('status-new');
@@ -234,6 +232,10 @@ class Segment extends React.Component {
             classes.push('editor');
             classes.push('opened');
         }
+        if (this.props.segment.modified) {
+            classes.push('modified');
+        }
+
         return classes;
     }
     //TODO: ###REMOVE###
@@ -309,23 +311,6 @@ class Segment extends React.Component {
         }
     }
 
-    setSegmentStatus(sid, status) {
-        if (this.props.segment.sid == sid) {
-            let classes = this.state.segment_classes.slice(0);
-            let index = classes.findIndex(function (item) {
-                return item.indexOf("status-") > -1;
-            });
-
-            if (index >= 0) {
-                classes.splice(index, 1);
-            }
-
-            this.setState({
-                segment_classes: classes,
-                status: status
-            });
-        }
-    }
 
     isSplitted() {
         return (!_.isUndefined(this.props.segment.split_group));
@@ -377,10 +362,9 @@ class Segment extends React.Component {
     componentDidMount() {
         //TODO: ###REMOVE###
         //SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
-        SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
-        SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
+        //SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
+        //SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
-        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.addListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
     }
@@ -389,10 +373,9 @@ class Segment extends React.Component {
     componentWillUnmount() {
         //TODO: ###REMOVE###
         //SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
-        SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
-        SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
+        //SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
+        //SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
-        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
     }
@@ -406,7 +389,12 @@ class Segment extends React.Component {
         if (this.props.segment.opened && !nextProps.segment.opened) {
             //check if this segment require setTranslation
             if (!this.props.isReview && this.props.segment.modified) {
-                UI.saveSegment($(this.section));
+                UI.setTranslation({
+                    id_segment: UI.getSegmentId($(this.section)),
+                    status: this.props.segment.status ,
+                    caller: 'autosave'
+                });
+                //UI.saveSegment($(this.section));
             }
         }
     }
@@ -422,7 +410,6 @@ class Segment extends React.Component {
             (!Immutable.fromJS(nextState.segment_classes).equals(Immutable.fromJS(this.state.segment_classes))) ||
             (nextState.modified !== this.state.modified) ||
             (nextState.autopropagated !== this.state.autopropagated) ||
-            (nextState.status !== this.state.status) ||
             (nextState.showTranslationIssues !== this.state.showTranslationIssues) ||
             (nextState.readonly !== this.state.readonly)
         );

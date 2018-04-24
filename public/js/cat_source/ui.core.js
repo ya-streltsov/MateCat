@@ -187,7 +187,6 @@ UI = {
             byStatus: byStatus,
             propagate: !noPropagation
         });
-        SegmentActions.removeClassToSegment(options.segment_id, 'saved');
 
         $(document).trigger('segment:status:change', [segment, options]);
     },
@@ -250,7 +249,7 @@ UI = {
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
             segment.find('.editarea').attr('contenteditable', 'false');
-            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor split-action');
+            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'split-action');
 
             $(window).trigger({
                 type: "segmentClosed",
@@ -1591,8 +1590,6 @@ UI = {
             segment = new UI.Segment( segment );
         }
 
-        SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
-
 		var dd = new Date();
 		ts = dd.getTime();
 		var token = segment.id + '-' + ts.toString();
@@ -1626,21 +1623,17 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-				if (segment.el.hasClass('waiting_for_check_result')) {
-                    // TODO: define d.total more explicitly
-					if ( !d.total ) {
-						$('p.warnings', segment.el).empty();
-						$('span.locked.mismatch', segment.el).removeClass('mismatch');
-                        $('.editor .editarea .order-error').removeClass('order-error');
-
-					}
-                    else {
-                        UI.fillCurrentSegmentWarnings(segment.el, d.details, false); // update warnings
-                        UI.markTagMismatch(d.details);
-                        delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
-                        SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
-                    }
-				}
+                // TODO: define d.total more explicitly
+                if ( !d.total ) {
+                    $('p.warnings', segment.el).empty();
+                    $('span.locked.mismatch', segment.el).removeClass('mismatch');
+                    $('.editor .editarea .order-error').removeClass('order-error');
+                }
+                else {
+                    UI.fillCurrentSegmentWarnings(segment.el, d.details, false); // update warnings
+                    UI.markTagMismatch(d.details);
+                    delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
+                }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
 		}, 'local');
@@ -2257,7 +2250,6 @@ UI = {
         }, 100);
 		if (this.undoStackPosition < (this.undoStack.length - 1))
 			this.undoStackPosition++;
-        SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	redoInSegment: function() {
@@ -2271,7 +2263,6 @@ UI = {
 		if (this.undoStackPosition > 0) {
             this.undoStackPosition--;
         }
-        SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	saveInUndoStack: function() {
