@@ -111,8 +111,6 @@ class Editarea extends React.Component {
             SegmentActions.modifiedTranslation(this.props.segment.sid,this.props.segment.fid,status);
         }
 
-
-
 	}
 
     onInputEvent(e) {
@@ -157,12 +155,12 @@ class Editarea extends React.Component {
         });
     }
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        //SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
         UI.editarea = $(this.editAreaRef);
     }
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        //SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
     }
     componentWillMount() {

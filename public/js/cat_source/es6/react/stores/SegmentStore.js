@@ -484,8 +484,8 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
-            let trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
-            SegmentStore.emitChange(action.actionType, action.id, trans);
+            //let trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
+            SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.REPLACE_SOURCE:
             let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
