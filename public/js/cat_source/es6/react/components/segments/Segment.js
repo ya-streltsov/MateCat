@@ -394,7 +394,6 @@ class Segment extends React.Component {
                     status: this.props.segment.status ,
                     caller: 'autosave'
                 });
-                //UI.saveSegment($(this.section));
             }
         }
     }

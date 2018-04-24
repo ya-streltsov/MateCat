@@ -289,7 +289,7 @@ $.extend( UI, {
         }, 50);
     },
     inputEditAreaEventHandler: function (e) {
-        SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
+        SegmentActions.modifiedTranslation(UI.getSegmentId( UI.currentSegment ),UI.getSegmentFileId(UI.currentSegment),true);
         UI.currentSegment.data('modified', true);
         UI.currentSegment.trigger('modified');
 
