@@ -103,12 +103,14 @@ class Editarea extends React.Component {
 		if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' ) || ReviewExtendedFooter.enabled()){
 			UI.trackChanges(this.editAreaRef);
 		}
-		const value = $(this.editAreaRef).text();
-		if(value !== this.props.segment.translation){
-		    console.log('ho modificato il segmento');
-        }else{
-            console.log('non ho modificato il segmento');
+
+		//check if the translation is changed
+		const   value = htmlEncode(UI.prepareTextToSend($(this.editAreaRef).html())),
+                status = (value !== this.props.segment.translation);
+		if(this.props.segment.modified != status){
+            SegmentActions.modifiedTranslation(this.props.segment.sid,this.props.segment.fid,status);
         }
+
 	}
 
     onInputEvent(e) {
@@ -153,12 +155,12 @@ class Editarea extends React.Component {
         });
     }
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        //SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
         UI.editarea = $(this.editAreaRef);
     }
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        //SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
     }
     componentWillMount() {

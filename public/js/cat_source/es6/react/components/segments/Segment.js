@@ -10,6 +10,9 @@
 * [ ] FARE ALLA FINE: CERCARE ###REMOVE### NEI COMMENTI E CANCELLARE LA FUNZIONI SUCCESSIVE
 * [ ] autoCopySuggestionEnabled (funzione usata in getContribution) viene sovrascritta dentro ebay-cat, fare un check
 * [ ] Non gestiamo il render degli errori delle contributions (renderContributionErrors)
+* [ ] Al momento quando faccio doppio click su un match chiamiamo un'azione che salva le classi correnti e poi le rivisualizza
+* anche quando non deve. Ho iniziato a fixare mettendo un modified:true nel segmento, ma al doppio click la trackchanges viene chiamata
+* 3 volte e le 2 vcolte successive viene chiamata a False. trovare un modo per fixare.
 *
 * Cose da fare con lo stato open:
 * [x] Metodo getContribution si può rimuovere (???)
@@ -83,7 +86,7 @@ class Segment extends React.Component {
         this.reviewExtendedFooter = 'extended-footer';
 
         this.createSegmentClasses = this.createSegmentClasses.bind(this);
-        this.hightlightEditarea = this.hightlightEditarea.bind(this);
+        /*this.hightlightEditarea = this.hightlightEditarea.bind(this);*/
         this.addClass = this.addClass.bind(this);
         this.removeClass = this.removeClass.bind(this);
         this.setAsAutopropagated = this.setAsAutopropagated.bind(this);
@@ -112,9 +115,9 @@ class Segment extends React.Component {
 
     openSegment() {
         if (!this.checkIfCanOpenSegment()) {
-            if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0 ) {
+            if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
                 alertNoTranslatedSegments();
-            }else{
+            } else {
                 alertNotTranslatedYet(this.props.segment.sid);
             }
         } else {
@@ -135,7 +138,7 @@ class Segment extends React.Component {
             let sourceTags = this.props.segment.segment
                 .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
             UI.sourceTags = sourceTags || [];
-            UI.currentSegmentTranslation =  $(this.section).find( UI.targetContainerSelector() ).text();
+            UI.currentSegmentTranslation = $(this.section).find(UI.targetContainerSelector()).text();
             UI.currentFile = $(this.section).closest("article");
             UI.currentFileId = this.props.segment.fid;
 
@@ -177,10 +180,6 @@ class Segment extends React.Component {
                 self.openSegment();
             });
         }
-    }
-
-    closeSegment() {
-
     }
 
     createSegmentClasses() {
@@ -237,12 +236,13 @@ class Segment extends React.Component {
         }
         return classes;
     }
+    //TODO: ###REMOVE###
+    /*hightlightEditarea(sid) {
 
-    hightlightEditarea(sid) {
         if (this.props.segment.sid == sid) {
-            /*  TODO REMOVE THIS CODE
+            /!*  TODO REMOVE THIS CODE
              *  The segment must know about his classes
-             */
+             *!/
             let classes = $('#segment-' + this.props.segment.sid).attr("class").split(" ");
             if (!!classes.indexOf("modified")) {
                 classes.push("modified");
@@ -251,7 +251,7 @@ class Segment extends React.Component {
                 });
             }
         }
-    }
+    }*/
 
     addClass(sid, newClass) {
         if (this.props.segment.sid == sid || sid === -1 || sid.toString().indexOf(this.props.segment.sid) !== -1) {
@@ -375,7 +375,8 @@ class Segment extends React.Component {
     }
 
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        //TODO: ###REMOVE###
+        //SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
@@ -386,7 +387,8 @@ class Segment extends React.Component {
 
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        //TODO: ###REMOVE###
+        //SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
@@ -400,8 +402,12 @@ class Segment extends React.Component {
             UI.scrollSegment($(this.section), this.props.segment.sid);
         }
 
+        //check if this segment is in closing
         if (this.props.segment.opened && !nextProps.segment.opened) {
-            console.log('Chiudo un segmento *******');
+            //check if this segment require setTranslation
+            if (!this.props.isReview && this.props.segment.modified) {
+                UI.saveSegment($(this.section));
+            }
         }
     }
 
@@ -421,8 +427,9 @@ class Segment extends React.Component {
             (nextState.readonly !== this.state.readonly)
         );
     }
-    render() {
 
+    render() {
+        console.log('Render segment: ',this.props.segment.sid,this.props.segment.opened);
         let job_marker = "",
             timeToEdit = "",
             readonly = this.state.readonly,

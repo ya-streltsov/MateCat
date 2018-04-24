@@ -210,6 +210,22 @@ var SegmentActions = {
             className: className
         });
     },
+    /**
+     *
+     * @param sid
+     * @param fid
+     * @param status - True/False
+     * Set modified to true/false inside segment
+     */
+    modifiedTranslation: function (sid,fid,status) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.MODIFIED_TRANSLATION,
+            sid: sid,
+            fid: fid,
+            status: status
+        });
+
+    },
     updateTranslation: function (fid, sid, editAreaText) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.TRANSLATION_EDITED,
