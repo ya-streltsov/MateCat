@@ -6,6 +6,7 @@
 
 /*
 * [x] Portare la createButtons in react
+* [ ] Portare la createButtons->bottoni repetitions in react
 * [ ] Riportare tutto ciò che chiama editAreaClick in React
 * [ ] FARE ALLA FINE: CERCARE ###REMOVE### NEI COMMENTI E CANCELLARE LA FUNZIONI SUCCESSIVE
 * [ ] autoCopySuggestionEnabled (funzione usata in getContribution) viene sovrascritta dentro ebay-cat, fare un check
