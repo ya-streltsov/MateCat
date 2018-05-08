@@ -56,5 +56,6 @@ module.exports = keyMirror({
     SET_GLOSSARY_TO_CACHE: null,
     SET_OPEN_SEGMENT: null,
     OPEN_SEGMENT: null,
-    MODIFIED_TRANSLATION: null
+    MODIFIED_TRANSLATION: null,
+    SET_OPERATION_STATUS: null
 });

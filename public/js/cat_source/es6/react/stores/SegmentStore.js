@@ -89,6 +89,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         split_group: splitGroup,
                         split_points_source: [],
                         status: status,
+                        operationStatus: {},
                         time_to_edit: "0",
                         translation: translation,
                         decoded_translation: UI.decodeText(segment, segment.translation),
@@ -173,6 +174,21 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
             // Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
         }
+    },
+    /**
+     * Set status of operations request eg. setTranslation
+     * @param sid
+     * @param fid
+     * @param operation - string of operation name
+     * @param status - integer of status"
+     * 0 : prepare to sending
+     * 1 : pending
+     * 2 : received data / completed
+     * 3 : failed
+     */
+    setOperationStatus(sid, fid, operation, status) {
+        const index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'operationStatus',operation], status);
     },
     openSegment(sid, fid) {
         let self = this;
@@ -442,6 +458,10 @@ AppDispatcher.register(function (action) {
             _.forEach(SegmentStore._segments, function (item, index) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
+            break;
+        case SegmentConstants.SET_OPERATION_STATUS:
+            SegmentStore.setOperationStatus(action.sid, action.fid, action.operation, action.status);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.ADD_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.fid, action.where);

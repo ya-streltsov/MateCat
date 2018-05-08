@@ -174,7 +174,26 @@ var SegmentActions = {
             originalTranslation: originalTranslation
         });
     },
-
+    /**
+     * Set status of operations request eg. setTranslation
+     * @param sid
+     * @param fid
+     * @param operation - string of operation name
+     * @param status - integer of status"
+     * 0 : prepare to sending
+     * 1 : pending
+     * 2 : received data / completed
+     * 3 : failed
+     */
+    setOperationStatus: function (sid, fid, operation,status) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_OPERATION_STATUS,
+            sid: sid,
+            fid: fid,
+            operation: operation,
+            status: status
+        });
+    },
     disableTagLock: function () {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.DISABLE_TAG_LOCK

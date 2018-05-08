@@ -10,9 +10,12 @@
 * [ ] FARE ALLA FINE: CERCARE ###REMOVE### NEI COMMENTI E CANCELLARE LA FUNZIONI SUCCESSIVE
 * [ ] autoCopySuggestionEnabled (funzione usata in getContribution) viene sovrascritta dentro ebay-cat, fare un check
 * [ ] Non gestiamo il render degli errori delle contributions (renderContributionErrors)
-* [ ] Al momento quando faccio doppio click su un match chiamiamo un'azione che salva le classi correnti e poi le rivisualizza
+* [x] Al momento quando faccio doppio click su un match chiamiamo un'azione che salva le classi correnti e poi le rivisualizza
 * anche quando non deve. Ho iniziato a fixare mettendo un modified:true nel segmento, ma al doppio click la trackchanges viene chiamata
 * 3 volte e le 2 vcolte successive viene chiamata a False. trovare un modo per fixare.
+* [ ] Cercare SegmentActions.addClassToSegment e SegmentActions.removeClassToSegment e riportare quelle logiche dentro react usando lo store
+* [ ] Collegato al precedente -> astrarre lo stato delle operation request e portare questa logica nello store del segmento così da poter gestire
+* gli stati tipo "richiesta get contributions in pending"
 *
 * Cose da fare con lo stato open:
 * [x] Metodo getContribution si può rimuovere (???)
