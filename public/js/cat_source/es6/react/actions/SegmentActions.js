@@ -303,6 +303,8 @@ var SegmentActions = {
     },
 
     getGlossaryMatch: function (text) {
+        text = UI.removeAllTags( htmlEncode(text) );
+        text = text.replace(/\"/g, "");
         return API.SEGMENT.getGlossaryMatch(text)
             .fail(function () {
                 UI.failedConnection(0, 'glossary');

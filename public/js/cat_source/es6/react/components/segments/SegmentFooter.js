@@ -36,13 +36,13 @@ class SegmentFooter extends React.Component {
                 elements: []
             },
             concordances: {
-                label: 'Concordance',
-                code: 'cc',
-                tab_class: 'concordances',
-                enabled: false,
-                visible: false,
-                open: false,
-                elements: []
+                label: 'TM Search',
+                code : 'cc',
+                tab_class : 'concordances',
+                enabled : false,
+                visible : false,
+                open : false,
+                elements : []
             },
             glossary: {
                 label: 'Glossary',
@@ -81,7 +81,6 @@ class SegmentFooter extends React.Component {
                 elements: []
             }
         };
-
         this.state = {
             tabs: this.registerTab(tabs,SegmentStore._footerTabsConfig),
             hideMatches: hideMatches
@@ -189,11 +188,15 @@ class SegmentFooter extends React.Component {
     }
 
     getHideMatchesCookie() {
-        let cookieName = (config.isReview) ? 'hideMatchesReview' : 'hideMatches';
-        if (!_.isUndefined(Cookies.get(cookieName + '-' + config.id_job)) && Cookies.get(cookieName + '-' + config.id_job) == "true") {
-            return true;
+        let cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
+        if( !_.isUndefined(Cookies.get(cookieName + '-' + config.id_job))) {
+            if (Cookies.get(cookieName + '-' + config.id_job) == "true") {
+                return true;
+            } else {
+                return false;
+            }
         }
-        return false;
+        return true;
     }
 
     changeTab(tabName, forceOpen) {
@@ -207,7 +210,8 @@ class SegmentFooter extends React.Component {
         for (let item in tabs) {
             tabs[item].open = false
         }
-        if (tab.open && !forceOpen) {
+        let hideMatches = this.getHideMatchesCookie();
+        if (tab.open && !forceOpen && !hideMatches) {
             tab.open = false;
             this.setHideMatchesCookie(true);
         } else {
@@ -218,8 +222,7 @@ class SegmentFooter extends React.Component {
         tabs[tabName] = tab;
 
         this.setState({
-            tabs: tabs,
-            hideMatches: !tab.open
+            tabs: tabs
         });
     }
 
@@ -248,7 +251,8 @@ class SegmentFooter extends React.Component {
         let labels = [];
         let containers = [];
         let self = this;
-        for (let key in this.state.tabs) {
+        let hideMatches = this.getHideMatchesCookie();
+        for ( let key in this.state.tabs ) {
             let tab = this.state.tabs[key];
             if (tab.enabled) {
                 /**
@@ -264,7 +268,7 @@ class SegmentFooter extends React.Component {
                     tab.index  = this.props.segment[key].length;
                 }
                 let hidden_class = (tab.visible) ? '' : 'hide';
-                let active_class = (tab.open && !this.state.hideMatches) ? 'active' : '';
+                let active_class = (tab.open && !hideMatches) ? 'active' : '';
                 let label = <li
                     key={tab.code}
                     ref={(elem) => this[tab.code] = elem}

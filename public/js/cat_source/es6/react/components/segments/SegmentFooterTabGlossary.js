@@ -23,11 +23,18 @@ class SegmentFooterTabGlossary extends React.Component {
 
     checkGlossary() {
         let self = this;
-        setTimeout(function (  ) {
+        setTimeout(function () {
             self.storeGlossaryData(self.props.segment.glossary);
+            self.setTotalMatchesInTab(self.props.segment.glossary);
         });
-
         SegmentActions.addClassToSegment(this.props.id_segment, 'glossary-loaded');
+    }
+
+    setTotalMatchesInTab(matches) {
+        let totalMatches = Object.size( matches );
+        if ( totalMatches > 0 ) {
+            SegmentActions.setTabIndex(this.props.id_segment, "glossary" , totalMatches);
+        }
     }
 
     searchInGlossary(e) {
@@ -51,8 +58,9 @@ class SegmentFooterTabGlossary extends React.Component {
                         self.storeGlossaryData(response.data.matches);
                         self.processLoadedGlossary(response.data.matches);
                         SegmentActions.addClassToSegment(self.props.id_segment, 'glossary-loaded');
+                        self.setTotalMatchesInTab( response.data.matches );
                         // Todo: refactor
-                        UI.markGlossaryItemsInSource(response);
+                        UI.markGlossaryItemsInSource( response.data.matches );
                     });
             } else if (txt && target) {
                 this.setGlossaryItem();
@@ -60,11 +68,13 @@ class SegmentFooterTabGlossary extends React.Component {
         }
     }
 
-    processLoadedGlossary(matches) {
-        this.setState({
-            loading: false,
-            matches: matches
-        });
+    processLoadedGlossary( matches ) {
+        if (this._isMounted) {
+            this.setState({
+                loading: false,
+                matches: matches
+            });
+        }
     }
 
     storeGlossaryData(data) {
@@ -192,10 +202,12 @@ class SegmentFooterTabGlossary extends React.Component {
                         enableAddButton: false,
                         matches: matches
                     });
+
+                    self.setTotalMatchesInTab( matches );
                     /*
                     * Todo: not work
                     * */
-                    /*UI.markGlossaryItemsInSource(response);*/
+                    /*UI.markGlossaryItemsInSource(matches);*/
                 });
 
         } else {
@@ -298,11 +310,15 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     componentDidMount() {
+        this._isMounted = true;
+        console.log("Mount SegmentFooterGlossary" + this.props.id_segment);
         SegmentStore.addListener(SegmentConstants.RENDER_GLOSSARY, this.checkGlossary);
 
     }
 
     componentWillUnmount() {
+        this._isMounted = false;
+        console.log("Unmount SegmentFooterGlossary" + this.props.id_segment);
         SegmentStore.removeListener(SegmentConstants.RENDER_GLOSSARY, this.checkGlossary);
 
     }

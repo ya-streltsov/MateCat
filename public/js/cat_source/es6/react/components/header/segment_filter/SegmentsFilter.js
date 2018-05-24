@@ -9,7 +9,7 @@ class SegmentsFilter extends React.Component {
             {value: 'repetitions', label: 'Repetitions'},
             {value: 'mt', label: 'MT'},
             {value: 'matches', label: '100% Matches'},
-            {value: 'fuzzies_50_74', label: 'fuzzies_50_74'},
+            // {value: 'fuzzies_50_74', label: 'fuzzies_50_74'},
             {value: 'fuzzies_75_84', label: 'fuzzies_75_84'},
             {value: 'fuzzies_85_94', label: 'fuzzies_85_94'},
             {value: 'fuzzies_95_99', label: 'fuzzies_95_99'},
@@ -43,7 +43,7 @@ class SegmentsFilter extends React.Component {
                 segmentsArray: [],
                 moreFilters: this.moreFilters
 
-        }
+            }
         }
     }
 
@@ -106,17 +106,39 @@ class SegmentsFilter extends React.Component {
     }
 
     filterSelectChanged(e) {
-        this.setState({
-            selectedStatus: e.target.value
-        });
+        let value = e.target.value;
+        if ( (!config.isReview && value === "TRANSLATED" && this.state.samplingType === "todo") ||
+            config.isReview && value === "APPROVED" && this.state.samplingType === "todo" ) {
+            this.setState({
+                selectedStatus: e.target.value,
+                samplingType: ""
+            });
+        } else  {
+            this.setState({
+                selectedStatus: e.target.value
+            });
+        }
+
     }
 
     moreFilterSelectChanged(e) {
-        this.setState({
-            samplingType: e.target.value,
-            samplingEnabled: false,
-            samplingSize: null
-        });
+        let value = e.target.value;
+        if ( (!config.isReview && this.state.selectedStatus === "TRANSLATED" && value === "todo") ||
+            config.isReview && this.state.selectedStatus === "APPROVED" && value === "todo" ) {
+            this.setState({
+                samplingType: e.target.value,
+                selectedStatus: "",
+                samplingEnabled: false,
+                samplingSize: null
+            });
+        } else  {
+            this.setState({
+                samplingType: e.target.value,
+                samplingEnabled: false,
+                samplingSize: null
+            });
+        }
+
     }
 
     submitEnabled() {
@@ -325,7 +347,7 @@ class SegmentsFilter extends React.Component {
 
         if (window.config.isReview) {
             controlsForSampling = <div>
-                <div className="block">
+                <div className="block data-sample-checkbox-container">
                     <label htmlFor="data-sample-checkbox">Data sample</label>
                     <input type="checkbox"
                            id="data-sample-checkbox"
@@ -341,7 +363,7 @@ class SegmentsFilter extends React.Component {
 
         return (this.props.active ? <div className="advanced-filter-searchbox searchbox">
             <form>
-                <div className="block">
+                <div className="block filter-status-container">
                     <label htmlFor="search-projectname">segment status</label>
                     <select
                         onChange={this.filterSelectChanged.bind(this)}
@@ -350,7 +372,7 @@ class SegmentsFilter extends React.Component {
                     </select>
                 </div>
 
-                <div className="block">
+                <div className="block filters-container">
                     <label htmlFor="search-projectname">Filters</label>
                     <select
                         onChange={this.moreFilterSelectChanged.bind(this)}
@@ -373,7 +395,7 @@ class SegmentsFilter extends React.Component {
                            disabled={!this.state.filtering}
                            value="Select All"/>
 
-                    <input id="clear-filter"
+                    <input id="close-filter"
                            type="button"
                            onClick={this.closeClick.bind(this)}
                            className={classnames({btn: true})}
