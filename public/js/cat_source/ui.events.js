@@ -5,7 +5,7 @@ $.extend(UI, {
 	bindShortcuts: function() {
 		$("body").removeClass('shortcutsDisabled');
 
-		$("body").on('keydown.shortcuts', null, "alt+s", function(e) {
+		$("body").on('keydown.shortcuts', null, "alt+h", function(e) {
             UI.openShortcutsModal();
 		});
 
@@ -281,7 +281,10 @@ $.extend(UI, {
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
 		}).on('dblclick', 'section.readonly', function() {
 			clearTimeout(UI.selectingReadonly);
-		}).on('dblclick', '.alternatives .graysmall', function() {
+		}).on('dblclick', '.alternatives .graysmall', function(e) {
+            if ($(e.target).closest('li').hasClass('goto')) {
+                return;
+            }
 			UI.chooseAlternative($(this));
         });
 
@@ -402,6 +405,7 @@ $.extend(UI, {
 
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
+			e.stopPropagation();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), $(this).attr('data-goto'), true);
 			SegmentActions.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
 		});
@@ -433,10 +437,12 @@ $.extend(UI, {
 
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();
-            UI.saveSegment(UI.currentSegment);
+			if (UI.currentSegment) {
+                UI.saveSegment(UI.currentSegment);
+            }
 			UI.renderAndScrollToSegment($(this).attr('data-segment'));
 		});
-		$("#jobMenu").on('click', 'li.currSegment', function(e) {
+		$("#jobMenu").on('click', 'li.currSegment:not(.disabled)', function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
 		});

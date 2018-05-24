@@ -3,7 +3,7 @@
   position: relative;
   width: 100%;
   float: left;
-  margin-top: 3px;
+  margin-top: 1px;
 }
 
 .qa-container {
@@ -53,6 +53,10 @@
   box-sizing: border-box;
 }
 
+.qa-issues-container.segments-with-issues {
+  width: 190px;
+}
+
 .qa-issues-container:hover, .qa-lexiqa-container:hover {
   background-color: #d0d0d0;
 }
@@ -90,6 +94,7 @@
 }
 
 .icon-qa-issues,
+.icon-qa-glossary,
 .icon-conflicts,
 .icon-qa-total-issues,
 .icon-qa-lexiqa {
@@ -106,6 +111,11 @@
 
 .icon-qa-total-issues:before {
   content: "\e903";
+  font-size: 25px;
+}
+
+.icon-qa-glossary:before {
+  content: "\ea4f";
   font-size: 25px;
 }
 
@@ -128,12 +138,17 @@
 
 .qa-total-issues-counter {
   top: 10px;
-  left: 50px;
+  left: 10px;
 }
 
 .qa-issues-counter {
   top: 10px;
   left: 25px;
+}
+
+.qa-glossary-counter {
+  top: 10px;
+  left: 10px;
 }
 
 .qa-conflicts-issues-counter {

@@ -48,6 +48,7 @@ class Bootstrap {
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
         INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View";
 
+
         //get the environment configuration
         self::initConfig();
 

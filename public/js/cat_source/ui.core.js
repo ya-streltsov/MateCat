@@ -27,9 +27,9 @@ UI = {
 		} else {
             currSegment = jobMenu.find('.currSegment');
             if (this.body.hasClass('editing')) {
-                currSegment.show();
+                currSegment.removeClass('disabled');
             } else {
-                currSegment.hide();
+                currSegment.addClass('disabled');
             }
             var menuHeight = jobMenu.height();
             if (LXQ.enabled()) {
@@ -187,7 +187,7 @@ UI = {
             byStatus: byStatus,
             propagate: !noPropagation
         });
-
+        UI.setSegmentModified( UI.currentSegment, false ) ;
         $(document).trigger('segment:status:change', [segment, options]);
     },
 
@@ -481,7 +481,7 @@ UI = {
 	},
 
 
-	createJobMenu: function() {
+	/*createJobMenu: function() {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
 				'    <ul>';
 		$.each(config.firstSegmentOfFiles, function() {
@@ -494,7 +494,22 @@ UI = {
 				'    </ul>' +
 				'</nav>';
 		this.body.append(menu);
-	},
+	},*/
+
+    createJobMenu: function() {
+        var menu = '<nav id="jobMenu" class="topMenu">' +
+            '<ul class="gotocurrentsegment">' +
+            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="javascript:void(0)">Go to current segment</a></li>' +
+            '</ul>' +
+            '<ul class="jobmenu-list">';
+        $.each(config.firstSegmentOfFiles, function() {
+            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20).concat("[...]" ).concat((this.file_name).substring(this.file_name.length-20))  + '</a></li>';
+        });
+        menu += '</ul>' +
+            '</nav>';
+        this.body.append(menu);
+    },
+
     handleReturn: function(e) {
         if(!this.hiddenTextEnabled) return;
         e.preventDefault();
@@ -1168,6 +1183,7 @@ UI = {
             // Make the diff between the text with the same codification
             var diff_obj = UI.execDiff(mainStr, transDecoded);
             var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
+            var html =
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
                 '<li class="sugg-source">' +
                 '   <span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
@@ -1182,18 +1198,18 @@ UI = {
                 '<a href="#" data-goto="' + this.involved_id[0]+ '">View</a>' +
                 '</li>' +
             '</ul>');
-            $('.sub-editor.alternatives .overflow', segment).find('.sugg-target .translation').html(translation);
+            $('.sub-editor.alternatives .overflow .graysmall[data-item='+ (index + 1) +']', segment).find('.sugg-target .translation').html(translation);
         });
 
         $.each(d.data.not_editable, function(index1) {
             var diff_obj = UI.execDiff(mainStr, this.translation);
             var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + translation + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '">' +
+                '<li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li>' +
+                '<li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span>' +
+                '<span class="translation">' + translation + '</span><span class="realData hide">' + this.translation + '</span></li>' +
+                '<li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
-        // Transform the tags
-        // UI.markSuggestionTags(segment);
-
-
     },
     execDiff: function (mainStr, cfrStr) {
         _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
@@ -1582,15 +1598,16 @@ UI = {
         });
 	},
     updateQAPanel: function () {
-        if ( UI.globalWarnings.tag_issues ) {
+        if ( !_.isUndefined(UI.globalWarnings.tag_issues) ) {
             CatToolActions.qaComponentSetTagIssues(UI.globalWarnings.tag_issues)
         }
 
-        var mismatches = [];
-        if ( UI.globalWarnings.translation_mismatches ) {
-            mismatches = UI.globalWarnings.translation_mismatches;
+        if ( !_.isUndefined( UI.globalWarnings.glossary_issues ) ) {
+            CatToolActions.qaComponentSetGlossaryIssues(UI.globalWarnings.glossary_issues)
         }
-        CatToolActions.qaComponentsetTranslationConflitcts(mismatches);
+        if ( !_.isUndefined( UI.globalWarnings.translation_mismatches ) ) {
+            CatToolActions.qaComponentsetTranslationConflitcts(UI.globalWarnings.translation_mismatches);
+        }
     },
 	displayMessage: function(messages) {
         var self = this;
@@ -2448,7 +2465,7 @@ UI = {
         //??
         $('.test-invisible').remove();
 
-        UI.setSegmentModified( UI.currentSegment, false ) ;
+        // UI.setSegmentModified( UI.currentSegment, false ) ;
 
         var skipChange = false;
         if (buttonValue == 'next-untranslated') {

@@ -1107,7 +1107,7 @@ div#matecat-modal p {
 
                     .content.user {
                         font-weight: bold;
-                        min-width: 360px;
+                        width: 340px;
                         &.invited {
                             font-weight: 100;
                         }
@@ -1536,5 +1536,28 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     }
     .matecat-modal-bottom {
         padding: 10px 25px;
+    }
+}
+
+
+
+[data-name="confirmCopyAllSources"] {
+    input, label {
+        display: inline-block;
+        vertical-align: middle;
+    }
+    label {
+        margin-left: 5px;
+    }
+    .text-container-top {
+        padding: 20px !important;
+        margin-top: 0 !important;
+    }
+    .popup p {
+        margin-bottom: 0;
+    }
+    .boxed {
+        padding-right: 20px;
+        padding-bottom: 0 !important;
     }
 }

@@ -276,7 +276,7 @@ APP = {
 
             if ( typeof options['checkbox_label'] != 'undefined' ) {
                 filled_tpl.find('.dont_show + label' )
-                        .html("Don't show this dialog again for the current job");
+                        .html(" Don't show this dialog again for the current job");
             }
             return filled_tpl;
         };
@@ -346,7 +346,7 @@ APP = {
                     case 'confirm':
                     case 'confirm_checkbox' :
                         if ( options['type'] == 'confirm_checkbox' ) {
-                            filled_tpl.find( '.popup p' )
+                            filled_tpl.find( '.popup p.buttons-popup-container' )
                                     .append( renderCheckbox( options ) );
                         }
 

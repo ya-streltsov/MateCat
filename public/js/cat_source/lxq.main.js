@@ -113,7 +113,6 @@ LXQ.init  = function () {
     });
     /* invoked when segment is completed (translated clicked)*/
     $(document).on('setTranslation:success', function(e, data) {
-      console.log('[LEXIQA] got setTranslation:success');
         var segment = data.segment;
         var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
         LXQ.doLexiQA(segment,translation,UI.getSegmentId(segment),true,null);
@@ -784,7 +783,7 @@ LXQ.init  = function () {
             });
         }
         var reloadPowertip = function(segment) {
-            if (segment!==undefined && segment!==null && LXQ.lexiqaData.segments.indexOf(segment) > -1) {
+            if (segment!==undefined && segment!==null && LXQ.lexiqaData.segments.indexOf(UI.getSegmentId(segment)) > -1) {
                 buildPowertipDataForSegment(segment);
                 $('.tooltipa',segment).powerTip({
                     placement: 'sw',
@@ -1319,7 +1318,7 @@ LXQ.init  = function () {
                         //myWindow.location =result.qaurl;
                         if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
                             //do something here -- enable qa errors
-                            if ( (ind = LXQ.lexiqaData.segments.indexOf( id_segment )) < 0 ) {
+                           if ( (ind = LXQ.lexiqaData.segments.indexOf( id_segment )) < 0 ) {
                                 LXQ.lexiqaData.segments.push( id_segment );
                                 LXQ.updateWarningsUI();
                             }
@@ -1373,16 +1372,14 @@ LXQ.init  = function () {
                             QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(segment);
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), segment ));
                             source_val = LXQ.highLightText( source_val, highlights.source, isSegmentCompleted, true, true, segment );
-                            if ( callback != null )
+                            if ( callback != null && UI.currentSegmentId == id_segment )
                                 saveSelection();
                             var target_val = $( UI.targetContainerSelector(), segment ).html();
                             target_val = LXQ.highLightText( target_val, highlights.target, isSegmentCompleted, true, false, segment );
 
                             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
-                            if ( callback != null ) {
-                                setTimeout(function () {
-                                    restoreSelection();
-                                });
+                            if ( callback != null && UI.currentSegmentId == id_segment ) {
+                                restoreSelection();
                             }
                             SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val)
                             LXQ.reloadPowertip( segment );
@@ -1400,12 +1397,12 @@ LXQ.init  = function () {
                             noVisibleErrorsFound = true;
                             source_val = $( ".source", segment ).html();
                             source_val = LXQ.cleanUpHighLighting( source_val );
-                            if ( callback != null )
+                            if ( callback != null && UI.currentSegmentId == id_segment )
                                 saveSelection();
                             target_val = $( UI.targetContainerSelector(), segment ).html();
                             target_val = LXQ.cleanUpHighLighting( target_val );
                             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
-                            if ( callback != null )
+                            if ( callback != null && UI.currentSegmentId == id_segment )
                                 restoreSelection();
                             SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val)
                             if ( callback != null )

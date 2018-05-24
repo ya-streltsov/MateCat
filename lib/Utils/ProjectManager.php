@@ -9,7 +9,6 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use Analysis\DqfQueueHandler;
 use ConnectedServices\GDrive as GDrive;
 use Jobs\SplitQueue;
 use Teams\TeamStruct;
@@ -1597,6 +1596,8 @@ class ProjectManager {
                     $show_in_cattool = 0;
                 } else {
 
+                    $this->_manageAlternativeTranslations( $xliff_trans_unit, $xliff_file[ 'attr' ] );
+
                     $trans_unit_reference = self::sanitizedUnitId( $xliff_trans_unit[ 'attr' ][ 'id' ], $fid );
 
                     // If the XLIFF is already segmented (has <seg-source>)
@@ -1645,12 +1646,12 @@ class ProjectManager {
                                         }
 
                                         /**
-                                         * Approved Flag
-                                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                                         * Trans-Unit
+                                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                                          */
                                         $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
                                                 $seg_source[ 'mid' ],
-                                                new ArrayObject( [ 2 => $target, 4 => @$xliff_trans_unit[ 'attr' ][ 'approved' ] ] )
+                                                new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
                                         );
 
                                         //seg-source and target translation can have different mrk id
@@ -1690,7 +1691,8 @@ class ProjectManager {
                             $this->addNotesToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
-                    } else {
+                    }
+                    else {
 
                         $wordCount = CatUtils::segment_raw_wordcount( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
 
@@ -1719,11 +1721,11 @@ class ProjectManager {
                                     }
 
                                     /**
-                                     * Approved Flag
-                                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                                     * Trans-Unit
+                                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                                      */
                                     $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append(
-                                            new ArrayObject( [ 2 => $target, 4 => @$xliff_trans_unit[ 'attr' ][ 'approved' ] ] )
+                                            new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
                                     );
 
                                 }
@@ -1754,6 +1756,7 @@ class ProjectManager {
                         $this->files_word_count += $wordCount;
 
                     }
+
                 }
 
                 //increment the counter for not empty segments
@@ -1923,8 +1926,8 @@ class ProjectManager {
                     //WARNING offset 2 is the target translation
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
                     /**
-                     * WARNING offset 4 is the Approved Flag
-                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                     * WARNING offset 4 is the Trans-Unit
+                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                      */
 
                     // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
@@ -1977,6 +1980,76 @@ class ProjectManager {
 
     }
 
+    /**
+     * @param array $xliff_trans_unit
+     *
+     * @param       $xliff_file_attributes
+     *
+     * @throws Exception
+     */
+    protected function _manageAlternativeTranslations( $xliff_trans_unit, $xliff_file_attributes ){
+
+        //Source and target language are mandatory, moreover do not set matches on public area
+        if (
+                (empty( $xliff_trans_unit[ 'source' ] ) && empty($xliff_trans_unit[ 'alt-trans' ]['source'])) ||
+                empty( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] ) ||
+                empty( $xliff_file_attributes[ 'source-language' ] ) ||
+                empty( $xliff_file_attributes[ 'target-language' ] ) ||
+                count( $this->projectStructure[ 'private_tm_key' ] ) == 0 ||
+                $this->features->filter( 'doNotManageAlternativeTranslations', true, $xliff_trans_unit, $xliff_file_attributes )
+        ) {
+            return;
+        }
+
+        // set the contribution for every key in the job belonging to the user
+        $engine = Engine::getInstance( 1 );
+        $config = $engine->getConfigStruct();
+
+        if ( count( $this->projectStructure[ 'private_tm_key' ] ) != 0 ) {
+
+            foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $tm_info ) {
+                if( $tm_info[ 'w' ] == 1 ){
+                    $config[ 'id_user' ][] = $tm_info['key'];
+                }
+            }
+
+        }
+
+        $config[ 'source' ]         = $xliff_file_attributes[ 'source-language' ];
+        $config[ 'target' ]         = $xliff_file_attributes[ 'target-language' ];
+        $config[ 'email' ]          = \INIT::$MYMEMORY_API_KEY;
+
+
+        if(!empty($xliff_trans_unit[ 'source' ])){
+            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+
+        }
+
+        if(!empty($xliff_trans_unit[ 'alt-trans' ]['source'])){
+            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ]['source'] );
+        }
+
+
+        $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $source_extract_external['seg'] );
+
+        $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] );
+        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $target_extract_external['seg'] );
+        $config[ 'context_after' ]  = null;
+        $config[ 'context_before' ] = null;
+
+        if( ! empty( $xliff_trans_unit[ 'alt-trans' ][ 'attr' ][ 'match-quality' ] ) ){
+
+            //get the Props
+            $config[ 'prop' ] = json_encode( [
+                    "match-quality" => $xliff_trans_unit[ 'alt-trans' ][ 'attr' ][ 'match-quality' ]
+            ] );
+
+        }
+
+        $engine->set( $config );
+
+    }
+
     protected function _insertPreTranslations( $jid ) {
 
         $this->_cleanSegmentsMetadata();
@@ -2000,12 +2073,13 @@ class ProjectManager {
 
                 $iceLockArray = $this->features->filter( 'setICESLockFromXliffValues',
                         [
-                                'approved'         => $translation_row [ 4 ],
+                                'approved'         => @$translation_row [ 4 ][ 'attr' ][ 'approved' ],
                                 'locked'           => 0,
                                 'match_type'       => 'ICE',
                                 'eq_word_count'    => 0,
                                 'status'           => $status,
-                                'suggestion_match' => null
+                                'suggestion_match' => null,
+                                'trans-unit'       => $translation_row[ 4 ],
                         ]
                 );
 
@@ -2477,7 +2551,10 @@ class ProjectManager {
      *
      * @param $firstTMXFileName
      *
-     * @return array
+     * @return bool
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
      */
     private function setPrivateTMKeys( $firstTMXFileName ) {
 
@@ -2605,11 +2682,20 @@ class ProjectManager {
      *
      * @return bool|mixed
      * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
     private function __isTranslated( $source, $target, $xliff_trans_unit ) {
         if ( $source != $target ) {
-            return true;
+            // evaluate if different source and target should be considered translated
+            $differentSourceAndTargetIsTranslated = true;
+            $differentSourceAndTargetIsTranslated = $this->features->filter(
+                    'filterDifferentSourceAndTargetIsTranslated',
+                    $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
+            );
+
+            return $differentSourceAndTargetIsTranslated;
+           //return true;
         } else {
             // evaluate if identical source and target should be considered non translated
             $identicalSourceAndTargetIsTranslated = false;

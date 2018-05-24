@@ -7,6 +7,7 @@ QaCheckGlossary.enabled = function() {
 if ( QaCheckGlossary.enabled() )
 (function($, QaCheckGlossary, undefined) {
     var matchRegExp = '\\b(%s)\\b' ;
+    var regExpFlags = 'g';
 
     var globalReceived = false ;
     var globalWarnings ;
@@ -114,22 +115,32 @@ if ( QaCheckGlossary.enabled() )
         var container = segment.el.find('.source');
 
         removeUnusedGlossaryMarks( container ) ;
-
+        if (unusedMatches.length === 0) {
+            return;
+        }
         var newHTML = container.html();
         //clean up lexiqa highlighting - if enabled
-        if (LXQ.enabled())
-          newHTML = LXQ.cleanUpHighLighting(newHTML);
+        if (LXQ.enabled()) {
+            newHTML = LXQ.cleanUpHighLighting(newHTML);
+        }
+        unusedMatches = unusedMatches.sort(function(a, b){
+            return b.raw_segment.length - a.raw_segment.length;
+        });
         $.each(unusedMatches, function( index ) {
             var value = (this.raw_segment) ? this.raw_segment : this.translation ;
             value = escapeRegExp( value );
-            var re = new RegExp('\\b(' + value + ')\\b',"g");
+            value = value.replace(/ /g, '(?: *<\/*(?:mark)*(?:span *)*(?: (data-id="(.*?)" )*class="(unusedGlossaryTerm)*(inGlossary)*")*> *)* *');
+            var re = new RegExp( sprintf( matchRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
             newHTML = newHTML.replace(
-                re , '<span data-id="' + this.id + '" class="unusedGlossaryTerm">$1</span>'
+                re , '<span data-id="' + index + '" class="unusedGlossaryTerm">$1</span>'
             );
         });
-        SegmentActions.replaceSourceText(UI.getSegmentId(container), UI.getSegmentFileId(container), newHTML);
+        setTimeout(function (  ) {
+            SegmentActions.replaceSourceText(UI.getSegmentId(container), UI.getSegmentFileId(container), newHTML);
+            bindEvents( container, unusedMatches );
 
-        bindEvents( container, unusedMatches );
+        }, 200);
+
     }
 
     function findUnusedGlossaryMatches( record ) {
@@ -141,7 +152,7 @@ if ( QaCheckGlossary.enabled() )
         return _.filter( record.glossary_matches, function( item ) {
             var translation = (item.raw_translation) ? item.raw_translation : item.translation;
             var value = escapeRegExp( translation );
-            var re = new RegExp( sprintf( matchRegExp, value ),"g");
+            var re = new RegExp( sprintf( matchRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
             var match = currentText.match( re ) ;
             return match == null ;
         });
@@ -150,7 +161,8 @@ if ( QaCheckGlossary.enabled() )
     $.extend(QaCheckGlossary, {
         removeUnusedGlossaryMarks : removeUnusedGlossaryMarks,
         destroyPowertip: destroyPowertip,
-        redoBindEvents: redoBindEvents
+        redoBindEvents: redoBindEvents,
+        qaCheckRegExpFlags: regExpFlags
     });
 
 })(jQuery, QaCheckGlossary);

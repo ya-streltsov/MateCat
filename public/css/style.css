@@ -120,22 +120,22 @@ body.searchActive #filterSwitch {
 .numbererror,
 .qa-total-issues-counter,
 .qa-issues-counter,
+.qa-glossary-counter,
 .qa-conflicts-issues-counter,
 .qa-lexiqa-counter {
     position: absolute;
     color: #fff;
     background: #e20001;
     margin-left: 20px;
-    margin-top: -2px;
+    margin-top: -8px;
     -moz-border-radius: 10px;
     border-radius: 10px;
     border: 1px solid #fff;
     display: block;
     font-size: 11px;
-    font-weight: bold;
     padding: 0 4px;
     text-align: center;
-    width: 8px;
+    min-width: 8px;
     height: 15px;
     line-height: 1.5;
     box-sizing: content-box;
@@ -309,6 +309,10 @@ section.opened .warnings {
 .breadcrumbs #pname {
     margin-left: 2px;
     word-break: break-all;
+    text-decoration: underline;
+}
+.breadcrumbs #pname:hover {
+    text-decoration: none;
 }
 
 .breadcrumbs #pname .details {
@@ -320,11 +324,12 @@ section.opened .warnings {
     float: left;
     border: 0;
     margin-top: 10px;
-    background: url(../img/logo.png) 0px 2px no-repeat;
-    width: 145px;
+    background: url(../../img/logo.png) 0px 2px no-repeat;
+    width: 132px;
     height: 31px;
     background-size: 130px 26px;
     margin-left: 13px;
+    margin-right: 13px;
 }
 
 .grayed {
@@ -539,7 +544,7 @@ body.editing .grayed, body.virtualEditing .grayed {
     cursor: default;
     height: inherit;
     padding-bottom: 1px;
-    width: 4%;
+    width: 4.5%;
 }
 
 .sid .txt {
@@ -560,10 +565,6 @@ section:hover .sid .txt input {
     display: unset;
 }
 
-section.editor .sid .txt input {
-    display: unset;
-}
-
 section.readonly .txt input {
     display: none !important;
 }
@@ -571,9 +572,9 @@ section.readonly .txt input {
 section.segment-selected-inBulk .sid .txt input {
     display: unset;
 }
-section.editor .sid .txt input {
+/*section.editor .sid .txt input {
     display: unset;
-}
+}*/
 
 section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
     display: unset;
@@ -593,10 +594,11 @@ section.segment-selected-inBulk .body .text:hover {
 
 
 p.split-shortcut {
-    background: #dde0e4;
+    background: #f2f4f7;
     padding: 1px 0px;
     width: 55px;
     margin: 0 auto;
+    margin-top: 5px;
 }
 
 .splitStart .sid {
@@ -606,7 +608,7 @@ p.split-shortcut {
 
 .splitInner .sid {
     background: url(../img/split-bg.png) no-repeat;
-    background-position: 48.5% 23px;
+    background-position: 48.5% 16px;
 }
 
 .splitEnd .sid {
@@ -615,11 +617,11 @@ p.split-shortcut {
 }
 
 .editor.splitStart .sid {
-    background-position: 50% 43px;
+    background-position: 49% 43px;
 }
 
 .editor.splitInner .sid {
-    background-position: 50.5% -40px;
+    background-position: 52% -40px;
 }
 
 .editor.splitEnd .sid {
@@ -1346,6 +1348,7 @@ section .body > .text {
     float: left;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
+    min-height: 87px;
 }
 
 /*.text {
@@ -1591,15 +1594,15 @@ body .footer.showMatches .sub-editor.open {
     height: 17px;
     width: 140px;
     position: absolute;
-    bottom: -26px;
+    bottom: -31px;
     right: 0px;
     border-radius: 0 0 0 2px;
     color: #fff;
-    padding: 4px 10px 4px 4px;
+    padding: 6px 10px 7px 4px;
     font-size: 12px;
     background: #09beec;
-    box-shadow: 0 0 10px #868686;
-    z-index: -1;
+    box-shadow: 0px 2px 4px 0px #868686;
+    z-index: 2;
 }
 
 .sub-editor.concordances .results {
@@ -1617,6 +1620,10 @@ body .footer.showMatches .sub-editor.open {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     min-width: 40px;
+    line-height: 20px;
+    position: relative;
+    top: 2px;
+    cursor: pointer;
 }
 
 .sub-editor .cc-search, .sub-editor .gl-search {
@@ -1625,7 +1632,7 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .sub-editor .cc-search.loading, .sub-editor .gl-search.loading {
-    background: url(../img/loading.gif) 47% 20px no-repeat;
+    background: url(../img/loading.gif) 50% 22px no-repeat;
     float: left;
     width: 100%;
     background-size: 20px 20px;
@@ -2417,12 +2424,12 @@ section.editor {
     z-index: 2;
     position: relative;
     height: 100%;
-    width: 102%;
-    margin-left: -1%;
+    width: 101%;
+    margin-left: -.5%;
 }
 
 section.editor .sid {
-    left: -4.5%;
+    left: -5%;
     color: black;
 }
 
@@ -2551,13 +2558,13 @@ body.archived section .status-container a.status:hover {
     font-size: 18px;
     margin: 2px 0 5px -11px;
     word-break: normal;
-    font-variant-ligatures: none;
     line-height: 25px;
     outline: none;
     color: #000;
     border: 1px solid #dedede;
     box-shadow: inset 0 1px 2px #ccc;
     -webkit-box-shadow: inset 0 1px 2px #ccc;
+    /*font-variant-ligatures: none;*/
 }
 .editor.editarea
 .highlighted1{
@@ -2668,7 +2675,7 @@ body.rtl-target .editor .editarea span {
     height: 16px;
     cursor: pointer;
     right: 40px;
-    top: 16px;
+    top: 15px;
 }
 
 .graysmall:hover .switch-editing {
@@ -2805,6 +2812,7 @@ body.rtl-target .editor .editarea span {
 .concordances .graysmall li.sugg-source {
     padding-left: 34px;
 }
+
 .suggestion-item.graysmall > li {
     width: 48%;
     float: left;
@@ -2819,12 +2827,26 @@ body.rtl-target .editor .editarea span {
     line-height: 26px;
 }
 
+.alternatives.tab ul li {
+    padding: 12px 5px 30px 5px;
+}
+
+.alternatives.tab ul li.sugg-source {
+    padding-left: 20px;
+    width: 50%;
+}
+
+/*.alternatives.tab ul li.sugg-target {
+    width: 42% !important;
+}*/
+
 .suggestion-item li.sugg-source {
     padding-left: 25px;
 }
 
 .graysmall li.goto {
-    width: 10px;
+    width: 10px !important;
+    padding: 15px !important;
 }
 
 .graysmall li.details {
@@ -2849,11 +2871,13 @@ body.rtl-target .editor .editarea span {
 
 .graysmall .b {
     padding-left: 12px !important;
-    position: relative
+    position: relative;
+    padding-right: 0;
 }
 
 .suggestion-item.graysmall .b {
     float: right;
+    padding-right: 30px;
 }
 
 .message li {
@@ -3138,33 +3162,17 @@ section.readonly:hover .ice-locked-label {
     right: 0;
     height: 100%;
     background: #ccced2;
-    top: 4%;
-    margin: -4px 0 0 0 !important;
+    top: 0;
     border-bottom: 0;
+    z-index: 0;
 }
-.editor .status-container .status {
-    top: 4px !important;
-    height: 100% !important;
-    z-index: 1;
-    padding-bottom: 0;
-}
+
 
 section.readonly .status-container a.status:hover,
 body.archived section .status-container a.status:hover {
     cursor: default !important;
 }
 
-/*.editor .status {
-    width: 8px;
-    display: block;
-    position: absolute;
-    right: 0;
-    height: 97%;
-    padding-bottom: 7px;
-    background: #f5f5f5;
-    margin: -6px 0 0 0 !important;
-    border-bottom: 0;
-}*/
 
 .status img {
     display: none
@@ -3176,11 +3184,6 @@ body.archived section .status-container a.status:hover {
     position: absolute;
     top: 0;
     right: 0px
-}
-
-.status-container {
-    float: right;
-    margin: 0 0px 0 0 !important;
 }
 
 section.status-translated .status {
@@ -3668,6 +3671,7 @@ span.locked.tag-html-container-close {
     padding: 3px;
 }
 
+
 .editarea .locked:hover,
 .source .locked:hover {
     background-color: #dddff0;
@@ -3737,11 +3741,9 @@ span.locked.tag-html-container-close {
     .graysmall li {
         width: 45.5%;
     }
-
     .header-menu {
         margin-right: 18px
     }
-
     #stat-completion, #stat-wph {
         display: block;
     }
@@ -3749,7 +3751,14 @@ span.locked.tag-html-container-close {
     p.split-shortcut, .editing .sid .txt {
         font-size: 10px;
     }
-
+    .sid {
+        width: 5.3%;
+        left: -5.7%;
+    }
+    section.editor .sid {
+        left: -5.1%;
+        width: 4.5%;
+    }
 }
 
 @media screen and (max-width: 1280px) {
@@ -3877,13 +3886,14 @@ span.locked.tag-html-container-close {
         margin-left: 6%;
     }
 
-    /*.sid {
-        left: -5.5%;
-    }*/
-
-    /*section.editor .sid {
-        left: -5%;
-    }*/
+    .sid {
+        width: 6%;
+        left: -6.5%;
+    }
+    section.editor .sid {
+        left: -6.2%;
+        width: 6%;
+    }
 }
 
 @media screen and (max-width: 1100px) {
@@ -3934,6 +3944,10 @@ body.rtl-target .footer .sugg-target {
     direction: rtl !important;
     text-align: right !important;
 }
+body.rtl-target section.ice-locked .target {
+    text-align: right;
+}
+
 
 body.archived ul.buttons,
 body.archived ul.header-menu,
@@ -4389,6 +4403,7 @@ section .toolbar .autofillTag {
     width: 25px;
     height: 25px;
     outline: none;
+    margin-top: 10px;
 }
 
 .split i {
@@ -4439,6 +4454,13 @@ body.tagModes:not(.tagmode-default-extended) .endTag {
     width: 7px;
     height: 8px;
     padding-top: 0px;
+}
+
+body span.endTag {
+    top: -3.4px;
+}
+body.tagModes .startTag, body.tagModes .endTag, body.editor.tagModes .startTag, body.editor.tagModes .endTag {
+    vertical-align: middle;
 }
 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
@@ -5007,33 +5029,6 @@ section .footer .tab.open {
     position: relative;
     border-top: 1px solid #cccccc;
     top: -1px;
-}
-
-
-/*This going to paypal*/
-/*section.editor .footer .tab.issues {
-    display: block !important;
-}*/
-/*Close - css going to paypal*/
-
-/*
- ******
- Comment intent element
- ******
- */
-.segment-side-buttons {
-    /* styles based on .sid line 376 style.css */
-    color: #999;
-    cursor: default;
-    display: block;
-    font-size: 12px;
-    height: inherit;
-    padding-bottom: 1px;
-    position: absolute;
-    text-align: center;
-    text-decoration: none;
-    right: -8%;
-    width: 8%;
 }
 
 section:hover .segment-side-buttons {
