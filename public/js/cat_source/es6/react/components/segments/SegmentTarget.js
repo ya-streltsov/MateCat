@@ -146,7 +146,6 @@ class SegmentTarget extends React.Component {
             }
 
             //Tag Mode Buttons
-
             if (this.props.tagModesEnabled && !this.props.enableTagProjection && UI.tagLockEnabled) {
                 let buttonClass = ($('body').hasClass("tagmode-default-extended")) ? "active" : "";
                 tagModeButton =
@@ -155,6 +154,9 @@ class SegmentTarget extends React.Component {
                         <span className="icon-tag-expand"/>
                         <span className="icon-chevron-right"/>
                     </a>;
+
+            }
+            if (this.props.tagModesEnabled  && UI.tagLockEnabled) {
                 tagCopyButton = <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
 
             }
