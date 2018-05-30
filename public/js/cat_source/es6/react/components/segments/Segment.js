@@ -418,6 +418,17 @@ class Segment extends React.Component {
         );
     }
 
+    onClickEvent(event) {
+        if (this.state.readonly || (!this.props.segment.unlocked && this.props.segment.ice_locked === '1')) {
+            UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
+        } else if (this.props.segment.muted) {
+            return;
+        } else {
+            this.openSegment();
+            UI.removeSelectedClassToTags()
+        }
+    }
+
     render() {
         console.log('Render segment: ',this.props.segment.sid,this.props.segment.opened);
         let job_marker = "",
@@ -460,6 +471,7 @@ class Segment extends React.Component {
                 data-split-original-id={originalId}
                 data-tagmode="crunched"
                 data-tagprojection={this.dataAttrTagged}
+                onClick={this.onClickEvent.bind(this)}
                 data-fid={this.props.fid}>
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
