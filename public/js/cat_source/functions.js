@@ -402,10 +402,10 @@ function insertHtmlAfterSelection(html) {
 // register a different activation function.
 // The function is defined in review_improved module.
 SegmentActivator.registry.push(function( sid ) {
-    var el = $("section:not(.opened) #segment-" + sid + "-target").find(".editarea");
-    $(el).click();
-    var fid = UI.getSegmentFileId(UI.getSegmentById(sid));
-    SegmentActions.openSegment(sid)
+    // var el = $("section:not(.opened) #segment-" + sid + "-target").find(".editarea");
+    // $(el).click();
+    // var fid = UI.getSegmentFileId(UI.getSegmentById(sid));
+    // SegmentActions.openSegment(sid)
 });
 
 function ParsedHash( hash ) {

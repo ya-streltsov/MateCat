@@ -393,7 +393,8 @@
             if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
                 MBC.openSegmentComment( UI.Segment.findEl( id ) ) ;
             } else {
-                SegmentActivator.activate(id);
+                SegmentActions.openSegment(id);
+                // SegmentActivator.activate(id);
             }
         },
         isReadonlySegment : function( segment ) {
