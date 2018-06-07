@@ -86,8 +86,9 @@ class SegmentFooterTabMatches extends React.Component {
         setTimeout(function () {
             UI.copySuggestionInEditarea(UI.currentSegment, $(ulDataItem + index + '] li.b .translation').html(),
                 $('.editor .editarea'), $(ulDataItem + index + '] ul.graysmall-details .percent').text(), false, false, index, $(ulDataItem + index + '] li.graydesc .bold').text());
-            SegmentActions.highlightEditarea(self.props.id_segment);
+            //SegmentActions.highlightEditarea(self.props.id_segment);
         }, 0);
+        SegmentActions.setChosenContributionIndex(this.props.segment.sid, this.props.segment.fid, index);
     }
 
     deleteSuggestion(match, index) {
@@ -138,6 +139,14 @@ class SegmentFooterTabMatches extends React.Component {
      * Do not delete, extended by plugin
      */
     componentDidUpdate() {
+        if (this.props.segment.status === 'NEW'
+            && !this.props.segment.chosenContributionIndex
+            && this.props.segment.contributions
+            && this.props.segment.contributions.length > 0) {
+            setTimeout(() => {
+                this.chooseSuggestion(this.props.segment.sid, 1);
+            }, 0);
+        }
     }
 
     allowHTML(string) {
