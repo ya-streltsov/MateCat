@@ -422,9 +422,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
     },
 
-    emitChange: function (event, args) {
-        this.emit.apply(this, arguments);
-    },
     setContributionsToCache: function (sid, fid, contributions) {
         let index = this.getSegmentIndex(sid, fid);
         this._segments[fid] = this._segments[fid].setIn([index, 'contributions'], contributions);
@@ -440,7 +437,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             open: open,
             enabled: true
         }
-    }
+    },
+
+    emitChange: function (event, args) {
+        this.emit.apply(this, arguments);
+    },
 
 
 });

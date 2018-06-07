@@ -15,7 +15,7 @@ $.extend(UI, {
 		// this.setFindFunction('find');
 		$('#exec-find').removeAttr('disabled');
 		this.enableTagMark();
-        this.markGlossaryItemsInSource(UI.cachedGlossaryData);
+        // this.markGlossaryItemsInSource(UI.cachedGlossaryData);
 	},
     checkReplaceAvailability: function () {
         if(($('#search-target').val() == '') && ($('#replace-target').val() != '') ) {
@@ -25,8 +25,6 @@ $.extend(UI, {
         }
     },
     execFind: function() {
-        this.removeGlossaryMarksFormAllSources();
-
 		this.searchResultsSegments = false;
 		$('.search-display').removeClass('displaying');
 		$('section.currSearchSegment').removeClass('currSearchSegment');

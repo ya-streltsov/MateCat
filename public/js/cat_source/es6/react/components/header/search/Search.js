@@ -89,7 +89,7 @@ class Search extends React.Component {
                 segmentToOpen: UI.currentSegmentId
             });
         }
-        UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
+        // UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
         this.setState(this.defaultState);
     }
 
