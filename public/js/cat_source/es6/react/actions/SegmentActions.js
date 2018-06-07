@@ -311,12 +311,6 @@ var SegmentActions = {
             });
     },
 
-    /*getGlossaryForSegment: function (text) {
-        return API.SEGMENT.getGlossaryForSegment(text)
-            .fail(function () {
-                UI.failedConnection(0, 'glossary');
-            });
-    },*/
 
     getGlossaryForSegment: function (sid, fid, text) {
         let requestes = [{
@@ -347,12 +341,14 @@ var SegmentActions = {
             if (typeof segment.glossary === 'undefined') {
                 API.SEGMENT.getGlossaryForSegment(request.text)
                     .done(function (response) {
+                        UI.storeGlossaryData(request.sid,response.data.matches);
                         AppDispatcher.dispatch({
                             actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
                             sid: request.sid,
                             fid: request.fid,
                             glossary: response.data.matches ? response.data.matches : []
                         });
+                        UI.markGlossaryItemsInSource(response.data.matches)
                     })
                     .fail(function (error) {
                         UI.failedConnection(sid, 'getContributions');
@@ -361,7 +357,22 @@ var SegmentActions = {
         }
 
     },
-
+    searchGlossary: function(sid,fid,text){
+        text = UI.removeAllTags( htmlEncode(text) );
+        text = text.replace(/\"/g, "");
+        API.SEGMENT.getGlossaryMatch(text)
+            .done(response => {
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
+                    sid: sid,
+                    fid: fid,
+                    glossary: response.data.matches ? response.data.matches : []
+                });
+            })
+            .fail(function () {
+                UI.failedConnection(0, 'glossary');
+            });
+    },
     deleteGlossaryItem: function (source, target) {
         return API.SEGMENT.deleteGlossaryItem(source, target)
             .fail(function () {
