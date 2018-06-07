@@ -125,9 +125,21 @@ class SegmentFooterTabMatches extends React.Component {
         </ul>;
     }
 
+    checkChosenSuggestionIndex(){
+        if (this.props.segment.status === 'NEW'
+            && !this.props.segment.chosenContributionIndex
+            && this.props.segment.contributions
+            && this.props.segment.contributions.length > 0) {
+            setTimeout(() => {
+                this.chooseSuggestion(this.props.segment.sid, 1);
+            }, 0);
+        }
+    }
+
     componentDidMount() {
         this._isMounted = true;
         SegmentStore.addListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
+        this.checkChosenSuggestionIndex();
     }
 
     componentWillUnmount() {
@@ -139,14 +151,7 @@ class SegmentFooterTabMatches extends React.Component {
      * Do not delete, extended by plugin
      */
     componentDidUpdate() {
-        if (this.props.segment.status === 'NEW'
-            && !this.props.segment.chosenContributionIndex
-            && this.props.segment.contributions
-            && this.props.segment.contributions.length > 0) {
-            setTimeout(() => {
-                this.chooseSuggestion(this.props.segment.sid, 1);
-            }, 0);
-        }
+        this.checkChosenSuggestionIndex();
     }
 
     allowHTML(string) {
