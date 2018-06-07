@@ -218,6 +218,18 @@ if (true)
             SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         },
 
+        storeGlossaryData: function (sid, matches) {
+            var matches = _.chain(Object.keys(matches)).map(function (item) {
+                return matches[item];
+            }).flatten().value();
+
+            // find current segment record
+            let record = MateCat.db.segments.by('sid', sid);
+            if (record) {
+                record.glossary_matches = matches;
+                MateCat.db.segments.update(record);
+            }
+        }
 
     } );
 
