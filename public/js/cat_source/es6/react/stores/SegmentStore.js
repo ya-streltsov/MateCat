@@ -92,7 +92,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         operationStatus: {},
                         time_to_edit: "0",
                         translation: translation,
-                        decoded_translation:  UI.decodeText(segment, translation),
+                        decoded_translation: UI.decodeText(segment, translation),
                         version: segment.version,
                         warning: "0",
                         tagged: false,
@@ -189,7 +189,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
      */
     setOperationStatus(sid, fid, operation, status) {
         const index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'operationStatus',operation], status);
+        this._segments[fid] = this._segments[fid].setIn([index, 'operationStatus', operation], status);
     },
     openSegment(sid, fid) {
         let self = this;
@@ -423,8 +423,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     setContributionsToCache: function (sid, fid, contributions) {
-        let index = this.getSegmentIndex(sid, fid);
+        const index = this.getSegmentIndex(sid, fid);
         this._segments[fid] = this._segments[fid].setIn([index, 'contributions'], contributions);
+    },
+
+    setChosenContribution: function (sid, fid, index) {
+        const segment_index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([segment_index, 'chosenContributionIndex'], index);
     },
 
     setGlossaryToCache: function (sid, fid, glossary) {
@@ -534,6 +539,10 @@ AppDispatcher.register(function (action) {
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
+        case SegmentConstants.SET_CHOSEN_CONTRIBUTION_INDEX:
+            SegmentStore.setChosenContribution(action.sid, action.fid, action.index);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            break
         case SegmentConstants.SET_GLOSSARY_TO_CACHE:
             SegmentStore.setGlossaryToCache(action.sid, action.fid, action.glossary);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);

@@ -43,10 +43,10 @@
 * [ ] Glossario, controllare all'apertura della ricerca che vengano tolti i mark e rimessi alla chiusura ( cacheGlossaryData ui.glossary.js->68)
 * [x] Prendere le get contribution con il nuovo sistema cache fatto in react,Pensare ad una maniera per precaricare il
 *     next ed il nextuntraslated glossary e contribution. (se non readonly)
-* [ ] Se l'editarea non ha contenuto e ci sono contributions al 100% bisogna inserire la contribution dentro la
+* [x] Se l'editarea non ha contenuto e ci sono contributions al 100% bisogna inserire la contribution dentro la
 *     editarea e fare anche qualche altra cosa (vedi renderContributions
-* [ ] Rendere l'editarea editabile (se non è readonly)
-* [ ] Controllare la classe editing che viene aggiunta (per ora) all'apertura del segmento e viene tolta alla chiusura (sul body)
+* [x] Rendere l'editarea editabile (se non è readonly)
+* [x] Controllare la classe editing che viene aggiunta (per ora) all'apertura del segmento e viene tolta alla chiusura (sul body)
 * [ ] Tenere traccia dell'editstart (è una new Date()) da quando inizio a modificare a quando invio la translation
 * [ ] Aprire commenti (MBC.main.js->879)
 * [ ] Se mi trovo in review, review extended o review extended footer, chiamare getSegmentVersionsIssuesHandler (magari riportarlo in react)
@@ -54,7 +54,7 @@
 * [ ] 'ESC' deve chiudere tutti i segmenti
 * [x] All'apertura del segmento modificare url con idSegment (UI.detectStartSegment)
 * [ ] Diff del tab Revise impazzisce, ricontrollare anche revise ebay/paypal
-* [ ] Check change status dal menu laterale segmento
+* [x] Check change status dal menu laterale segmento
 *
 * Cose da fare con lo stato close:
 * [x] Togliere l'editarea editabile

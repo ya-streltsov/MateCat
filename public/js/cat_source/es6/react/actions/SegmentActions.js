@@ -454,6 +454,14 @@ var SegmentActions = {
         }
 
     },
+    setChosenContributionIndex: function(sid,fid,index){
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_CHOSEN_CONTRIBUTION_INDEX,
+            sid: sid,
+            fid: fid,
+            index: index
+        });
+    },
     /************ Revise ***************/
     showSelection: function (sid, data) {
         AppDispatcher.dispatch({
