@@ -466,6 +466,9 @@ AppDispatcher.register(function (action) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
             break;
+        case SegmentConstants.SCROLL_TO_SEGMENT:
+            SegmentStore.emitChange(action.actionType, action.sid, action.fid);
+            break;
         case SegmentConstants.SET_OPERATION_STATUS:
             SegmentStore.setOperationStatus(action.sid, action.fid, action.operation, action.status);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);

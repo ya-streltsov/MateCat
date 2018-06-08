@@ -314,7 +314,9 @@ class Segment extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (!this.props.segment.opened && nextProps.segment.opened) {
-            UI.scrollSegment($(this.section), this.props.segment.sid);
+            //UI.scrollSegment($(this.section), this.props.segment.sid);
+            setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid,this.props.segment.fid)},0)
+
         }
 
         //check if this segment is in closing
