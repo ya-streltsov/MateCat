@@ -73,6 +73,14 @@ var SegmentActions = {
         });
     },
 
+    scrollToSegment: function (sid, fid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+            sid: sid,
+            fid: fid
+        });
+    },
+
     addClassToSegment: function (sid, newClass) {
         setTimeout(function () {
             AppDispatcher.dispatch({
@@ -185,7 +193,7 @@ var SegmentActions = {
      * 2 : received data / completed
      * 3 : failed
      */
-    setOperationStatus: function (sid, fid, operation,status) {
+    setOperationStatus: function (sid, fid, operation, status) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_OPERATION_STATUS,
             sid: sid,
@@ -236,7 +244,7 @@ var SegmentActions = {
      * @param status - True/False
      * Set modified to true/false inside segment
      */
-    modifiedTranslation: function (sid,fid,status) {
+    modifiedTranslation: function (sid, fid, status) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.MODIFIED_TRANSLATION,
             sid: sid,
@@ -303,7 +311,7 @@ var SegmentActions = {
     },
 
     getGlossaryMatch: function (text) {
-        text = UI.removeAllTags( htmlEncode(text) );
+        text = UI.removeAllTags(htmlEncode(text));
         text = text.replace(/\"/g, "");
         return API.SEGMENT.getGlossaryMatch(text)
             .fail(function () {
@@ -318,15 +326,15 @@ var SegmentActions = {
             fid: fid,
             text: text
         }];
-        let nextSegment = SegmentStore.getNextSegment(sid,fid);
-        if(nextSegment){
+        let nextSegment = SegmentStore.getNextSegment(sid, fid);
+        if (nextSegment) {
             requestes.push({
                 sid: nextSegment.sid,
                 fid: nextSegment.fid,
                 text: nextSegment.segment
             });
-            let nextSegmentUntranslated = SegmentStore.getNextSegment(sid,fid,8);
-            if(nextSegmentUntranslated && requestes[1].sid != nextSegmentUntranslated.sid){
+            let nextSegmentUntranslated = SegmentStore.getNextSegment(sid, fid, 8);
+            if (nextSegmentUntranslated && requestes[1].sid != nextSegmentUntranslated.sid) {
                 requestes.push({
                     sid: nextSegmentUntranslated.sid,
                     fid: nextSegmentUntranslated.fid,
@@ -335,13 +343,13 @@ var SegmentActions = {
             }
         }
 
-        for(let index = 0; index < requestes.length; index ++){
+        for (let index = 0; index < requestes.length; index++) {
             let request = requestes[index];
             let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);
             if (typeof segment.glossary === 'undefined') {
                 API.SEGMENT.getGlossaryForSegment(request.text)
                     .done(function (response) {
-                        UI.storeGlossaryData(request.sid,response.data.matches);
+                        UI.storeGlossaryData(request.sid, response.data.matches);
                         AppDispatcher.dispatch({
                             actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
                             sid: request.sid,
@@ -363,8 +371,8 @@ var SegmentActions = {
             glossary: glossary
         });
     },
-    searchGlossary: function(sid,fid,text){
-        text = UI.removeAllTags( htmlEncode(text) );
+    searchGlossary: function (sid, fid, text) {
+        text = UI.removeAllTags(htmlEncode(text));
         text = text.replace(/\"/g, "");
         API.SEGMENT.getGlossaryMatch(text)
             .done(response => {
@@ -424,15 +432,15 @@ var SegmentActions = {
             fid: fid,
             target: target
         }];
-        let nextSegment = SegmentStore.getNextSegment(sid,fid);
-        if(nextSegment){
+        let nextSegment = SegmentStore.getNextSegment(sid, fid);
+        if (nextSegment) {
             requestes.push({
                 sid: nextSegment.sid,
                 fid: nextSegment.fid,
                 target: nextSegment.segment
             });
-            let nextSegmentUntranslated = SegmentStore.getNextSegment(sid,fid,8);
-            if(nextSegmentUntranslated && requestes[1].sid != nextSegmentUntranslated.sid){
+            let nextSegmentUntranslated = SegmentStore.getNextSegment(sid, fid, 8);
+            if (nextSegmentUntranslated && requestes[1].sid != nextSegmentUntranslated.sid) {
                 requestes.push({
                     sid: nextSegmentUntranslated.sid,
                     fid: nextSegmentUntranslated.fid,
@@ -440,7 +448,7 @@ var SegmentActions = {
                 });
             }
         }
-        for(let index = 0; index < requestes.length; index ++){
+        for (let index = 0; index < requestes.length; index++) {
             let request = requestes[index];
             let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);
             if (!segment.contributions || (segment.contributions && segment.contributions.length === 0)) {
@@ -460,7 +468,7 @@ var SegmentActions = {
         }
 
     },
-    setChosenContributionIndex: function(sid,fid,index){
+    setChosenContributionIndex: function (sid, fid, index) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_CHOSEN_CONTRIBUTION_INDEX,
             sid: sid,
