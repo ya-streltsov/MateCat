@@ -357,6 +357,12 @@ var SegmentActions = {
         }
 
     },
+    setQaCheckGlossaryItems(glossary) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_QA_CHECK_GLOSSARY_TO_CACHE,
+            glossary: glossary
+        });
+    },
     searchGlossary: function(sid,fid,text){
         text = UI.removeAllTags( htmlEncode(text) );
         text = text.replace(/\"/g, "");

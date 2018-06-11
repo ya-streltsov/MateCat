@@ -27,9 +27,9 @@ if ( QaCheckGlossary.enabled() )
     /**
      * Ensure update is reissued after glossarySourceMarked.
      */
-    $(document).on('glossarySourceMarked', function(e, data) {
-        startLocalUnusedGlossaryHighlight( data.segment );
-    });
+    // $(document).on('glossarySourceMarked', function(e, data) {
+    //     startLocalUnusedGlossaryHighlight( data.segment );
+    // });
 
     function updateGlobalWarnings(glossary) {
 
@@ -42,6 +42,7 @@ if ( QaCheckGlossary.enabled() )
         });
 
         globalWarnings = mapped;
+        SegmentActions.setQaCheckGlossaryItems(mapped);
     }
 
     function removeUnusedGlossaryMarks( container ) {

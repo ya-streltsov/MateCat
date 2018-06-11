@@ -125,10 +125,23 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
 
     },
-    // getSegmentIndexNoFid(sid) {
-    //     this._segments
-    //
-    // },
+    getSegmentIndexAndFid(sid) {
+        let segmentIndex, fileId;
+        let self = this;
+        _.forEach(this._segments, function (item, fid) {
+            if (_.isUndefined(segmentIndex)) {
+                segmentIndex = self._segments[fid].findIndex(function (segment, index) {
+                    return parseInt(segment.get('sid')) === parseInt(sid);
+                });
+                fileId = fid;
+            }
+
+        });
+        return {
+            index: segmentIndex,
+            fid: fileId
+        }
+    },
     splitSegment(oldSid, newSegments, fid, splitGroup) {
         var index = this._segments[fid].findIndex(function (segment, index) {
             return (segment.get('sid') == oldSid);
@@ -436,6 +449,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         let index = this.getSegmentIndex(sid, fid);
         this._segments[fid] = this._segments[fid].setIn([index, 'glossary'], glossary);
     },
+    setQACheckGlossaryToCache: function (glossaryObj) {
+        let self = this;
+        _.forEach(glossaryObj, function (item, index) {
+            let obj = self.getSegmentIndexAndFid(index);
+            self._segments[obj.fid] = self._segments[obj.fid].setIn([obj.index, 'qaGlossary'], item);
+        });
+    },
     setConfigTabs: function (tabName, visible, open) {
         this._footerTabsConfig[tabName] = {
             visible: visible,
@@ -545,6 +565,10 @@ AppDispatcher.register(function (action) {
             break
         case SegmentConstants.SET_GLOSSARY_TO_CACHE:
             SegmentStore.setGlossaryToCache(action.sid, action.fid, action.glossary);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            break;
+        case SegmentConstants.SET_QA_CHECK_GLOSSARY_TO_CACHE:
+            SegmentStore.setQACheckGlossaryToCache(action.glossary);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
