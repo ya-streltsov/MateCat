@@ -28,6 +28,9 @@ if (true)
                 record.glossary_matches = matches;
                 MateCat.db.segments.update(record);
             }
+        },
+        openSegmentGlossaryTab: function ( $segment ) {
+            $segment.find('.tab-switcher-gl').click();
         }
 
     } );
