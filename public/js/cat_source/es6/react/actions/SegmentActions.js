@@ -451,14 +451,15 @@ var SegmentActions = {
         for (let index = 0; index < requestes.length; index++) {
             let request = requestes[index];
             let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);
-            if (!segment.contributions || (segment.contributions && segment.contributions.length === 0)) {
+            if (!segment.contributions || (segment.contributions && segment.contributions.matches.length === 0)) {
                 API.SEGMENT.getContributions(request.sid, request.target)
                     .done(function (response) {
                         AppDispatcher.dispatch({
                             actionType: SegmentConstants.SET_CONTRIBUTIONS_TO_CACHE,
                             sid: request.sid,
                             fid: request.fid,
-                            matches: response.data.matches
+                            matches: response.data.matches,
+                            errors: response.errors
                         });
                     })
                     .fail(function (error) {

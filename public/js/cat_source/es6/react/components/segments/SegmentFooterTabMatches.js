@@ -126,13 +126,13 @@ class SegmentFooterTabMatches extends React.Component {
         </ul>;
     }
 
-    checkChosenSuggestionIndex(){
+    checkChosenSuggestionIndex() {
         if (config.auto_copy_suggestion
-            && ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() ) //Todo: check Speech2Text
+            && ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed(match)) || !Speech2Text.enabled()) //Todo: check Speech2Text
             && this.props.segment.status === 'NEW'
             && !this.props.segment.chosenContributionIndex
             && this.props.segment.contributions
-            && this.props.segment.contributions.length > 0) {
+            && this.props.segment.contributions.matches.length > 0) {
             setTimeout(() => {
                 this.chooseSuggestion(this.props.segment.sid, 1);
             }, 0);
@@ -163,8 +163,8 @@ class SegmentFooterTabMatches extends React.Component {
 
     render() {
         let matches = [];
-        if (this.props.segment.contributions && this.props.segment.contributions.length > 0) {
-            let tpmMatches = this.processContributions(this.props.segment.contributions)
+        if (this.props.segment.contributions && this.props.segment.contributions.matches.length > 0) {
+            let tpmMatches = this.processContributions(this.props.segment.contributions.matches);
             let self = this;
             tpmMatches.forEach(function (match, index) {
                 let trashIcon = (match.disabled) ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'}
@@ -200,6 +200,49 @@ class SegmentFooterTabMatches extends React.Component {
                 matches.push(item);
             });
         }
+
+        let errors = [];
+        if (this.props.segment.contributions && this.props.segment.contributions.errors.length > 0) {
+            this.props.segment.contributions.errors.forEach((error, index) => {
+                let toAdd = false,
+                    percentClass = '',
+                    messageClass,
+                    imgClass,
+                    messageTypeText;
+
+                switch (error.code) {
+                    case '-2001':
+                        toAdd = true;
+                        percentClass = "per-red";
+                        messageClass = 'error';
+                        imgClass = 'error-img';
+                        messageTypeText = 'Error: ';
+                        break;
+                    case '-2002':
+                        toAdd = true;
+                        messageClass = 'warning';
+                        imgClass = 'warning-img';
+                        messageTypeText = 'Warning: ';
+                        break;
+                }
+                if (toAdd) {
+
+                    let item = <ul className="engine-error-item graysmall">
+                        <li className="engine-error">
+                            <div className={imgClass}></div>
+                            <span
+                                className={"engine-error-message " + messageClass}>{messageTypeText + ' ' + error.message}</span>
+                        </li>
+                    </ul>;
+
+                    errors.push(item);
+
+                }
+            });
+
+        }
+
+
         return (
             <div
                 key={"container_" + this.props.code}
@@ -208,7 +251,7 @@ class SegmentFooterTabMatches extends React.Component {
                 <div className="overflow">
                     {matches}
                 </div>
-                <div className="engine-errors"></div>
+                <div className="engine-errors">{errors}</div>
             </div>
         )
     }

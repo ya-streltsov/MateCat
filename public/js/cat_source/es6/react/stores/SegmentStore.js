@@ -435,9 +435,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
     },
 
-    setContributionsToCache: function (sid, fid, contributions) {
+    setContributionsToCache: function (sid, fid, contributions,errors) {
         const index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'contributions'], contributions);
+        this._segments[fid] = this._segments[fid].setIn([index, 'contributions'], {
+            matches: contributions,
+            errors: errors
+        });
     },
 
     setChosenContribution: function (sid, fid, index) {
@@ -559,7 +562,7 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
             break;
         case SegmentConstants.SET_CONTRIBUTIONS_TO_CACHE:
-            SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches);
+            SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches,action.errors);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.SET_CHOSEN_CONTRIBUTION_INDEX:
