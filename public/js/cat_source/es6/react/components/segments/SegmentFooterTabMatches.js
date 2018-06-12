@@ -17,6 +17,7 @@ class SegmentFooterTabMatches extends React.Component {
         this.suggestionShortcutLabel = 'CTRL+';
         this.processContributions = this.processContributions.bind(this);
         this.chooseSuggestion = this.chooseSuggestion.bind(this);
+        SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
     }
 
 
