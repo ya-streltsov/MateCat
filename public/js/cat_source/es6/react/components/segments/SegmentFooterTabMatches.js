@@ -126,7 +126,9 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     checkChosenSuggestionIndex(){
-        if (this.props.segment.status === 'NEW'
+        if (config.auto_copy_suggestion
+            && ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() ) //Todo: check Speech2Text
+            && this.props.segment.status === 'NEW'
             && !this.props.segment.chosenContributionIndex
             && this.props.segment.contributions
             && this.props.segment.contributions.length > 0) {
