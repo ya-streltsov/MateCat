@@ -73,7 +73,9 @@ class SegmentSource extends React.Component {
 
     addEvents() {
         let self = this;
-        $(this.sourceRef).on('click', '.inGlossary, .unusedGlossaryTerm', function (  ) {
+        $(this.sourceRef).on('click', '.inGlossary, .unusedGlossaryTerm', function ( e ) {
+            e.stopPropagation();
+            e.preventDefault();
             self.openGlossaryTab()
         })
     }
@@ -114,13 +116,13 @@ class SegmentSource extends React.Component {
     }
 
 
-    markGlossaryItemsInSource() {
+    markGlossaryItemsInSource(source) {
         let self = this;
         let matchesObj = this.props.segment.glossary;
 
         if ( ! Object.size( matchesObj ) ) return this.state.source;
 
-        let cleanString = this.state.source;
+        let cleanString = source;
 
         let intervals = [];
         let matches = [];
@@ -155,9 +157,9 @@ class SegmentSource extends React.Component {
         return cleanString;
     }
 
-    markGlossaryUnusedMatches() {
+    markGlossaryUnusedMatches(source) {
         let unusedMatches = this.props.segment.qaGlossary;
-        let newHTML = this.state.source;
+        let newHTML = source;
         unusedMatches = unusedMatches.sort(function(a, b){
             return b.raw_segment.length - a.raw_segment.length;
         });
@@ -213,10 +215,10 @@ class SegmentSource extends React.Component {
     render() {
         let source = this.state.source;
         if ( this.props.segment.opened && this.props.segment.glossary) {
-            source = this.markGlossaryItemsInSource();
+            source = this.markGlossaryItemsInSource(source);
         }
         if (QaCheckGlossary.enabled() && this.props.segment.opened && this.props.segment.qaGlossary) {
-            source = this.markGlossaryUnusedMatches();
+            source = this.markGlossaryUnusedMatches(source);
         }
         let escapedSegment = this.createEscapedSegment();
         return (

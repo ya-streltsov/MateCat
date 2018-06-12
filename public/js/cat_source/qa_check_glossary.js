@@ -59,7 +59,8 @@ if ( QaCheckGlossary.enabled() )
     }
 
     $.extend(QaCheckGlossary, {
-        qaCheckRegExpFlags: regExpFlags
+        qaCheckRegExpFlags: regExpFlags,
+        qaCheckRegExp: qaCheckRegExp
     });
 
 })(jQuery, QaCheckGlossary);
