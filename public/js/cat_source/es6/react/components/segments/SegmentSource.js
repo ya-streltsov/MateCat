@@ -68,7 +68,16 @@ class SegmentSource extends React.Component {
             let area = $("#segment-" + this.props.segment.sid + " .source");
             this.props.afterRenderOrUpdate(area);
         }
+        this.addPowerTips()
 
+    }
+
+    addPowerTips() {
+        $(this.sourceRef).find('.unusedGlossaryTerm').each(function(index, item) {
+            let el = $(item);
+            el.powerTip({ placement : 's' });
+            el.data({ 'powertipjq' : $('<div class="unusedGlossaryTip" style="padding: 4px;">Unused glossary term</div>') });
+        });
     }
 
     addEvents() {
@@ -77,7 +86,8 @@ class SegmentSource extends React.Component {
             e.stopPropagation();
             e.preventDefault();
             self.openGlossaryTab()
-        })
+        });
+
     }
 
     onCopyEvent(e) {
@@ -172,12 +182,12 @@ class SegmentSource extends React.Component {
             let check = re.test( '<span class="unusedGlossaryTerm">$1</span>' );
             if ( !check ){
                 newHTML = newHTML.replace(
-                    re , '<span class="unusedGlossaryTerm">$1</span>'
+                    re , '<span data-id="' + index + '" class="unusedGlossaryTerm">$1</span>'
                 );
             } else  {
                 re = new RegExp( sprintf( "\\s\\b(%s)\\s\\b", value ), QaCheckGlossary.qaCheckRegExpFlags);
                 newHTML = newHTML.replace(
-                    re , ' <span class="unusedGlossaryTerm">$1</span> '
+                    re , ' <span data-id="' + index + '" class="unusedGlossaryTerm">$1</span> '
                 );
             }
         });
