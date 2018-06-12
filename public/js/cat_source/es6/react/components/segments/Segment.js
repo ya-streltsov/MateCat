@@ -89,7 +89,6 @@ class Segment extends React.Component {
             /************/
             UI.editStart = new Date();
             SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
-            SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
             SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
 
             //From EditAreaClick

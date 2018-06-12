@@ -88,7 +88,7 @@
                 lxq_partnerid: '${lxq_partnerid | string:}',
                 lxq_enabled:  ${lxq_enabled},
                 lexiqa_languages: ${lexiqa_languages | string:[]},
-                lexiqaServer: '${lexiqaServer | string:}',                
+                lexiqaServer: '${lexiqaServer | string:}',
 
                 qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
                 qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
@@ -99,7 +99,8 @@
                 tag_projection_languages: ${tag_projection_languages},
                 languages_array : ${languages_array},
                 segmentation_rule : '${segmentation_rule}',
-                segmentFilterEnabled: true
+                segmentFilterEnabled: true,
+                auto_copy_suggestion: ${auto_copy_suggestion}
             };
 
             var renderStart = new Date();

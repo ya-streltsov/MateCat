@@ -17,6 +17,7 @@ class SegmentFooterTabMatches extends React.Component {
         this.suggestionShortcutLabel = 'CTRL+';
         this.processContributions = this.processContributions.bind(this);
         this.chooseSuggestion = this.chooseSuggestion.bind(this);
+        SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
     }
 
 
@@ -126,7 +127,9 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     checkChosenSuggestionIndex(){
-        if (this.props.segment.status === 'NEW'
+        if (config.auto_copy_suggestion
+            && ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() ) //Todo: check Speech2Text
+            && this.props.segment.status === 'NEW'
             && !this.props.segment.chosenContributionIndex
             && this.props.segment.contributions
             && this.props.segment.contributions.length > 0) {
