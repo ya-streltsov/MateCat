@@ -30,7 +30,8 @@ if (true)
             }
         },
         openSegmentGlossaryTab: function ( $segment ) {
-            $segment.find('.tab-switcher-gl').click();
+            //TODO: Create an action to open a Tab
+            $segment.closest('section').find('.tab-switcher-gl').click();
         }
 
     } );

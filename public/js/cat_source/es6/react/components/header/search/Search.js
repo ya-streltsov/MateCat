@@ -23,7 +23,7 @@ class Search extends React.Component {
             currentTargetSearch: null,
             currentSourceSearch: null,
             funcFindButton: true  // true=find / false=next
-        }
+        };
         this.state = this.defaultState;
 
         this.handleSubmit = this.handleSubmit.bind(this);

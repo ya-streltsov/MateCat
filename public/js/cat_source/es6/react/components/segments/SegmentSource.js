@@ -21,6 +21,7 @@ class SegmentSource extends React.Component {
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.toggleTagLock = this.toggleTagLock.bind(this);
+
     }
 
     replaceSource(sid, source) {
@@ -64,9 +65,29 @@ class SegmentSource extends React.Component {
 
     afterRenderActions() {
         if (!this.props.isReviewImproved) {
-            var area = $("#segment-" + this.props.segment.sid + " .source");
+            let area = $("#segment-" + this.props.segment.sid + " .source");
             this.props.afterRenderOrUpdate(area);
         }
+        this.addPowerTips()
+
+    }
+
+    addPowerTips() {
+        $(this.sourceRef).find('.unusedGlossaryTerm').each(function(index, item) {
+            let el = $(item);
+            el.powerTip({ placement : 's' });
+            el.data({ 'powertipjq' : $('<div class="unusedGlossaryTip" style="padding: 4px;">Unused glossary term</div>') });
+        });
+    }
+
+    addEvents() {
+        let self = this;
+        $(this.sourceRef).on('click', '.inGlossary, .unusedGlossaryTerm', function ( e ) {
+            e.stopPropagation();
+            e.preventDefault();
+            self.openGlossaryTab()
+        });
+
     }
 
     onCopyEvent(e) {
@@ -100,15 +121,18 @@ class SegmentSource extends React.Component {
         } );
         return inclusiveMatches ;
     }
+    openGlossaryTab() {
+        UI.openSegmentGlossaryTab($(this.sourceRef));
+    }
 
-    markGlossaryItemsInSource() {
+
+    markGlossaryItemsInSource(source) {
+        let self = this;
         let matchesObj = this.props.segment.glossary;
 
         if ( ! Object.size( matchesObj ) ) return this.state.source;
 
-        // root.QaCheckGlossary.enabled() && root.QaCheckGlossary.removeUnusedGlossaryMarks( container );
-
-        let cleanString = this.state.source;
+        let cleanString = source;
 
         let intervals = [];
         let matches = [];
@@ -132,9 +156,9 @@ class SegmentSource extends React.Component {
                 .replace( /\(/gi, '\\(' )
                 .replace( /\)/gi, '\\)' );
 
-            var re = new RegExp( '\\b'+ glossaryTerm_escaped.trim() + '\\b', "gi" );
+            var re = new RegExp( '\\b('+ glossaryTerm_escaped.trim() + ')\\b', "gi" );
 
-            cleanString = cleanString.replace( re, '<mark class="inGlossary">' + currentMatch + '</mark>' );
+            cleanString = cleanString.replace( re, '<mark class="inGlossary">$1</mark>' );
 
 
         } );
@@ -143,11 +167,39 @@ class SegmentSource extends React.Component {
         return cleanString;
     }
 
+    markGlossaryUnusedMatches(source) {
+        let unusedMatches = this.props.segment.qaGlossary;
+        let newHTML = source;
+        unusedMatches = unusedMatches.sort(function(a, b){
+            return b.raw_segment.length - a.raw_segment.length;
+        });
+        $.each(unusedMatches, function( index ) {
+            let value = (this.raw_segment) ? this.raw_segment : this.translation ;
+            value = escapeRegExp( value );
+            value = value.replace(/ /g, '(?: *<\/*(?:mark)*(?:span *)*(?: (data-id="(.*?)" )*class="(unusedGlossaryTerm)*(inGlossary)*")*> *)* *');
+            let re = new RegExp( sprintf( QaCheckGlossary.qaCheckRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
+            //Check if value match inside the span (Ex: ID, class, data, span)
+            let check = re.test( '<span class="unusedGlossaryTerm">$1</span>' );
+            if ( !check ){
+                newHTML = newHTML.replace(
+                    re , '<span data-id="' + index + '" class="unusedGlossaryTerm">$1</span>'
+                );
+            } else  {
+                re = new RegExp( sprintf( "\\s\\b(%s)\\s\\b", value ), QaCheckGlossary.qaCheckRegExpFlags);
+                newHTML = newHTML.replace(
+                    re , ' <span data-id="' + index + '" class="unusedGlossaryTerm">$1</span> '
+                );
+            }
+        });
+        return newHTML;
+    }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_SOURCE, this.replaceSource);
         SegmentStore.addListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
         SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
         this.afterRenderActions();
+        this.addEvents();
     }
 
     componentWillUnmount() {
@@ -173,11 +225,15 @@ class SegmentSource extends React.Component {
     render() {
         let source = this.state.source;
         if ( this.props.segment.opened && this.props.segment.glossary) {
-            source = this.markGlossaryItemsInSource();
+            source = this.markGlossaryItemsInSource(source);
+        }
+        if (QaCheckGlossary.enabled() && this.props.segment.opened && this.props.segment.qaGlossary) {
+            source = this.markGlossaryUnusedMatches(source);
         }
         let escapedSegment = this.createEscapedSegment();
         return (
-            <div className={"source item"}
+            <div ref={(container)=>this.sourceRef=container}
+                 className={"source item"}
                  tabIndex={0}
                  id={"segment-" + this.props.segment.sid +"-source"}
                  data-original={escapedSegment}
