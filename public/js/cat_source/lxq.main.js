@@ -128,12 +128,10 @@ LXQ.init  = function () {
                       console.log('in loadmore segments, segment: '+segment.sid+' already has qa info...');
                       //clean up and redo powertip on any glossaries/blacklists
                       var _segment = UI.getSegmentById(segment.sid)
-                      QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(_segment);
                       QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), _segment ));
                       LXQ.redoHighlighting(segment.sid,true);
                       LXQ.redoHighlighting(segment.sid,false);
                       QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), _segment ));
-                      QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(_segment);
                   }
             });
           }
@@ -1369,7 +1367,6 @@ LXQ.init  = function () {
                             } );
                             //delete LXQ.lexiqaWarnings[id_segment];
                             LXQ.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
-                            QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(segment);
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), segment ));
                             source_val = LXQ.highLightText( source_val, highlights.source, isSegmentCompleted, true, true, segment );
                             if ( callback != null && UI.currentSegmentId == id_segment )
@@ -1384,7 +1381,6 @@ LXQ.init  = function () {
                             SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val)
                             LXQ.reloadPowertip( segment );
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), segment ));
-                            QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(segment);
                             //only reload dropdown menu and link, if there was an error...
                             //if ( LXQ.enabled() ) LXQ.refreshElements();
 
@@ -1501,7 +1497,6 @@ LXQ.init  = function () {
                             LXQ.shouldHighlighWarningsForSegment( element.segid, element.show );
 
                             var source_val = $( ".source", seg ).html();
-                            QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(seg);
                             source_val = LXQ.highLightText( source_val, highlights.source, true, LXQ.shouldHighlighWarningsForSegment( seg ), true, seg );
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), seg ));
                             var target_val = $(".targetarea", seg).html();
@@ -1509,7 +1504,6 @@ LXQ.init  = function () {
                             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(seg), UI.getSegmentFileId(seg), target_val);
                             SegmentActions.replaceSourceText(UI.getSegmentId(seg), UI.getSegmentFileId(seg), source_val);
                             LXQ.buildPowertipDataForSegment( seg );
-                            QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(seg);
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), seg ));
                         } );
 
