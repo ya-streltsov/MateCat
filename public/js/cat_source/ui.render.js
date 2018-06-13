@@ -1,6 +1,7 @@
 /*
 	Component: ui.render 
  */
+
 $.extend(UI, {
 	render: function(options) {
         options = options || {};
@@ -85,6 +86,17 @@ $.extend(UI, {
                 	filtersEnabled: SegmentFilter.enabled()
 				}),
             $('#header-bars-wrapper')[0]
+        );
+
+        ReactDOM.render(
+            React.createElement(
+                FileNavigationMenu, {
+                    source_rfc: config.source_rfc,
+                    target_rfc: config.target_rfc,
+                    job_id: config.id_job,
+                    project_name: config.project_name
+                }),
+            $('#file-navigation-menu')[0]
         );
 
         return UI.getSegments(options);

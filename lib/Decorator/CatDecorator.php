@@ -33,6 +33,7 @@ class CatDecorator {
         $this->controller     = $controller;
         $this->template       = $template;
         $this->job            = $this->controller->getChunk();
+        $this->project        = $this->job->getProject();
         $this->jobStatsStruct = new JobStatsStruct( $this->controller->getJobStats() );
 
         $this->isGDriveProject = $controller->isCurrentProjectGDrive();
@@ -98,6 +99,7 @@ class CatDecorator {
         $this->template->allow_link_to_analysis = true ;
 
         $this->template->auto_copy_suggestion = true ;
+        $this->template->project_name = $this->project->name;
     }
 
     /**
