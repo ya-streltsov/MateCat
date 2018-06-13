@@ -467,6 +467,22 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
 
+    getCurrentSegment: function(){
+        let current = null,
+            tmpCurrent = null;
+
+        _.forEach(this._segments, (item, index) => {
+            tmpCurrent = this._segments[index].find((segment) => {
+               return segment.get('opened') === true
+            });
+            if(tmpCurrent){
+                current = Object.assign({},tmpCurrent.toJS());
+            }
+        });
+
+        return current;
+    },
+
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
     },

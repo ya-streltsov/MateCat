@@ -20,7 +20,8 @@ UI = {
         $(document).trigger('editingSegment:change', {segment: segment});
     },
 
-	toggleFileMenu: function() {
+    //todo: ###REMOVE###
+	/*toggleFileMenu: function() {
         var jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
 			return false;
@@ -55,7 +56,7 @@ UI = {
             return true;
         }
 
-	},
+	},*/
 
     activateSegment: function(segment) {
         // SegmentActions.createFooter(UI.getSegmentId(segment));
@@ -477,7 +478,8 @@ UI = {
 		this.body.append(menu);
 	},*/
 
-    createJobMenu: function() {
+	//Todo: ###REMOVE###
+    /*createJobMenu: function() {
         var menu = '<nav id="jobMenu" class="topMenu">' +
             '<ul class="gotocurrentsegment">' +
             '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="javascript:void(0)">Go to current segment</a></li>' +
@@ -489,7 +491,7 @@ UI = {
         menu += '</ul>' +
             '</nav>';
         this.body.append(menu);
-    },
+    },*/
 
     handleReturn: function(e) {
         if(!this.hiddenTextEnabled) return;

@@ -56,7 +56,7 @@ $.extend(UI, {
 
         if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
-		this.createJobMenu();
+		//this.createJobMenu();
 		this.checkVersion();
         this.initTM();
 		this.initAdvanceOptions();
