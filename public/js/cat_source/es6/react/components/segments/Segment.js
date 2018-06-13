@@ -74,7 +74,6 @@ class Segment extends React.Component {
             //end old cache
 
             UI.evalNextSegment($(this.section), 'untranslated');
-            UI.updateJobMenu();
             UI.clearUndoStack();
             $(document).trigger('segment:activate', {segment: new UI.Segment($(this.section))});  //Used by Segment Filter
             UI.getNextSegment(UI.currentSegment, 'untranslated');

@@ -78,7 +78,6 @@ class SegmentsContainer extends React.Component {
 
     scrollToSegment(sid, fid) {
         if (fid === this.props.fid) {
-            console.log('scroll to segment', sid, fid)
             const to = ReactDOM.findDOMNode(this.segmentsRefs[parseInt(sid)]);
             const element = document.getElementById('outer');
             const container = document.getElementById('file-'+this.props.fid);

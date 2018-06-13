@@ -2389,14 +2389,15 @@ UI = {
 	clearUndoStack: function() {
 		this.undoStack = [];
 	},
-	updateJobMenu: function() {
+    //todo: ###REMOVE###
+	/*updateJobMenu: function() {
 		$('#jobMenu li.current').removeClass('current');
 		$('#jobMenu li:not(.currSegment)').each(function() {
 			if ($(this).attr('data-file') == UI.currentFileId)
 				$(this).addClass('current');
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
-	},
+	},*/
     isCJK: function () {
         return config.targetIsCJK;
     },

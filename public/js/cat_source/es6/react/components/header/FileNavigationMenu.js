@@ -11,6 +11,7 @@ class FileNavigationMenu extends React.Component {
             initDropdown: true
         };
         this.dropDown = null;
+        this.pname = null;
     }
 
     componentDidMount() {
@@ -25,6 +26,8 @@ class FileNavigationMenu extends React.Component {
                 .dropdown({
                     action: 'hide'
                 });
+
+            APP.fitText($(this.dropDown), $(this.pname),30);
             this.setState({
                 initDropdown: false
             });
@@ -35,15 +38,27 @@ class FileNavigationMenu extends React.Component {
     goToCurrentSegment() {
         let currentSegment = SegmentStore.getCurrentSegment();
         setTimeout(()=>{SegmentActions.scrollToSegment(currentSegment.sid, currentSegment.fid)},0)
+
+        $(this.dropDown).dropdown('toggle');
+    }
+    goToFile(index){
+        UI.renderAndScrollToSegment(config.firstSegmentOfFiles[index].first_segment);
     }
 
     render() {
         const files = [];
-        _.forEach(config.firstSegmentOfFiles, function (item, index) {
-            const fileClass = UI.getIconClass(item.file_name.split('.')[item.file_name.split('.').length - 1])
-            const file = <div className="item" key={index}>
+        _.forEach(config.firstSegmentOfFiles, (item, index) => {
+            const fileClass = UI.getIconClass(item.file_name.split('.')[item.file_name.split('.').length - 1]);
+            let name;
+            if(item.file_name.split('').length>40){
+                name = item.file_name.substring(0,20).concat("[...]" ).concat((item.file_name).substring(item.file_name.length-20));
+            }else{
+                name = item.file_name;
+            }
+
+            const file = <div className="item" key={index} onClick={this.goToFile.bind(this,index)} title={item.file_name}>
                 <i className={fileClass}></i>
-                <p>{item.file_name}</p>
+                <p>{name}</p>
             </div>;
             files.push(file);
         });
@@ -51,7 +66,7 @@ class FileNavigationMenu extends React.Component {
 
         return <div id="fileNavigationMenu">
             <div className="ui dropdown button" ref={(ref) => this.dropDown = ref}>
-                <span className="text">
+                <span className="text"  ref={(ref) => this.pname = ref}>
                     {this.props.project_name}
                 </span>
                 <div className="menu">
