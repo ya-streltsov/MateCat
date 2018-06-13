@@ -382,12 +382,12 @@ $.extend(UI, {
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
 		});
-
-		$("#pname").on('click', function(e) {
+		//todo: ###REMOVE
+		/*$("#pname").on('click', function(e) {
 			UI.closeAllMenus(e);
 			e.preventDefault();
 			UI.toggleFileMenu();
-		});
+		});*/
 
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();

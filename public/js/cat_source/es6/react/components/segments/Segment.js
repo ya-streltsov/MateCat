@@ -359,7 +359,7 @@ class Segment extends React.Component {
     }
 
     render() {
-        console.log('Render segment: ',this.props.segment.sid,this.props.segment.opened);
+        //console.log('Render segment: ',this.props.segment.sid,this.props.segment.opened);
         let job_marker = "",
             timeToEdit = "",
             readonly = this.state.readonly,

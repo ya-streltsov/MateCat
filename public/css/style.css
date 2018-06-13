@@ -1038,7 +1038,9 @@ article .approved:active {
     -webkit-box-shadow: none;
     box-shadow: none;
 }
-
+.outer > article{
+    display: inline-block;
+}
 .translated:hover,
 .next-untranslated:hover,
 .guesstags:hover {

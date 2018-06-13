@@ -20,6 +20,7 @@ class SegmentsContainer extends React.Component {
         };
 
         this.segmentsRefs = {};
+        this.containerRef;
         this.segmentsRefsArray = [];
         this.renderSegments = this.renderSegments.bind(this);
         this.updateAllSegments = this.updateAllSegments.bind(this);
@@ -80,17 +81,19 @@ class SegmentsContainer extends React.Component {
             console.log('scroll to segment', sid, fid)
             const to = ReactDOM.findDOMNode(this.segmentsRefs[parseInt(sid)]);
             const element = document.getElementById('outer');
+            const container = document.getElementById('file-'+this.props.fid);
 
-            const   index = this.segmentsRefsArray.indexOf(sid);
-            let     offsetScroll = 140;
-            if(this.segmentsRefsArray.indexOf(sid) > 0) {
-                const ref = ReactDOM.findDOMNode(this.segmentsRefs[this.segmentsRefsArray[index-1]]);
-                const prevHeight =ref.clientHeight;
-                prevHeight > offsetScroll ? offsetScroll = prevHeight+10 : null;
+            const index = this.segmentsRefsArray.indexOf(sid);
+            let offsetScroll = 140;
+            if (this.segmentsRefsArray.indexOf(sid) > 0) {
+                const ref = ReactDOM.findDOMNode(this.segmentsRefs[this.segmentsRefsArray[index - 1]]);
+                const prevHeight = ref.clientHeight;
+                prevHeight > offsetScroll ? offsetScroll = prevHeight + 10 : null;
             }
-            element.scroll({top: to.offsetTop-offsetScroll, left: 0, behavior: 'smooth' })
+            element.scroll({top: to.offsetTop - offsetScroll + container.offsetTop, left: 0, behavior: 'smooth'})
         }
     }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
@@ -148,7 +151,9 @@ class SegmentsContainer extends React.Component {
             />;
             items.push(item);
         });
-        return <div>{items}</div>;
+        return <div ref={(el) => {
+            this.containerRef = el
+        }} style={{display:'inline-block'}}>{items}</div>;
     }
 }
 
