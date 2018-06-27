@@ -496,6 +496,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setQACheckGlossaryToCache: function (glossaryObj) {
         let self = this;
+        _.forEach(this._segments, function (item, index) {
+            self._segments[index] = self._segments[index].map(segment => segment.set('qaGlossary', []));
+        });
         _.forEach(glossaryObj, function (item, index) {
             let obj = self.getSegmentIndexAndFid(index);
             self._segments[obj.fid] = self._segments[obj.fid].setIn([obj.index, 'qaGlossary'], item);
@@ -634,9 +637,9 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.REPLACE_SOURCE:
-            let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
+            // let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
             // SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
-            SegmentStore.emitChange(action.actionType, action.id, source);
+            SegmentStore.emitChange(action.actionType, action.id, action.source);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
@@ -667,7 +670,9 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.SET_QA_CHECK_GLOSSARY_TO_CACHE:
             SegmentStore.setQACheckGlossaryToCache(action.glossary);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            _.forEach(SegmentStore._segments, function (item, index) {
+                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
+            });
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
             SegmentStore.emitChange(action.actionType, action.sid, action.index);

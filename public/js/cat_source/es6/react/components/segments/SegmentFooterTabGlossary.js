@@ -148,7 +148,6 @@ class SegmentFooterTabGlossary extends React.Component {
                     self.target.textContent = '';
 
                     let matches = $.extend({}, response.data.matches, self.props.segment.glossary);
-                    // UI.markGlossaryItemsInSource(matches);
 
                     self.setState({
                         loading: false,

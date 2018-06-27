@@ -378,7 +378,6 @@ var SegmentActions = {
                             fid: request.fid,
                             glossary: response.data.matches ? response.data.matches : []
                         });
-                        // UI.markGlossaryItemsInSource(response.data.matches)
                     })
                     .fail(function (error) {
                         UI.failedConnection(sid, 'getContributions');
