@@ -170,9 +170,11 @@ class Editarea extends React.Component {
     }
     componentDidUpdate() {
         let self = this;
-        /*setTimeout(function (  ) {
-            self.emitTrackChanges();
-        });*/
+        setTimeout(function (  ) {
+            if ( !_.isNull(self.editAreaRef) ) {
+                self.emitTrackChanges();
+            }
+        });
         /*
          *Todo: remove UI.editarea from Editarea.js
          */

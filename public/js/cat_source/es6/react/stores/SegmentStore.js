@@ -42,8 +42,23 @@ EventEmitter.prototype.setMaxListeners(0);
 var SegmentStore = assign({}, EventEmitter.prototype, {
 
     _segments: {},
+    _segmentsFiles: Immutable.fromJS({}),
     segmentsInBulk: [],
-    _footerTabsConfig: {},
+    _globalWarnings: {
+        lexiqa: [],
+        matecat: {
+            ERROR: {
+                Categories: []
+            },
+            WARNING: {
+                Categories: []
+            },
+            INFO: {
+                Categories: []
+            }
+        }
+    },
+    segmentsInBulk: [],
     /**
      * Update all
      */
@@ -57,17 +72,20 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments, fid));
         }
 
-        if (this.segmentsInBulk.length > 0) {
+        this.buildSegmentsFiles(fid, segments);
+
+        if ( this.segmentsInBulk.length > 0 ) {
             this.setBulkSelectionSegments(this.segmentsInBulk);
         }
         // console.timeEnd("Time: updateAll segments"+fid);
     },
 
     normalizeSplittedSegments: function (segments, fid) {
-        var newSegments = [];
+        let newSegments = [];
+        let self = this;
         $.each(segments, function (index) {
-            var splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
-            var segment = this;
+            let splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
+            let segment = this;
             if (splittedSourceAr.length > 1) {
                 var splitGroup = [];
                 $.each(splittedSourceAr, function (i) {
@@ -75,9 +93,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 });
 
                 $.each(splittedSourceAr, function (i) {
-                    var translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
-                    var status = segment.target_chunk_lengths.statuses[i];
-                    var segData = {
+                    let translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
+                    let status = segment.target_chunk_lengths.statuses[i];
+                    let segData = {
                         autopropagated_from: "0",
                         has_reference: "false",
                         parsed_time_to_edit: ["00", "00", "00", "00"],
@@ -95,7 +113,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         decoded_translation: UI.decodeText(segment, translation),
                         version: segment.version,
                         warning: "0",
-                        tagged: false,
+                        warnings: {},
+                        tagged: !self.hasSegmentTagProjectionEnabled(segment),
                         unlocked: false,
                         fid: fid,
                     };
@@ -106,7 +125,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.decoded_translation = UI.decodeText(segment, segment.translation);
                 segment.decoded_source = UI.decodeText(segment, segment.segment);
                 segment.unlocked = UI.isUnlockedSegment(segment);
-                segment.tagged = false;
+                segment.warnings = {};
+                segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
                 segment.fid = fid;
                 newSegments.push(this);
             }
@@ -114,6 +134,28 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         return newSegments;
     },
+    hasSegmentTagProjectionEnabled: function ( segment ) {
+        if (UI.enableTagProjection) {
+            if ( (segment.status === "NEW" || segment.status === "DRAFT") && (UI.checkXliffTagsInText(segment.segment) && (!UI.checkXliffTagsInText(segment.translation))) ) {
+                return true;
+            }
+        }
+        return false;
+    },
+    buildSegmentsFiles: function (fid, segments) {
+        segments.map(segment => {
+            var splittedSourceAr = segment.segment.split(UI.splittedTranslationPlaceholder);
+            if (splittedSourceAr.length > 1) {
+                let self = this;
+                $.each(splittedSourceAr, function (i) {
+                    self._segmentsFiles = self._segmentsFiles.set(segment.sid + '-' + (i + 1), fid);
+                });
+            } else {
+                this._segmentsFiles = this._segmentsFiles.set(segment.sid, fid);
+            }
+        });
+    },
+
     getSegmentById(sid, fid) {
         return this._segments[fid].find(function (seg) {
             return seg.get('sid') == sid;
@@ -396,13 +438,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             this.setBulkSelectionInterval(from + 1, to, fid);
         }
     },
-    setBulkSelectionSegments: function (segmentsArray) {
+    setBulkSelectionSegments: function ( segmentsArray ) {
         let self = this;
         this.segmentsInBulk = segmentsArray;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(function (segment) {
-                if (segmentsArray.indexOf(segment.get('sid')) > -1) {
-                    if (segment.get('ice_locked') == "1" && !segment.get('unlocked')) {
+        _.forEach(this._segments, function ( item, index ) {
+            self._segments[index] = self._segments[index].map(function ( segment ) {
+                if ( segmentsArray.indexOf(segment.get('sid')) > -1 ) {
+                    if ( segment.get('ice_locked') == "1" && !segment.get('unlocked') ) {
                         let index = segmentsArray.indexOf(segment.get('sid'));
                         self.segmentsInBulk.splice(index, 1);  // if is a locked segment remove it from bulk
                     } else {
@@ -413,11 +455,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             });
         });
     },
-    setMutedSegments: function (segmentsArray) {
+    setMutedSegments: function ( segmentsArray ) {
         let self = this;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(function (segment) {
-                if (segmentsArray.indexOf(segment.get('sid')) === -1) {
+        _.forEach(this._segments, function ( item, index ) {
+            self._segments[index] = self._segments[index].map(function ( segment ) {
+                if ( segmentsArray.indexOf(segment.get('sid')) === -1 ) {
                     return segment.set('muted', true);
                 }
                 return segment;
@@ -483,6 +525,40 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return current;
     },
 
+    filterGlobalWarning: function (type, sid) {
+        if (type === "TAGS") {
+
+            let fid = this._segmentsFiles.get(sid);
+            if ( !fid) {
+                fid = this._segmentsFiles.get(sid + "-1");
+            }
+            if(!fid){
+                return true
+            }
+            let index = this.getSegmentIndex(sid, fid);
+            let segment = this._segments[fid].get(index);
+            return segment.get('tagged');
+        }
+
+        return sid > -1
+    },
+    // Local warnings
+    setSegmentWarnings(sid, warning) {
+        const fid = this._segmentsFiles.get(sid);
+        let index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'warnings'], Immutable.fromJS(warning));
+    },
+    updateGlobalWarnings: function (warnings) {
+        Object.keys(warnings).map(key => {
+            Object.keys(warnings[key].Categories).map(key2 => {
+                warnings[key].Categories[key2] = warnings[key].Categories[key2].filter(this.filterGlobalWarning.bind(this, key2));
+            });
+        });
+        this._globalWarnings.matecat = warnings;
+    },
+    updateLexiqaWarnings: function(warnings){
+        this._globalWarnings.lexiqa = warnings.filter(this.filterGlobalWarning.bind(this, "LXQ"));
+    },
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
     },
@@ -492,7 +568,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
 
 // Register callback to handle all updates
-AppDispatcher.register(function (action) {
+AppDispatcher.register(function(action) {
 
     switch (action.actionType) {
         case SegmentConstants.RENDER_SEGMENTS:
@@ -669,6 +745,19 @@ AppDispatcher.register(function (action) {
             });
             // Todo remove this
             SegmentStore.emitChange(action.actionType);
+            break;
+        case SegmentConstants.SET_SEGMENT_WARNINGS:  // LOCAL
+            SegmentStore.setSegmentWarnings(action.sid, action.warnings);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[SegmentStore._segmentsFiles.get(action.sid)], SegmentStore._segmentsFiles.get(action.sid));
+            break;
+        case SegmentConstants.UPDATE_GLOBAL_WARNINGS:
+            SegmentStore.updateGlobalWarnings(action.warnings);
+            SegmentStore.emitChange(action.actionType, SegmentStore._globalWarnings);
+            break;
+
+        case SegmentConstants.QA_LEXIQA_ISSUES:
+            SegmentStore.updateLexiqaWarnings(action.warnings);
+            SegmentStore.emitChange(SegmentConstants.UPDATE_GLOBAL_WARNINGS, SegmentStore._globalWarnings);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

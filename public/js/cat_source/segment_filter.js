@@ -98,10 +98,7 @@ if (SegmentFilter.enabled())
             return localStorage.removeItem( keyForLocalStorage() ) ;
         },
 
-        filterSubmit : function( data, wantedSegment,extendendLocalStorageValues) {
-            if (!wantedSegment) {
-                wantedSegment = null;
-            }
+        filterSubmit : function( data ,extendendLocalStorageValues) {
             if(!extendendLocalStorageValues){
                 extendendLocalStorageValues = {};
             }
@@ -132,8 +129,8 @@ if (SegmentFilter.enabled())
                 SegmentActions.setMutedSegments(data[ 'segment_ids' ]);
 
                 var segmentToOpen ;
-
-                if ( !wantedSegment ) {
+                var lastSegmentId = SegmentFilter.getStoredState().lastSegmentId;
+                if ( !lastSegmentId ) {
                     segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
                     var segment$ = UI.getSegmentById(segmentToOpen);
                     if (segment$.length) {
@@ -141,11 +138,10 @@ if (SegmentFilter.enabled())
                     } else {
                         UI.scrollSegment(segment$, segmentToOpen);
                     }
-                } else if ( wantedSegment && !segmentIsInSample( wantedSegment, data[ 'segment_ids' ] ) ) {
-                    segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
-                    callbackForSegmentNotInSample( wantedSegment )  ;
+                } else if ( lastSegmentId && !segmentIsInSample( lastSegmentId, data[ 'segment_ids' ] ) ) {
+                    callbackForSegmentNotInSample( lastSegmentId )  ;
                 } else {
-                    segmentToOpen = wantedSegment ;
+                    segmentToOpen = lastSegmentId ;
                     var segment$ = UI.getSegmentById(segmentToOpen);
                     if (segment$) {
                         SegmentActions.openSegment(segmentToOpen);
@@ -164,11 +160,12 @@ if (SegmentFilter.enabled())
          *
          */
         openFilter : function() {
-
             CatToolActions.openSegmentFilter();
             this.open = true;
-            if ( this.getStoredState().serverData ) {
+            var localStorageData = this.getStoredState();
+            if ( localStorageData.serverData ) {
                 SegmentActions.setMutedSegments(this.getStoredState().serverData.segment_ids);
+                CatToolActions.setSegmentFilter(localStorageData.serverData, localStorageData.reactState);
                 this.filteringSegments = true;
                 setTimeout( function() {
                     UI.createButtons();
@@ -181,7 +178,7 @@ if (SegmentFilter.enabled())
         clearFilter : function() {
             this.clearStoredData();
             this.filteringSegments = false;
-            this.closeFilter() ;
+            SegmentActions.removeAllMutedSegments();
         },
 
         closeFilter : function() {
@@ -291,7 +288,6 @@ if (SegmentFilter.enabled())
             SegmentFilter.closeFilter();
             SegmentFilter.open = false;
         }
-        // SegmentFilter.openFilter();
     });
 
 

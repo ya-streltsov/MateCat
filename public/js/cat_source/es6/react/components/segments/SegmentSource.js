@@ -15,6 +15,7 @@ class SegmentSource extends React.Component {
             source : this.props.segment.decoded_source
 
         };
+        this.originalSource = this.createEscapedSegment(this.props.segment.segment);
         this.createEscapedSegment = this.createEscapedSegment.bind(this);
         this.decodeTextSource = this.decodeTextSource.bind(this);
         this.replaceSource = this.replaceSource.bind(this);
@@ -42,13 +43,12 @@ class SegmentSource extends React.Component {
         return this.props.decodeTextFn(segment, source);
     }
 
-    createEscapedSegment() {
-        var text = this.props.segment.segment;
+    createEscapedSegment(text) {
         if (!$.parseHTML(text).length) {
             text = text.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
         }
 
-        var escapedSegment = htmlEncode(text.replace(/\"/g, "&quot;"));
+        let escapedSegment = htmlEncode(text.replace(/\"/g, "&quot;"));
         /* this is to show line feed in source too, because server side we replace \n with placeholders */
         escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
         escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
@@ -230,13 +230,13 @@ class SegmentSource extends React.Component {
         if (QaCheckGlossary.enabled() && this.props.segment.opened && this.props.segment.qaGlossary) {
             source = this.markGlossaryUnusedMatches(source);
         }
-        let escapedSegment = this.createEscapedSegment();
+        //let escapedSegment = this.createEscapedSegment();
         return (
             <div ref={(container)=>this.sourceRef=container}
                  className={"source item"}
                  tabIndex={0}
                  id={"segment-" + this.props.segment.sid +"-source"}
-                 data-original={escapedSegment}
+                 data-original={this.originalSource}
                  dangerouslySetInnerHTML={ this.allowHTML(source) }
                  onCopy={this.onCopyEvent.bind(this)}
                  onDragStart={this.onDragEvent.bind(this)}
