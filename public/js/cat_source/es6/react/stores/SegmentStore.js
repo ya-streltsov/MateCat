@@ -43,7 +43,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     _segments: {},
     _segmentsFiles: Immutable.fromJS({}),
-    segmentsInBulk: [],
     _globalWarnings: {
         lexiqa: [],
         matecat: {
@@ -59,6 +58,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
     segmentsInBulk: [],
+    _footerTabsConfig: {},
     /**
      * Update all
      */
