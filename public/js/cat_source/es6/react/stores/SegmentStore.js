@@ -659,7 +659,7 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.TRANSLATION_EDITED:
-            let translation = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
+            // let translation = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.REGISTER_TAB:
