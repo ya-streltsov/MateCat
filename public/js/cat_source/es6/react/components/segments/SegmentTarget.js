@@ -73,6 +73,22 @@ class SegmentTarget extends React.Component {
         return this.props.decodeTextFn(segment, translation);
     }
 
+    markBlacklistMatches(source) {
+        let unusedMatches = this.props.segment.qaBlacklist;
+        let newHTML = source;
+
+        $.each(unusedMatches, function( index ) {
+            let value = this.match ;
+            value = escapeRegExp( value );
+            let re = new RegExp( sprintf( QaCheckBlacklist.qaCheckRegExp, value ), QaCheckBlacklist.qaCheckRegExpFlags);
+            newHTML = newHTML.replace(
+                re , '<span  class="blacklistItem">$1</span>'
+            );
+
+        });
+        return newHTML;
+    }
+
     allowHTML(string) {
         return {__html: string};
     }
@@ -108,7 +124,9 @@ class SegmentTarget extends React.Component {
     render() {
         let textAreaContainer = "";
         let translation = this.state.translation.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );
-
+        if (QaCheckBlacklist.enabled() && this.props.segment.opened && this.props.segment.qaBlacklist) {
+            translation = this.markBlacklistMatches(translation);
+        }
         if (this.props.isReviewImproved) {
             textAreaContainer = <div data-mount="segment_text_area_container">
                 <div className="textarea-container" onClick={this.onClickEvent.bind(this)}>

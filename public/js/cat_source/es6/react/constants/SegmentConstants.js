@@ -59,6 +59,7 @@ module.exports = keyMirror({
     SET_CHOSEN_CONTRIBUTION_INDEX: null,
     SET_GLOSSARY_TO_CACHE: null,
     SET_QA_CHECK_GLOSSARY_TO_CACHE: null,
+    SET_QA_CHECK_BLACKLIST_TO_CACHE: null,
     SET_OPEN_SEGMENT: null,
     OPEN_SEGMENT: null,
     MODIFIED_TRANSLATION: null,

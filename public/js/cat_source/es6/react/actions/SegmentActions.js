@@ -408,6 +408,12 @@ var SegmentActions = {
                 UI.failedConnection(0, 'glossary');
             });
     },
+    setQaCheckBlacklistItems(blacklist) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_QA_CHECK_BLACKLIST_TO_CACHE,
+            blacklist: blacklist
+        });
+    },
     deleteGlossaryItem: function (source, target) {
         return API.SEGMENT.deleteGlossaryItem(source, target)
             .fail(function () {

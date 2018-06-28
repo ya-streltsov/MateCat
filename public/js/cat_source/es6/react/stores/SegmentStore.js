@@ -504,6 +504,16 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             self._segments[obj.fid] = self._segments[obj.fid].setIn([obj.index, 'qaGlossary'], item);
         });
     },
+    setQACheckBlacklistToCache: function (blacklistObj) {
+        let self = this;
+        _.forEach(this._segments, function (item, index) {
+            self._segments[index] = self._segments[index].map(segment => segment.set('qaBlacklist', []));
+        });
+        _.forEach(blacklistObj, function (item, index) {
+            let obj = self.getSegmentIndexAndFid(index);
+            self._segments[obj.fid] = self._segments[obj.fid].setIn([obj.index, 'qaBlacklist'], item);
+        });
+    },
     setConfigTabs: function (tabName, visible, open) {
         this._footerTabsConfig[tabName] = {
             visible: visible,
@@ -633,11 +643,11 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
-            //let trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
+            let trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.REPLACE_SOURCE:
-            // let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
+            let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
             // SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             SegmentStore.emitChange(action.actionType, action.id, action.source);
             break;
@@ -670,6 +680,12 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.SET_QA_CHECK_GLOSSARY_TO_CACHE:
             SegmentStore.setQACheckGlossaryToCache(action.glossary);
+            _.forEach(SegmentStore._segments, function (item, index) {
+                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
+            });
+            break;
+        case SegmentConstants.SET_QA_CHECK_BLACKLIST_TO_CACHE:
+            SegmentStore.setQACheckBlacklistToCache(action.blacklist);
             _.forEach(SegmentStore._segments, function (item, index) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });

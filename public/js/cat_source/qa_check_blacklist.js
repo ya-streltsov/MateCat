@@ -8,17 +8,28 @@ QaCheckBlacklist.enabled = function() {
 if (QaCheckBlacklist.enabled() )
 (function($, UI, undefined) {
 
-    var globalReceived = false ;
-    var globalWarnings ;
+    var qaCheckRegExp = '\\b(%s)\\b' ;
+    // var cjkRegExp = '(%s)';
+    var regExpFlags = 'g';
 
-    function blacklistItemClick(e) {
-        // TODO: investigate the need for this. Click on .blacklistItem clears up the #outer
-        // this function forwards the click to the containing editarea.
-        e.preventDefault();
-        e.stopPropagation();
-        $(e.target).closest(UI.targetContainerSelector()).click();
-        console.log('blacklist item clicked');
-    }
+    // $( window ).on( 'segmentsAdded', function ( e ) {
+    //     globalReceived = false ;
+    //     renderGlobalWarnings() ;
+    // });
+
+    $(document).on('getWarning:global:success', function(e, data) {
+        renderGlobalWarnings(data.resp.data.blacklist) ;
+    });
+
+    $(document).on('getWarning:local:success', function(e, data) {
+        if ( !data.resp.data.blacklist  ) {
+            return ;
+        }
+
+        var matched_words = Object.keys( data.resp.data.blacklist.matches )
+
+        updateBlacklistItemsInSegment( UI.getSegmentId(data.segment.el), matched_words );
+    });
 
     function addTip( editarea ) {
         $('.blacklistItem', editarea).powerTip({
@@ -35,7 +46,6 @@ if (QaCheckBlacklist.enabled() )
             placement : 's'
         });
         $('.blacklistItem', editarea).data({ 'powertipjq' : $('<div class="blacklistTooltip">Blacklisted term</div>') });
-        $('.blacklistItem', editarea).on('click', blacklistItemClick);
     }
     /*
     * Can be called externaly (by LexiQA) to destroy powtip and prevent
@@ -49,92 +59,72 @@ if (QaCheckBlacklist.enabled() )
      * @param editarea
      * @param matched_words
      */
-    function updateBlacklistItemsInSegment( editarea, matched_words ) {
-        saveSelection() ;
+    function updateBlacklistItemsInSegment( segmentId, matched_words ) {
+        // saveSelection() ;
+        //
+        // editarea.find('.blacklistItem').each(function(index)  {
+        //     $(this).replaceWith( this.childNodes );
+        // });
+        //
+        // if ( matched_words.length ) {
+        //     editarea[0].normalize() ;
+        //
+        //     var newHTML = editarea.html() ;
+        //     if (LXQ.enabled())
+        //       newHTML = LXQ.cleanUpHighLighting(newHTML);
+        //     $(matched_words).each(function(index, value) {
+        //         value = escapeRegExp( value );
+        //         var re = new RegExp('\\b(' + value + ')\\b',"g");
+        //         newHTML = newHTML.replace(
+        //             re , '<span class="blacklistItem">$1</span>'
+        //         );
+        //     });
+        //     SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(editarea), UI.getSegmentFileId(editarea), newHTML);
+        // }
+        //
+        // restoreSelection();
+        //
+        // setTimeout(addTip( editarea ));
 
-        editarea.find('.blacklistItem').each(function(index)  {
-            $(this).replaceWith( this.childNodes );
+        var mapped = {}
+        mapped[segmentId] = [];
+        _.each(matched_words, function(item, key) {
+            mapped[segmentId].push({match: key});
         });
-
-        if ( matched_words.length ) {
-            editarea[0].normalize() ;
-
-            var newHTML = editarea.html() ;
-            if (LXQ.enabled())
-              newHTML = LXQ.cleanUpHighLighting(newHTML);
-            $(matched_words).each(function(index, value) {
-                value = escapeRegExp( value );
-                var re = new RegExp('\\b(' + value + ')\\b',"g");
-                newHTML = newHTML.replace(
-                    re , '<span class="blacklistItem">$1</span>'
-                );
-            });
-            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(editarea), UI.getSegmentFileId(editarea), newHTML);
-        }
-
-        restoreSelection();
-
-        $('.blacklistItem', editarea).on('click', blacklistItemClick);
-        addTip( editarea ) ;
+        // SegmentActions.updateQaCheckBlacklistItems(mapped);
     }
 
 
-    function renderGlobalWarnings() {
-        if ( !globalWarnings ) return ;
+    function renderGlobalWarnings(blacklist) {
 
         var mapped = {} ;
 
         // group by segment id
-        var segments_to_refresh = _.each( globalWarnings.matches, function ( item ) {
+        _.each( blacklist.matches, function ( item ) {
             mapped[ item.id_segment ] ? null : mapped[ item.id_segment ] = []  ;
             mapped[ item.id_segment ].push( { severity: item.severity, match: item.data.match } );
         });
 
-        _.each(Object.keys( mapped ) , function(item, index) {
-            var segment = UI.Segment.find( item );
-            if ( !segment || segment.isReadonly() ) return ;
+        SegmentActions.setQaCheckBlacklistItems(mapped);
 
-            var matched_words = _.chain( mapped[item]).map( function( match ) {
-                return match.match ;
-            }).uniq().value() ;
-
-            var editarea = segment.el.find(  UI.targetContainerSelector() ) ;
-            updateBlacklistItemsInSegment( editarea, matched_words ) ;
-        });
-
-        globalReceived = true ;
+        // _.each(Object.keys( mapped ) , function(item, index) {
+        //     var segment = UI.Segment.find( item );
+        //     if ( !segment || segment.isReadonly() ) return ;
+        //
+        //     var matched_words = _.chain( mapped[item]).map( function( match ) {
+        //         return match.match ;
+        //     }).uniq().value() ;
+        //
+        //     var editarea = segment.el.find(  UI.targetContainerSelector() ) ;
+        //     updateBlacklistItemsInSegment( editarea, matched_words ) ;
+        // });
+        //
+        // globalReceived = true ;
     }
 
-    $( window ).on( 'segmentsAdded', function ( e ) {
-        globalReceived = false ;
-        renderGlobalWarnings() ;
-    });
-
-    $(document).on('getWarning:global:success', function(e, data) {
-        if ( globalReceived ) {
-            return ;
-        }
-
-        globalWarnings = data.resp.data.blacklist ;
-        renderGlobalWarnings() ;
-    });
-
-    $(document).on('getWarning:local:success', function(e, data) {
-        if ( !data.resp.data.blacklist || data.segment.isReadonly() ) {
-            // No blacklist data contained in response, skip it
-            // or segment is readonly, skip
-            return ;
-        }
-
-        var matched_words = Object.keys( data.resp.data.blacklist.matches )
-        var editarea = data.segment.el.find( UI.targetContainerSelector() ) ;
-
-        updateBlacklistItemsInSegment( editarea, matched_words );
-    });
-
     $.extend(QaCheckBlacklist, {
-        reloadPowertip : reloadPowertip,
-        destroyPowertip: destroyPowertip
+        qaCheckRegExpFlags: regExpFlags,
+        qaCheckRegExp: qaCheckRegExp
     });
 
 })(jQuery, UI );
