@@ -1,20 +1,23 @@
 
 class HeaderJobInfo extends React.Component {
-    componentDidMount() {
+    downloadQaReport() {
 
+    }
+    componentDidMount() {
+        // $(this.dropdown).dropdown();
     }
     render () {
         return <div className="header-project-info">
-                {/*<div className="header-id-project-name">*/}
-                    {/*<div className="header-project-id">*/}
+                <div className="header-id-project-name">
+                    <div className="header-project-id">
                         {/*48503849*/}
-                    {/*</div>*/}
-                    {/*<div className="header-project-name">*/}
+                    </div>
+                    <div className="header-project-name">
                         {/*Test_Project_For_New_QR.html*/}
-                    {/*</div>*/}
-                {/*</div>*/}
+                    </div>
+                </div>
 
-                {/*<div className="header-team-assignee-icon">*/}
+                <div className="header-team-assignee-icon">
                     {/*<div className="header-team">MateCatone</div>*/}
                     {/*<div className="header-assignee">*/}
                         {/*<div className="header-icon-assignee">*/}
@@ -22,13 +25,13 @@ class HeaderJobInfo extends React.Component {
                         {/*</div>*/}
                         {/*<span className="assignee-first-name">Ruben</span> <span>Santillan</span>*/}
                     {/*</div>*/}
-                    {/*<div className="header-icon-dropdown ui icon top right pointing dropdown circular button">*/}
+                    {/*<div className="header-icon-dropdown ui icon top right pointing dropdown circular button" ref={(dropdown)=>this.dropdown=dropdown}>*/}
                         {/*<i className="icon-more_vert icon" />*/}
                         {/*<div className="menu">*/}
-                            {/*<a className="item">Download QA Report</a>*/}
+                            {/*<a className="item" onClick={this.downloadQaReport.bind(this)}>Download QA Report</a>*/}
                         {/*</div>*/}
                     {/*</div>*/}
-                {/*</div>*/}
+                </div>
         </div>
     }
 }
