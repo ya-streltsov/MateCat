@@ -894,13 +894,11 @@ UI = {
      * react components, closing side panel etc.
      */
     unmountSegments : function() {
-        $('[data-mount=translation-issues-button]').each( function() {
-            ReactDOM.unmountComponentAtNode(this);
-        });
         $('.article-segments-container').each(function (index, value) {
             ReactDOM.unmountComponentAtNode(value);
             delete UI.SegmentsContainers;
         });
+        this.removeWaypoints();
         $('#outer').empty();
     },
 
@@ -1025,7 +1023,7 @@ UI = {
 					$('#file-' + fid).append(newFile);
 				}
 			}
-            console.time("Time: RenderSegments"+fid);
+            // console.time("Time: RenderSegments"+fid);
             UI.renderSegments(this.segments, false, fid, where);
             // console.timeEnd("Time: RenderSegments"+fid);
             // console.timeEnd("Time: from start()");
@@ -1220,8 +1218,7 @@ UI = {
     },
 	copyAlternativeInEditarea: function(translation) {
 		if ($.trim(translation) !== '') {
-			if (this.body.hasClass('searchActive'))
-				SearchUtils.addWarningToSearchDisplay();
+
 			this.saveInUndoStack('copyalternative');
 
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), translation);
@@ -1668,7 +1665,7 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-			    if(d.details){
+			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.id,{});
@@ -1682,7 +1679,7 @@ UI = {
     translationIsToSave : function( segment ) {
         // add to setTranslation tail
         var alreadySet = this.alreadyInSetTranslationTail( segment.id );
-        var emptyTranslation = ( segment && segment.el.find('.editarea').text().trim().length )? false : true;
+        var emptyTranslation = ( segment && segment.el.find('.targetarea').text().trim().length )? false : true;
 
         return ((!alreadySet)&&(!emptyTranslation));
     },
@@ -1781,9 +1778,11 @@ UI = {
         var reqArguments = arguments;
 		var segment = $('#segment-' + id_segment);
 		var contextBefore = UI.getContextBefore(id_segment);
-		var contextAfter = UI.getContextAfter(id_segment);
+        var idBefore = UI.getIdBefore(id_segment);
+        var contextAfter = UI.getContextAfter(id_segment);
+        var idAfter = UI.getIdAfter(id_segment);
 
-		this.lastTranslatedSegmentId = id_segment;
+        this.lastTranslatedSegmentId = id_segment;
 
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
@@ -1829,7 +1828,9 @@ UI = {
             version: segment.attr('data-version'),
             propagate: propagate,
             context_before: contextBefore,
-            context_after: contextAfter
+            id_before: idBefore,
+            context_after: contextAfter,
+            id_after: idAfter,
         };
         if(isSplitted) {
             this.setStatus($('#segment-' + id_segment), status);
@@ -2018,58 +2019,6 @@ UI = {
         var deferred = new jQuery.Deferred() ;
         return deferred.resolve();
     },
-    /**
-     * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
-     * @param str
-     * @returns {XML|string}
-     */
-    decodePlaceholdersToText: function (str) {
-        if(!UI.hiddenTextEnabled) return str;
-		var _str = str;
-        if(UI.markSpacesEnabled) {
-            if(jumpSpacesEncode) {
-                _str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
-            }
-        }
-
-		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'"><br /></span>' )
-					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'"><br /></span>' )
-		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
-					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
-					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
-					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' )
-                    .replace(/(<\/span\>)$/gi, "</span><br class=\"end\">"); // For rangy cursor after a monad marker
-
-		return _str;
-    },
-
-	encodeSpacesAsPlaceholders: function(str, root) {
-        if(!UI.hiddenTextEnabled) return str;
-
-		var newStr = '';
-		$.each($.parseHTML(str), function() {
-
-			if(this.nodeName == '#text') {
-				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
-			} else {
-				match = this.outerHTML.match(/<.*?>/gi);
-				if(match.length == 1) { // se è 1 solo, è un tag inline
-
-				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
-					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
-				} else { // se sono più di due, ci sono tag innestati
-
-					newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
-
-				}
-			}
-		});
-		if(root) {
-			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
-		}
-		return newStr;
-	},
 
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
@@ -2136,7 +2085,7 @@ UI = {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
-            SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending');
+            SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending modified');
 
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
@@ -2255,6 +2204,13 @@ UI = {
         this.settedWaypoints = true;
 	},
 
+    removeWaypoints: function (  ) {
+        if (this.settedWaypoints) {
+            Waypoint.destroyAll();
+            this.settedWaypoints = false;
+        }
+    },
+
     storeClientInfo: function () {
         clientInfo = {
             xRes: window.screen.availWidth,
@@ -2276,13 +2232,16 @@ UI = {
 	},
 	undoInSegment: function() {
 		console.log('undoInSegment');
-		if (this.undoStackPosition === 0)
-			this.saveInUndoStack('undo');
-		var ind = 0;
+        if (this.undoStack.length === 0) {
+            return;
+        }
+        if (this.undoStackPosition === 0) {
+            this.saveInUndoStack( 'undo' );
+        }
+        var ind = 0;
 		if (this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1])
 			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), this.undoStack[ind]);
-        // this.editarea.html(this.undoStack[ind]);
         setTimeout(function () {
             setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
             $('.undoCursorPlaceholder').remove();
@@ -2320,12 +2279,12 @@ UI = {
 		if (this.editarea.html() === '') return;
         if (this.editarea.length === 0 ) return ;
 
-		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
-		var tt = this.editarea.html().match(/&lt;/gi);
-        if ( tt ) {
-            if ( (tt.length) && (!ss) )
-                return;
-        }
+        // var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
+        // var tt = this.editarea.html().match(/&lt;/gi);
+        // if ( tt ) {
+        //     if ( (tt.length) && (!ss) )
+        //         return;
+        // }
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {

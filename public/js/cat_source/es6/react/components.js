@@ -19,9 +19,9 @@ window.QualityReportVersions = require('./components/review_improved/QualityRepo
 
 window.Review_QualityReportButton = require('./components/review/QualityReportButton').default ;
 
-window.SubHeaderContainer = require('./components/header/SubHeaderContainer').default ;
-window.FileNavigationMenu = require('./components/header/FileNavigationMenu').default;
-window.SegmentFilter = require('./components/header/segment_filter/SegmentsFilter').default;
+window.SubHeaderContainer = require('./components/header/cattol/SubHeaderContainer').default ;
+window.FileNavigationMenu = require('./components/header/cattol/FileNavigationMenu').default;
+window.SegmentFilter = require('./components/header/cattol/segment_filter/SegmentsFilter').default;
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
 window.ManageConstants = require('./constants/ManageConstants');
@@ -43,7 +43,7 @@ window.ProjectContainer = require('./components/projects/ProjectContainer').defa
 window.JobContainer = require('./components/projects/JobContainer').default;
 window.JobMenu = require('./components/projects/JobMenu').default;
 
-window.Header = require("./components/Header").default;
+window.Header = require("./components/header/Header").default;
 
 window.ModalWindow = require('./modals/ModalWindowComponent').default;
 window.SuccessModal = require('./modals/SuccessModal').default;
@@ -70,8 +70,12 @@ window.OpenJobBox = require('./components/outsource/OpenJobBox').default;
 window.SegmentActions = require('./actions/SegmentActions');
 window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;
+window.Segment = require('./components/segments/Segment').default;
+window.SegmentFooter = require('./components/segments/SegmentFooter').default;
 window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatches').default;
 window.SegmentTabMessages = require('./components/segments/SegmentFooterTabMessages').default;
 window.SegmentWarnings = require('./components/segments/SegmentWarnings').default;
 
-window.SearchUtils = require('./components/header/search/ui.search');
+window.SearchUtils = require('./components/header/cattol/search/searchUtils');
+
+

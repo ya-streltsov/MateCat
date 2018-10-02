@@ -211,6 +211,7 @@ class QA {
     const ERR_GLOSSARY_MISMATCH = 26;
     const ERR_SPECIAL_ENTITY_MISMATCH = 27;
     const ERR_EUROSIGN_MISMATCH = 28;
+    const ERR_UNCLOSED_G_TAG = 29;
 
     const ERR_TAG_MISMATCH = 1000;
 
@@ -274,6 +275,7 @@ class QA {
             25   => 'Star sign mismatch',
             26   => 'Glossary mismatch',
             27   => 'Special char entity mismatch',
+            29   => 'File-breaking tag issue',
 
             /*
              * grouping
@@ -319,7 +321,9 @@ class QA {
          *  2 =>  'bad source xml',
          *  3 =>  'bad target xml',
          */
+        29 => "Should be < g ... > ... < /g >",
         1000 => "Press the < key to add tags."
+
     );
 
     protected static $asciiPlaceHoldMap = array(
@@ -425,6 +429,7 @@ class QA {
                 ) );
                 break;
             case self::ERR_UNCLOSED_X_TAG:
+            case self::ERR_UNCLOSED_G_TAG:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
@@ -1034,12 +1039,18 @@ class QA {
 
             $errorList = libxml_get_errors();
             foreach ( $errorList as $error ) {
-                if ( $error->code == 76 /* libxml _xmlerror XML_ERR_TAG_NOT_FINISHED */ ) {
-                    if ( preg_match( '#<x[^/>]+>#', $xmlString ) && preg_match( '# x #', $error->message ) ) {
-                        $this->_addError( self::ERR_UNCLOSED_X_TAG );
-                    }
+                if ( $this->checkUnclosedTag( "x", $xmlString, $error ) ) {
+                    $this->_addError( self::ERR_UNCLOSED_X_TAG );
+                    return $dom;
+                }
+
+                if ( $this->checkUnclosedTag( "g", $xmlString, $error ) ) {
+                    $this->_addError( self::ERR_UNCLOSED_G_TAG );
+                    return $dom;
                 }
             }
+
+
 //            Log::doLog($xmlString);
 //            Log::doLog($errorList);
 
@@ -1047,6 +1058,15 @@ class QA {
         }
 
         return $dom;
+    }
+
+    private function checkUnclosedTag($tag, $xmlString, $error){
+        /* error code 76 libxml _xmlerror XML_ERR_TAG_NOT_FINISHED */
+        $message = str_replace("\n", " ", $error->message);
+        if ( $error->code == 76 && preg_match( '#<'.$tag.'[^/>]+>#', $xmlString ) && preg_match( '# '.$tag.' #', $message ) ) {
+            return true;
+        }
+        return false;
     }
 
     public function getMalformedXmlStructs() {
@@ -1286,8 +1306,8 @@ class QA {
         //</g> ...
         // <g ... >
         // <x ... />
-        preg_match_all( '#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:(?:x|ph)[^>]+|[^/>]+)>#u', rtrim( $this->source_seg ), $source_tags );
-        preg_match_all( '#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:(?:x|ph)[^>]+|[^/>]+)>#u', rtrim( $this->target_seg ), $target_tags );
+        preg_match_all( '#</g>[\s\t\x{a0}\r\n\.\,\;\!\?]+|[\s\t\x{a0}\r\n]+<(?:(?:x|ph)[^>]+|[^/>]+)>#u', rtrim( $this->source_seg ), $source_tags );
+        preg_match_all( '#</g>[\s\t\x{a0}\r\n\.\,\;\!\?]+|[\s\t\x{a0}\r\n]+<(?:(?:x|ph)[^>]+|[^/>]+)>#u', rtrim( $this->target_seg ), $target_tags );
 //        preg_match_all('#[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->source_seg), $source_tags);
 //        preg_match_all('#[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->target_seg), $target_tags);
         $source_tags = $source_tags[ 0 ];
@@ -1306,8 +1326,8 @@ class QA {
         //get all special chars ( and spaces ) after a tag x or ph
         //</x> ...
         //</ph> ...
-        preg_match_all( '#<(?:(?:x|ph)[^>]+|[^/>]+)>+[\s\t\x{a0}\r\n]#u', $this->source_seg, $source_tags );
-        preg_match_all( '#<(?:(?:x|ph)[^>]+|[^/>]+)>+[\s\t\x{a0}\r\n]#u', $this->target_seg, $target_tags );
+        preg_match_all( '#<(?:(?:x|ph)[^>]+|[^/>]+)>+[\s\t\x{a0}\r\n\,\.\;\!\?]#u', $this->source_seg, $source_tags );
+        preg_match_all( '#<(?:(?:x|ph)[^>]+|[^/>]+)>+[\s\t\x{a0}\r\n\,\.\;\!\?]#u', $this->target_seg, $target_tags );
         $source_tags = $source_tags[ 0 ];
         $target_tags = $target_tags[ 0 ];
         if ( ( count( $source_tags ) != count( $target_tags ) ) ) {

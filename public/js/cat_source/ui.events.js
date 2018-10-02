@@ -41,14 +41,14 @@ $.extend(UI, {
             UI.gotoNextSegment();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate_nextUntranslated.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
-            $('.editor .next-untranslated').click();
-            $('.editor .next-unapproved').click();
+            $('.editor .next-untranslated:not(.disabled)').click();
+            $('.editor .next-unapproved:not(.disabled)').click();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             if ( config.isReview ) {
-                $('body.review .editor .approved').click();
+                $('body.review .editor .approved:not(.disabled)').click();
             } else {
-                if ( $('.editor .translated').length > 0 ) {
+                if ( $('.editor .translated:not(.disabled)').length > 0 ) {
                     $('.editor .translated').click();
                 } else if ( $('.editor .guesstags').length > 0 ) {
                     $('.editor .guesstags').click();
@@ -66,6 +66,12 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
+        }).on('keydown.shortcuts', null, "ctrl+u", function(e) {
+            // to prevent the underline shortcut
+            e.preventDefault();
+        }).on('keydown.shortcuts', null, "ctrl+b", function(e) {
+            // to prevent the underline shortcut
+            e.preventDefault();
         });
 	},
 	unbindShortcuts: function() {
@@ -248,9 +254,6 @@ $.extend(UI, {
 
 		$('html').on('click', 'section .actions', function(e){
             e.stopPropagation();
-        }).on('click', '#quality-report', function(e){
-            var win = window.open( $('#quality-report' ).data('url') , '_self');
-            win.focus();
         }).on('keydown', function(e) {
             var esc = 27 ;
 

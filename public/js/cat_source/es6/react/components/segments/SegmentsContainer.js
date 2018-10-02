@@ -5,7 +5,7 @@
 var React = require('react');
 let PropTypes = require('prop-types');
 var SegmentStore = require('../../stores/SegmentStore');
-var Segment = require('./Segment').default;
+let Segment = require('./Segment').default;
 var SegmentConstants = require('../../constants/SegmentConstants');
 
 class SegmentsContainer extends React.Component {
@@ -93,6 +93,39 @@ class SegmentsContainer extends React.Component {
         }
     }
 
+    getSegments() {
+        let items = [];
+        let self = this;
+        let isReviewImproved = !!(this.props.isReviewImproved);
+        let isReviewExtended = !!(this.props.isReviewExtended);
+        this.state.segments.forEach((segImmutable) => {
+            let segment = segImmutable.toJS();
+            const item = <Segment
+                key={segment.sid}
+                segment={segment}
+                timeToEdit={this.state.timeToEdit}
+                fid={this.props.fid}
+                isReviewImproved={isReviewImproved}
+                isReviewExtended={isReviewExtended}
+                isReview={this.props.isReview}
+                enableTagProjection={this.props.enableTagProjection}
+                decodeTextFn={this.props.decodeTextFn}
+                tagLockEnabled={this.state.tagLockEnabled}
+                tagModesEnabled={this.props.tagModesEnabled}
+                speech2textEnabledFn={this.props.speech2textEnabledFn}
+                reviewType={this.props.reviewType}
+                setLastSelectedSegment={this.setLastSelectedSegment.bind(this)}
+                setBulkSelection={this.setBulkSelection.bind(this)}
+                ref={(el) => {
+                    this.segmentsRefs[segment.sid] = el;
+                    this.segmentsRefsArray.push(segment.sid);
+                }}
+            />;
+            items.push(item);
+        });
+        return items;
+    }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
@@ -124,32 +157,7 @@ class SegmentsContainer extends React.Component {
     }
 
     render() {
-        let items = [];
-        let isReviewImproved = !!(this.props.isReviewImproved);
-        this.state.segments.forEach((segImmutable) => {
-            let segment = segImmutable.toJS();
-            const item = <Segment
-                key={segment.sid}
-                segment={segment}
-                timeToEdit={this.state.timeToEdit}
-                fid={this.props.fid}
-                isReviewImproved={isReviewImproved}
-                isReview={this.props.isReview}
-                enableTagProjection={this.props.enableTagProjection}
-                decodeTextFn={this.props.decodeTextFn}
-                tagLockEnabled={this.state.tagLockEnabled}
-                tagModesEnabled={this.props.tagModesEnabled}
-                speech2textEnabledFn={this.props.speech2textEnabledFn}
-                reviewType={this.props.reviewType}
-                setLastSelectedSegment={this.setLastSelectedSegment.bind(this)}
-                setBulkSelection={this.setBulkSelection.bind(this)}
-                ref={(el) => {
-                    this.segmentsRefs[segment.sid] = el;
-                    this.segmentsRefsArray.push(segment.sid);
-                }}
-            />;
-            items.push(item);
-        });
+        let items = this.getSegments();
         return <div ref={(el) => {
             this.containerRef = el
         }} style={{display:'inline-block'}}>{items}</div>;

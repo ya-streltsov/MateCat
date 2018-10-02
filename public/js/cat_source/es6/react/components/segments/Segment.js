@@ -7,6 +7,9 @@ let SegmentFooter = require('./SegmentFooter').default;
 let SegmentBody = require('./SegmentBody').default;
 let TranslationIssuesSideButtons = require('../review/TranslationIssuesSideButton').default;
 let IssuesContainer = require('./footer-tab-issues/SegmentFooterTabIssues').default;
+let ReviewExtendedPanel = require('../review_extended/ReviewExtendedPanel').default;
+let WrapperLoader = require('../../common/WrapperLoader').default;
+
 let Immutable = require('immutable');
 
 class Segment extends React.Component {
@@ -37,8 +40,10 @@ class Segment extends React.Component {
             unlocked: UI.isUnlockedSegment(this.props.segment),
             readonly: readonly,
             inBulk: false,
-            tagProjectionEnabled: this.props.enableTagProjection && (this.props.segment.status.toLowerCase() === 'draft' || this.props.segment.status.toLowerCase() === 'new')
-            && !UI.checkXliffTagsInText(this.props.segment.translation)
+            tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')
+            && !UI.checkXliffTagsInText(this.props.segment.translation),
+            showRevisionPanel: false,
+            selectedTextObj: null
         }
     }
 
@@ -152,6 +157,9 @@ class Segment extends React.Component {
         if (this.props.isReviewImproved) {
             classes.push("reviewImproved");
         }
+        if (this.props.segment.edit_area_locked) {
+            classes.push("editAreaLocked");
+        }
         if (this.props.segment.inBulk) {
             classes.push("segment-selected-inBulk");
         }
@@ -247,7 +255,7 @@ class Segment extends React.Component {
     }
 
     isFirstOfSplit() {
-        return (!_.isUndefined(this.props.split_group) &&
+        return (!_.isUndefined(this.props.segment.split_group) &&
             this.props.segment.split_group.indexOf(this.props.segment.sid) === 0);
     }
 
@@ -258,12 +266,16 @@ class Segment extends React.Component {
     }
 
     getTranslationIssues() {
-        if (this.state.showTranslationIssues &&
-            (!(this.props.segment.readonly === 'true') && !this.isSplitted())) {
+        if (this.state.showTranslationIssues && !this.state.showRevisionPanel &&
+            ( !(this.props.segment.readonly === 'true')  &&
+                ( !this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit()))
+            )
+        ) {
             return <TranslationIssuesSideButtons
-                sid={this.props.segment.sid.split('-')[0]}
-                reviewType={this.props.reviewType}
-                segment={this.props.segment}
+                    sid={this.props.segment.sid.split('-')[0]}
+                    reviewType={this.props.reviewType}
+                    segment={this.props.segment}
+                    open={this.state.showRevisionPanel}
             />;
         }
         return null;
@@ -284,6 +296,42 @@ class Segment extends React.Component {
         }
     }
 
+    openRevisionPanel(data) {
+        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) ) {
+            this.setState( {
+                showRevisionPanel: true,
+                showTranslationIssues: false,
+                selectedTextObj : data.selection
+            } );
+        } else {
+            this.setState({
+                showRevisionPanel: false,
+                showTranslationIssues: true,
+                selectedTextObj: null
+            });
+        }
+    }
+    removeSelection() {
+        var selection = document.getSelection();
+        if ( this.section.contains(selection.anchorNode) ) {
+            selection.removeAllRanges();
+        }
+        this.setState({
+            selectedTextObj: null
+        });
+    }
+    /*
+    Is possible to close the single segmentIssue panel passing the id or all segments issue panel
+    without passing anything
+     */
+    closeRevisionPanel(sid) {
+        if ( (!sid  || (sid && parseInt(sid) === parseInt(this.props.segment.sid))) && this.state.showRevisionPanel ) {
+            this.setState({
+                showRevisionPanel: false,
+                showTranslationIssues: true
+            });
+        }
+    }
 
     allowHTML(string) {
         return {__html: string};
@@ -297,6 +345,14 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.addListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
+        //Review
+        SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel.bind(this));
+        SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel.bind(this));
+        if (this.state.showRevisionPanel) {
+            setTimeout(()=>{
+                UI.openIssuesPanel(null, false)
+            });
+        }
     }
 
 
@@ -308,6 +364,9 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
+        //Review
+        SegmentStore.removeListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
+        SegmentStore.removeListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -337,12 +396,15 @@ class Segment extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         return (
-            (!Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment))) ||
-            (!Immutable.fromJS(nextState.segment_classes).equals(Immutable.fromJS(this.state.segment_classes))) ||
-            (nextState.modified !== this.state.modified) ||
-            (nextState.autopropagated !== this.state.autopropagated) ||
-            (nextState.showTranslationIssues !== this.state.showTranslationIssues) ||
-            (nextState.readonly !== this.state.readonly)
+            !Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment)) ||
+            !Immutable.fromJS(nextState.segment_classes).equals(Immutable.fromJS(this.state.segment_classes)) ||
+            nextState.modified !== this.state.modified ||
+            nextState.autopropagated !== this.state.autopropagated ||
+            nextState.status !== this.state.status ||
+            nextState.showTranslationIssues !== this.state.showTranslationIssues ||
+            nextState.readonly !== this.state.readonly ||
+            nextState.showRevisionPanel !== this.state.showRevisionPanel ||
+            (nextState.selectedTextObj !== this.state.selectedTextObj)
         );
     }
 
@@ -458,6 +520,7 @@ class Segment extends React.Component {
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
                         locked={!this.props.segment.unlocked && this.props.segment.ice_locked === '1'}
                         openSegment={this.openSegment}
+                        removeSelection={this.removeSelection.bind(this)}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
@@ -488,6 +551,25 @@ class Segment extends React.Component {
                          data-sid={this.props.segment.sid}>
                         {translationIssues}
                     </div>
+                </div>
+                <div className="segment-side-container">
+                    {this.props.isReviewExtended && this.state.showRevisionPanel ? (
+                        <div className="review-balloon-container">
+                            {!this.props.segment.versions ? (
+                                (null)
+                            ) : (
+                                <ReviewExtendedPanel
+                                    reviewType={this.props.reviewType}
+                                    segment={this.props.segment}
+                                    sid={this.props.segment.sid}
+                                    isReview={config.isReview}
+                                    selectionObj={this.state.selectedTextObj}
+                                    removeSelection={this.removeSelection.bind(this)}
+                                />
+                            )}
+
+                        </div>
+                    ) : (null)}
                 </div>
             </section>
         );

@@ -138,10 +138,7 @@ class SegmentBody extends React.Component {
                             <p>{copySourceShortcuts.toUpperCase()}</p>
                         </div>
                         <SegmentTarget
-                            fid={this.props.fid}
                             segment={this.props.segment}
-                            reviewType={this.props.reviewType}
-                            isReview={this.props.isReview}
                             isReviewImproved={this.props.isReviewImproved}
                             enableTagProjection={this.props.enableTagProjection}
                             decodeTextFn={this.props.decodeTextFn}
@@ -152,6 +149,7 @@ class SegmentBody extends React.Component {
                             locked={this.props.locked}
                             readonly={this.props.readonly}
                             openSegment={this.props.openSegment}
+                            removeSelection={this.props.removeSelection}
                         />
 
                     </div>

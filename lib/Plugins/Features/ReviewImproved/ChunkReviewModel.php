@@ -97,6 +97,14 @@ class ChunkReviewModel
         }
     }
 
+    public function getPenaltyPoints(){
+        return $this->chunk_review->penalty_points;
+    }
+
+    public function getReviewedWordsCount(){
+        return $this->chunk_review->reviewed_words_count;
+    }
+
     /**
      *
      * @throws \Exception

@@ -418,7 +418,7 @@
         },
 
         isUnlockedSegment: function ( segment ) {
-            let readonly = UI.isReadonlySegment(segment);
+            var readonly = UI.isReadonlySegment(segment);
             return (segment.ice_locked === "1" && !readonly) && !_.isNull(UI.getFromStorage('unlocked-' + segment.sid))
         },
         getStatusForAutoSave : function( segment ) {
@@ -447,7 +447,8 @@
         },
 
         saveSegment: function(segment) {
-            this.setTranslation({
+            SegmentActions.addClassToSegment(UI.getSegmentId( segment ), 'saved');
+            return this.setTranslation({
                 id_segment: this.getSegmentId(segment),
                 status: this.getStatusForAutoSave( segment ) ,
                 caller: 'autosave'
@@ -570,7 +571,7 @@
                 if (before.length === 0 ) {
                     return undefined;
                 }
-                else if (before.attr('data-split-original-id') !== originalId) {
+                else if (before.attr('data-split-original-id') && before.attr('data-split-original-id') !== originalId) {
                     return before;
                 } else {
                     return findBefore(before);
@@ -599,7 +600,7 @@
                 if (after.length === 0 ) {
                     return undefined;
                 }
-                else if (after.attr('data-split-original-id') !== originalId) {
+                else if (after.attr('data-split-original-id') && after.attr('data-split-original-id') !== originalId) {
                     return after;
                 } else {
                     return findAfter(after);
@@ -618,6 +619,49 @@
             } else {
                 return $('.source', segmentAfter ).text();
             }
+        },
+        getIdBefore: function(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentBefore = (function  findBefore(segment) {
+                var before = segment.prev('section');
+                if (before.length === 0 ) {
+                    return undefined;
+                }
+                else if (before.attr('data-split-original-id') !== originalId) {
+                    return before;
+                } else {
+                    return findBefore(before);
+                }
+
+            })(segment);
+            // var segmentBefore = findSegmentBefore();
+            if (_.isUndefined(segmentBefore)) {
+                return null;
+            }
+            var segmentBeforeId = UI.getSegmentId(segmentBefore);
+            return segmentBeforeId;
+        },
+        getIdAfter: function(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentAfter = (function findAfter(segment) {
+                var after = segment.next('section');
+                if (after.length === 0 ) {
+                    return undefined;
+                }
+                else if (after.attr('data-split-original-id') !== originalId) {
+                    return after;
+                } else {
+                    return findAfter(after);
+                }
+
+            })(segment);
+            if (_.isUndefined(segmentAfter)) {
+                return null;
+            }
+            var segmentAfterId = UI.getSegmentId(segmentAfter);
+            return segmentAfterId;
         },
         /**
          * findNextSegment
@@ -663,9 +707,9 @@
             return API.SEGMENT.approveSegments(segmentsArray).done(function ( response ) {
                 if (response.data && response.unchangeble_segments.length === 0) {
                     segmentsArray.forEach(function ( item ) {
-                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "APPROVED");
-                        let $segment = UI.getSegmentById(item);
+                        var $segment = UI.getSegmentById(item);
                         if ( $segment ) {
                             UI.setSegmentModified( $segment, false ) ;
                             UI.disableTPOnSegment( $segment )
@@ -673,14 +717,14 @@
 
                     })
                 } else if (response.unchangeble_segments.length > 0) {
-                    let arrayMapped = _.map(segmentsArray, function ( item ) {
+                    var arrayMapped = _.map(segmentsArray, function ( item ) {
                         return parseInt(item);
                     });
-                    let array = _.difference(arrayMapped, response.unchangeble_segments);
+                    var array = _.difference(arrayMapped, response.unchangeble_segments);
                     array.forEach(function ( item ) {
-                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "APPROVED");
-                        let $segment = UI.getSegmentById(item);
+                        var $segment = UI.getSegmentById(item);
                         if ( $segment ) {
                             UI.setSegmentModified( $segment, false ) ;
                             UI.disableTPOnSegment( $segment )
@@ -694,23 +738,23 @@
             return API.SEGMENT.translateSegments(segmentsArray).done(function ( response ) {
                 if (response.data && response.unchangeble_segments.length === 0) {
                     segmentsArray.forEach(function ( item ) {
-                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "TRANSLATED");
-                        let $segment = UI.getSegmentById(item);
+                        var $segment = UI.getSegmentById(item);
                         if ( $segment ) {
                             UI.setSegmentModified( $segment, false ) ;
                             UI.disableTPOnSegment( $segment )
                         }
                     })
                 } else if (response.unchangeble_segments.length > 0) {
-                    let arrayMapped = _.map(segmentsArray, function ( item ) {
+                    var arrayMapped = _.map(segmentsArray, function ( item ) {
                         return parseInt(item);
                     });
-                    let array = _.difference(arrayMapped, response.unchangeble_segments);
+                    var array = _.difference(arrayMapped, response.unchangeble_segments);
                     array.forEach(function ( item ) {
-                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "TRANSLATED");
-                        let $segment = UI.getSegmentById(item);
+                        var $segment = UI.getSegmentById(item);
                         if ( $segment ) {
                             UI.setSegmentModified( $segment, false ) ;
                             UI.disableTPOnSegment( $segment )
@@ -719,6 +763,15 @@
                     UI.showTranslateAllModalWarnirng();
                 }
             });
+        },
+        disableSegmentButtons: function ( sid ) {
+            var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved, .next-untranslated, .translated");
+            div.addClass('disabled').attr("disabled", false);
+
+        },
+        enableSegmentsButtons: function ( sid ) {
+            var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved, .next-untranslated, .translated");
+            div.removeClass('disabled').attr("disabled", true);
         }
     });
 })(jQuery); 

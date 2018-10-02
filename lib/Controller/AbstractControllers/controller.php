@@ -54,6 +54,10 @@ abstract class controller implements IController {
         return $this->user;
     }
 
+    public function userIsLogged(){
+        return $this->userIsLogged;
+    }
+
     /**
      * Controllers Factory
      *
@@ -83,6 +87,8 @@ abstract class controller implements IController {
 
         //Default :  catController
         $action = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( isset( $_GET[ 'action' ] ) ? $_GET[ 'action' ] : 'cat' );
+        $actionList = explode( '\\', $action ); // do not accept namespaces ( Security issue: directory traversal )
+        $action = end( $actionList ); // do not accept namespaces ( Security issue: directory traversal )
         $className = $action . "Controller";
 
         //Put here all actions we want to be performed by ALL controllers

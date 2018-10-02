@@ -140,6 +140,22 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'qa-report-improved.js'
             },
+            qualityReport: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    }
+                },
+                src: [
+                    basePath + 'cat_source/es6/react/components/quality_report/*.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/quality_report/*.js',
+                    basePath + 'cat_source/es6/react/utils/textUtils.js',
+                ],
+                dest: buildPath + 'qa-report.js'
+            },
             test: {
                 options: {
                     external: [
@@ -230,10 +246,10 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/segment_notes.*.js',
 
                     basePath + 'cat_source/ui.review.js',
-                    basePath + 'cat_source/review_extended_footer.js',
-                    basePath + 'cat_source/review_extended_footer.*.js',
-                    basePath + 'cat_source/review_extended.js',
-                    basePath + 'cat_source/review_extended.*.js',
+                    basePath + 'cat_source/review_extended.default.js',
+                    basePath + 'cat_source/review_extended.footer.js',
+                    basePath + 'cat_source/review_extended.ui_extension.js',
+                    basePath + 'cat_source/review_extended.common_events.js',
                     basePath + 'cat_source/review_improved.js',
                     basePath + 'cat_source/review_improved.*.js',
                     basePath + 'cat_source/review.*.js',
@@ -268,6 +284,8 @@ module.exports = function(grunt) {
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/calendar.min.js',
                     basePath + 'lib/imagesloaded.min.js',
+                    basePath + 'lib/jquery.atwho.min.js',
+                    basePath + 'lib/jquery.caret.min.js',
                     gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
@@ -472,6 +490,16 @@ module.exports = function(grunt) {
                 ],
                 dest: cssBase + 'build/analyze-build.css'
             },
+            distQR: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                src: [
+                    cssBase + 'sass/quality-report.scss'
+                ],
+                dest: cssBase + 'build/quality_report.css'
+            },
             distIcons: {
                 options : {
                     sourceMap : false,
@@ -566,6 +594,7 @@ module.exports = function(grunt) {
         'browserify:libs',
         'browserify:components',
         'browserify:qaReportsVersions',
+        'browserify:qualityReport',
         'concat:libs',
         'concat:libs_upload',
         'concat:semantic',
