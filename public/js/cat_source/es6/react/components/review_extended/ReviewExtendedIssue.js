@@ -24,6 +24,13 @@ class ReviewExtendedIssue extends React.Component {
 			}).first();
 	}
 
+    getSeverity(category) {
+
+        return category.severities.find((sev)=>{
+            return sev.label === this.props.issue.severity;
+        });
+    }
+
 	deleteIssue(event) {
 		event.preventDefault();
 		event.stopPropagation();
@@ -179,6 +186,7 @@ class ReviewExtendedIssue extends React.Component {
 	render() {
     	if ( this.state.visible ) {
             let category = this.getCategory();
+            let severity = this.getSeverity(category);
             // let formatted_date = moment(this.props.issue.created_at).format('lll');
 
             let commentViewButtonClass = (this.state.commentView ? "re-active" : '');
@@ -215,12 +223,12 @@ class ReviewExtendedIssue extends React.Component {
 
 			</div>;
             //END comments html section
-
+            let labelSev = (severity.code) ? severity.code : severity.label.substring( 0, 3 );
             return <div className={containerClass} ref={( node ) => this.el = node}>
 				<div className="re-item-box re-issue shadow-1">
 					<div className="issue-head pad-right-10">
 						<span className="re-category-issue-head" title={category.label}>{category.label}</span>
-						<b><span title="Type of severity">[{this.props.issue.severity.substring( 0, 3 )}]</span></b>
+						<b><span title={"Type of severity: " + severity.label}>[{labelSev}]</span></b>
 					</div>
 					<div className="issue-activity-icon">
 						<div className="icon-buttons">

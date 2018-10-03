@@ -90,8 +90,10 @@ class QualitySummaryTable extends React.Component {
                 if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
                     catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.label) * severityFound[0].penalty);
                     catHtml.push(<div className="qr-element severity">{totalIssues.get('founds').get(currentSev.label)}</div>);
-                } else {
+                } else if ( severityFound.length > 0 ) {
                     catHtml.push(<div className="qr-element severity"/>);
+                } else {
+                    catHtml.push(<div className="qr-element severity severity-not-present"/>);
                 }
             });
             let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;

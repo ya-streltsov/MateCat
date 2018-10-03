@@ -60,47 +60,21 @@ class ReviewExtendedCategorySelector extends React.Component{
                 </div>
 
             </div>
-        } else if ( this.props.category.severities.length === 3 ) {
-            let button1 =  <button key={'value-' + this.props.category.severities[0].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[0].label)}
-                                   className="ui left attached button"
-                                   title={this.props.category.severities[0].label}>{this.props.category.severities[0].label.substring(0,3)}
-                                   </button>;
-            let button2 =  <button key={'value-' + this.props.category.severities[1].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[1].label)}
-                                   className="ui attached button"
-                                   title={this.props.category.severities[1].label}>{this.props.category.severities[1].label.substring(0,3)}
-            </button>;
-            let button3 =  <button key={'value-' + this.props.category.severities[2].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[2].label)}
-                                   className="ui right attached button"
-                                   title={this.props.category.severities[2].label}>{this.props.category.severities[2].label.substring(0,3)}
-                                   </button>;
-            select = <div className="re-severities-buttons ui tiny buttons" ref={(input) => { this.selectRef = input;}}
-                          name="severities"
-                          title="Select severities">
-                            {button1}
-                            {button2}
-                            {button3}
-                    </div>
-        } else if ( this.props.category.severities.length === 2 ) {
-            let button1 =  <button key={'value-' + this.props.category.severities[0].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[0].label)}
-                                   className="ui left attached button"
-                                   title={this.props.category.severities[0].label}>{this.props.category.severities[0].label.substring(0,3)}
-            </button>;
-            let button2 =  <button key={'value-' + this.props.category.severities[1].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[1].label)}
-                                   className="ui right attached button"
-                                   title={this.props.category.severities[1].label}>{this.props.category.severities[1].label.substring(0,3)}
-            </button>;
+        } else if ( this.props.category.severities.length <= 3 ) {
+            let buttons = this.props.category.severities.map(function(severity, i) {
+                let label = (this.props.category.severities[i].code) ? this.props.category.severities[i].code : this.props.category.severities[i].label.substring(0,3);
+                return <button key={'value-' + this.props.category.severities[i].label}
+                               onClick={this.onClick.bind(this, this.props.category.severities[i].label)}
+                               className="ui left attached button"
+                               title={this.props.category.severities[i].label}>{label}
+                </button> ;
+            }.bind(this));
 
             select = <div className="re-severities-buttons ui tiny buttons" ref={(input) => { this.selectRef = input;}}
                           name="severities"
                           title="Select severities">
-                {button1}
-                {button2}
-            </div>
+                            {buttons}
+                    </div>
         }
 		return <div className={"re-item re-category-item " + containerClass}>
             <div className="re-item-box re-error">

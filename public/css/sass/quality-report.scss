@@ -278,7 +278,11 @@ header {
                                     &:first-child {
                                         border: none;
                                     }
+                                    &.severity-not-present {
+                                        background: #e4e4e400
+                                    }
                                 }
+
 
                             }
                             .qr-title, .qr-element {
