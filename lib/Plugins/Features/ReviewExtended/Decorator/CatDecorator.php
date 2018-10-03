@@ -18,6 +18,7 @@ class CatDecorator extends ReviewImproved\Decorator\CatDecorator {
         $this->template->review_type = 'extended';
         $this->template->segmentFilterEnabled = true;
         $this->template->showReplaceOptionsInSearch = true ;
+        $this->template->quality_report_href = \INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
 //        if ( $this->controller->isRevision() ) {
 //            $this->template->footer_show_revise_link    = false;
 //            $this->template->footer_show_translate_link = true;
