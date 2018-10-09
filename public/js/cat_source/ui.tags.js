@@ -137,12 +137,26 @@ $.extend(UI, {
             .replace( /\&lt;\/_plh_/gi, "</span" )
             .replace( /\&lt;lxqwarning/gi, "<lxqwarning" )
             .replace( /\&lt;\/lxqwarning/gi, "</lxqwarning" )
-            .replace( /\&lt;div\>/gi, "<div>" )
-            .replace( /\&lt;\/div\>/gi, "</div>" )
-            .replace( /\&lt;br\>/gi, "<br />" )
-            .replace( /\&lt;br \/>/gi, "<br />" )
-            .replace( /\&lt;mark/gi, "<mark" )
-            .replace( /\&lt;\/mark/gi, "</mark" )
+
+
+            .replace( /(\&lt;div[^\&]*\&gt;)/gi, brTx2 ) //open div
+            .replace( /(\&lt;span[^\&]*\&gt;)/gi, brTx2 ) //open span
+            .replace( /(\&lt;a(:?.*?)\&gt;)/gi, brTx2 ) //open a with href
+            .replace( /(\&lt;li[^\&]*\&gt;)/gi, brTx2 ) //open li
+            .replace( /(\&lt;ul[^\&]*\&gt;)/gi, brTx2 ) //open ul
+            .replace( /(\&lt;p[^\&]*\&gt;)/gi, brTx2 ) //open p
+
+            .replace( /(\&lt;\s*\/\s*div\&gt;)/gi, brTx2 ) //closed div
+            .replace( /(\&lt;\s*\/\s*span\&gt;)/gi, brTx2 ) //closed span
+            .replace( /(\&lt;\s*\/\s*a\&gt;)/gi, brTx2 ) //closed a
+            .replace( /(\&lt;\s*\/\s*li\&gt;)/gi, brTx2 ) //closed li
+            .replace( /(\&lt;\s*\/\s*ul\&gt;)/gi, brTx2 ) //closed ul
+            .replace( /(\&lt;\s*\/\s*p\&gt;)/gi, brTx2 ) //closed p
+            .replace( /(\&lt;\s*br\s*\/\s*\&gt;)/gi, brTx2 ) //BR
+
+
+            .replace( /\&lt;mark/gi, "<mark" ) // For glossary check
+            .replace( /\&lt;\/mark/gi, "</mark" ) // For glossary check
             .replace( /\&lt;ins/gi, "<ins" ) // For translation conflicts tab
             .replace( /\&lt;\/ins/gi, "</ins" ) // For translation conflicts tab
             .replace( /\&lt;del/gi, "<del" ) // For translation conflicts tab
@@ -150,8 +164,9 @@ $.extend(UI, {
             .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
             .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );
 
-
         tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
+
+
         tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
         tx = this.transformTagsWithHtmlAttribute(tx);
         // tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );  // This to show the cursor after the last tag, moved to editarea component
