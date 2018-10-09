@@ -145,6 +145,8 @@ $.extend(UI, {
             .replace( /(\&lt;li[^\&]*\&gt;)/gi, brTx2 ) //open li
             .replace( /(\&lt;ul[^\&]*\&gt;)/gi, brTx2 ) //open ul
             .replace( /(\&lt;p[^\&]*\&gt;)/gi, brTx2 ) //open p
+            .replace( /(\&lt;b[^\&]*\&gt;)/gi, brTx2 ) //open b
+
 
             .replace( /(\&lt;\s*\/\s*div\&gt;)/gi, brTx2 ) //closed div
             .replace( /(\&lt;\s*\/\s*span\&gt;)/gi, brTx2 ) //closed span
@@ -152,6 +154,9 @@ $.extend(UI, {
             .replace( /(\&lt;\s*\/\s*li\&gt;)/gi, brTx2 ) //closed li
             .replace( /(\&lt;\s*\/\s*ul\&gt;)/gi, brTx2 ) //closed ul
             .replace( /(\&lt;\s*\/\s*p\&gt;)/gi, brTx2 ) //closed p
+            .replace( /(\&lt;\s*\/\s*b\&gt;)/gi, brTx2 ) //closed b
+
+            .replace( /(\&lt;img[^\&]*\&gt;)/gi, brTx2 ) //IMG
             .replace( /(\&lt;\s*br\s*\/\s*\&gt;)/gi, brTx2 ) //BR
 
 
@@ -240,7 +245,7 @@ $.extend(UI, {
         if ( segment.length == 0 ) return ;
 
         var sourceTags = htmlDecode($('.source', segment).data('original'))
-            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk|b|span|div|img|a|p|ul|li|br)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
         this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
     },
