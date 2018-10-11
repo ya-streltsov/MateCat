@@ -32,7 +32,7 @@ class INIT {
     public static $HTTPHOST;
     public static $PROTOCOL;
     public static $DEBUG               = true;
-    public static $PRINT_ERRORS        = false;
+    public static $PRINT_ERRORS        = true;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
