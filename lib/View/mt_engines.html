@@ -446,3 +446,22 @@
         <a href="https://cloud.google.com/translate/" target="_blank" class="continuebtn btn-ok">Find out more</a>
     </template>
 </div>
+
+<div metal:define-macro="template-intento">
+    <template id="mt-provider-intento-fields">
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <div class="mt-error-key">Error message</div>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>API key<sup>*</sup></label>
+                <input class="required" data-field-name="secret" />
+            </div>
+        </div>
+    </template>
+    <template id="mt-provider-intento-msg">
+        <p>A performance of third-party AI models varies up to 4x case by case. It depends on how their training data is similar to yours and you never know. Given 100x difference in price, the wrong choice may be a complete miss. We help to source, evaluate and use the right models in a vendor-agnostic fashion.</p>
+        <a href="https://inten.to" target="_blank" class="continuebtn btn-ok">Intento</a>
+    </template>
+</div>
