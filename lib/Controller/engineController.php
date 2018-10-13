@@ -241,6 +241,20 @@ class engineController extends ajaxController {
 
                 break;
 
+            case strtolower( Constants_Engines::INTENTO ):
+
+                /**
+                 * Create a record of type Intento
+                 */
+                $newEngineStruct = EnginesModel_IntentoStruct::getStruct();
+
+                $newEngineStruct->name                                = $this->name;
+                $newEngineStruct->uid                                 = $this->user->uid;
+                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'apikey' ]        = $this->engineData[ 'secret' ];
+
+                break;
+
             case strtolower( Constants_Engines::GOOGLE_TRANSLATE ):
 
                 /**
@@ -328,7 +342,7 @@ class engineController extends ajaxController {
 
                 return;
             }
-            
+
         } elseif ( $newEngineStruct instanceof EnginesModel_LetsMTStruct ) {
             // TODO: Do a simple translation request so that the system wakes up by the time the user needs it for translating
             // TODO: Tilde MT engine allows to select multiple translation systems. Should we wake up all of them?
