@@ -458,7 +458,20 @@
                 <label>API key<sup>*</sup></label>
                 <input class="required" data-field-name="secret" />
             </div>
+            <div class="provider-field">
+                <label>Providers</label>
+                <select name="providers">
+                    <option value="none" selected="">Choose provider...</option>
+                    <option tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" value="mmt">ModernMT</option>
+                    <option value="altlang">AltLang</option>
+                </select>
+            </div>
+            <div class="provider-field">
+
+            </div>
         </div>
+
+
     </template>
     <template id="mt-provider-intento-msg">
         <p>A performance of third-party AI models varies up to 4x case by case. It depends on how their training data is similar to yours and you never know. Given 100x difference in price, the wrong choice may be a complete miss. We help to source, evaluate and use the right models in a vendor-agnostic fashion.</p>

@@ -156,7 +156,6 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
     abstract protected function _decode( $rawValue );
 
     public function _call( $url, Array $curl_options = array() ) {
-
         $mh       = new MultiCurlHandler();
         $uniq_uid = uniqid( '', true );
 
