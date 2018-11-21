@@ -6,10 +6,8 @@ class Engines_Intento extends Engines_AbstractEngine
 {
 
     const INTENTO_USER_AGENT   = 'Intento.MatecatPlugin/1.2';
-    const INTENTO_PROVIDER_KEY = 'j5p1AVG0ZNctzkTFSaGj6VNwBjC3z5A2';
+    const INTENTO_PROVIDER_KEY = 'd3ic8QPYVwRhy6IIEHi6yiytaORI2kQk';
     const INTENTO_API_URL      = 'https://api.inten.to';
-    private $_matecat_user_agent;
-
 
     protected $_config
         = array(
@@ -45,20 +43,55 @@ class Engines_Intento extends Engines_AbstractEngine
      *
      * @return array
      */
-    protected function _decode($rawValue)
+    protected function _decode($rawValue, $parameters = null, $function = null)
     {
         $all_args = func_get_args();
-
         if (is_string($rawValue))
         {
-            $_response = json_decode($rawValue, true);
-            $decoded   = array(
-                'data' => array(
-                    'translations' => array(
-                        array('translatedText' => $this->_resetSpecialStrings($_response["results"][0]))
+            $result = json_decode($rawValue, false);
+            if ($result AND isset($result->id))
+            {
+                $id = $result->id;
+                if (isset($result->response) AND isset($result->done) AND $result->done == true)
+                {
+                    $text    = $result->response[0]->results[0];
+                    $decoded = array(
+                        'data' => array(
+                            'translations' => array(
+                                array('translatedText' => $this->_resetSpecialStrings($text))
+                            )
+                        )
+                    );
+
+                } elseif (isset($result->done) AND $result->done == false)
+                {
+                    sleep(5);
+                    $cnf = array('async' => true, 'id' => $id);
+
+                    return $this->_curl_async($cnf, $parameters, $function);
+                } elseif (isset($result->error) AND $result->error != null)
+                {
+                    $decoded = array(
+                        'error' => array(
+                            'code'    => '-2',
+                            'message' => $result->error->reason
+                        )
+                    );
+                } else
+                {
+                    $cnf = array('async' => true, 'id' => $id);
+
+                    return $this->_curl_async($cnf, $parameters, $function);
+                }
+            } else
+            {
+                $decoded = array(
+                    'error' => array(
+                        'code'    => '-1',
+                        'message' => ''
                     )
-                )
-            );
+                );
+            }
 
         } else
         {
@@ -67,8 +100,8 @@ class Engines_Intento extends Engines_AbstractEngine
                 $_response_error = json_decode($rawValue['error']["response"], true);
                 $decoded         = array(
                     'error' => array(
-                        'code'    => $_response_error['error']['code'],
-                        'message' => $_response_error['error']['message']
+                        'code'    => array_key_exists('error', $_response_error) ? array_key_exists('code', $_response_error['error']) ? -$_response_error['error']['code'] : '-1' : '-1',
+                        'message' => array_key_exists('error', $_response_error) ? array_key_exists('message', $_response_error['error']) ? $_response_error['error']['message'] : '' : ''
                     )
                 );
             } else
@@ -94,7 +127,7 @@ class Engines_Intento extends Engines_AbstractEngine
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-            $this->_preserveSpecialStrings($all_args[1]['context']['text']),
+            $this->_preserveSpecialStrings($parameters['context']['text']),
             $mt_result->translatedText,
             100 - $this->getPenalty() . "%",
             "MT-" . $this->getName(),
@@ -122,12 +155,15 @@ class Engines_Intento extends Engines_AbstractEngine
         $parameters['context']['from'] = $_config['source'];
         $parameters['context']['to']   = $_config['target'];
         $parameters['context']['text'] = $_config['segment'];
-        if ($this->provider != null AND $this->provider != '')
+        $provider                      = $this->provider;
+        $provider                      = "ai.text.translate.microsoft.translator_text_api.2-0";
+        if ($provider != null AND $provider != '')
         {
-            $parameters['service']['provider'] = $this->provider;
+            $parameters['service']['async']    = true;
+            $parameters['service']['provider'] = $provider;
             if ($this->providerauth != null AND $this->providerauth != '')
             {
-                $parameters['service']['auth'][$this->provider] = array($this->providerauth);
+                $parameters['service']['auth'][$provider] = array($this->providerauth);
             }
             if ($this->category != null AND $this->category != '')
             {
@@ -147,9 +183,34 @@ class Engines_Intento extends Engines_AbstractEngine
 
         $this->call("translate_relative_url", $parameters, true);
 
-        $this->_resetMatecatUserAgent(); //Set Matecat User Agent
-
         return $this->result;
+
+    }
+
+    protected function _curl_async($config, $parameters = null, $function = null)
+    {
+        $id = $config['id'];
+        if ($this->apikey != null AND $this->apikey != '')
+        {
+            $_headers = array('apikey: ' . $this->apikey, 'Content-Type: application/json');
+        }
+
+        $this->_setIntentoUserAgent(); //Set Intento User Agent
+
+        $this->_setAdditionalCurlParams(
+            array(
+                CURLOPT_HTTPHEADER => $_headers
+            )
+        );
+
+        $url      = self::INTENTO_API_URL . '/operations/' . $id;
+        $curl_opt = array(
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => static::GET_REQUEST_TIMEOUT
+        );
+        $rawValue = $this->_call($url, $curl_opt);
+
+        return $this->_decode($rawValue, $parameters, $function);
 
     }
 
@@ -180,18 +241,9 @@ class Engines_Intento extends Engines_AbstractEngine
      */
     private function _setIntentoUserAgent()
     {
-        $this->_matecat_user_agent = INIT::$BUILD_NUMBER;
-        INIT::$BUILD_NUMBER        .= ' ' . self::INTENTO_USER_AGENT;
+        $this->curl_additional_params[CURLOPT_USERAGENT] = self::INTENTO_USER_AGENT . ' ' . INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER;
     }
 
-
-    /**
-     *  Reset Matecat + Intento user agent
-     */
-    private function _resetMatecatUserAgent()
-    {
-        INIT::$BUILD_NUMBER = $this->_matecat_user_agent;
-    }
 
     public static function getProviderList()
     {
@@ -200,10 +252,10 @@ class Engines_Intento extends Engines_AbstractEngine
         $result       = $conn->get('IntentoProviders');
         if ($result)
         {
-            //return json_decode($result);
+           // return json_decode($result);
         }
 
-        $_api_url = self::INTENTO_API_URL . '/ai/text/translate?fields=auth&integrated=true';
+        $_api_url = self::INTENTO_API_URL . '/ai/text/translate?fields=auth&integrated=true&published=true';
         $curl     = curl_init($_api_url);
         $_params  = array(
             CURLOPT_HTTPHEADER     => array('apikey: ' . self::INTENTO_PROVIDER_KEY, 'Content-Type: application/json'),
@@ -223,12 +275,14 @@ class Engines_Intento extends Engines_AbstractEngine
         {
             foreach ($result as $value)
             {
-                $_providers[$value->id] = array('id' => $value->id, 'name' => $value->name, 'vendor' => $value->vendor, 'auth_example'=>(array)$value->auth);
+                $example = (array)$value->auth;
+                $example = json_encode($example);
+                $_providers[$value->id] = array('id' => $value->id, 'name' => $value->name, 'vendor' => $value->vendor, 'auth_example' => $example);
             }
             ksort($_providers);
         }
         $conn->set('IntentoProviders', json_encode($_providers));
-        $conn->expire('IntentoProviders', 60 * 60 * 24 * 7);
+        $conn->expire('IntentoProviders', 60 * 60 * 24);
 
         return $_providers;
     }
