@@ -165,9 +165,9 @@ class Engines_Intento extends Engines_AbstractEngine
             {
                 $parameters['service']['auth'][$provider] = array($this->providerauth);
             }
-            if ($this->category != null AND $this->category != '')
+            if ($this->providercategory != null AND $this->providercategory != '')
             {
-                $parameters['context']['category'] = $this->category;
+                $parameters['context']['category'] = $this->providercategory;
             }
         }
 

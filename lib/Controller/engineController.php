@@ -261,12 +261,13 @@ class engineController extends ajaxController
                  */
                 $newEngineStruct = EnginesModel_IntentoStruct::getStruct();
 
-                $newEngineStruct->name                         = $this->name;
-                $newEngineStruct->uid                          = $this->user->uid;
-                $newEngineStruct->type                         = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters['apikey']   = $this->engineData['secret'];
-                $newEngineStruct->extra_parameters['provider'] = $this->engineData['provider'];
-                $newEngineStruct->extra_parameters['providerkey'] = $this->engineData['providerkey'];
+                $newEngineStruct->name                                 = $this->name;
+                $newEngineStruct->uid                                  = $this->user->uid;
+                $newEngineStruct->type                                 = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters['apikey']           = $this->engineData['secret'];
+                $newEngineStruct->extra_parameters['provider']         = $this->engineData['provider'];
+                $newEngineStruct->extra_parameters['providerkey']      = $this->engineData['providerkey'];
+                $newEngineStruct->extra_parameters['providercategory'] = $this->engineData['providercategory'];
 
                 break;
 

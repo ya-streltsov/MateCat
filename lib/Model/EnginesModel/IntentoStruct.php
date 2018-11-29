@@ -30,7 +30,7 @@ class EnginesModel_IntentoStruct extends EnginesModel_EngineStruct {
         'apikey' => "",
         'provider'=> "",
         'providerkey'=>"",
-        'category'=> ""
+        'providercategory'=> ""
     );
 
     /**
