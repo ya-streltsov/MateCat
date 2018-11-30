@@ -65,7 +65,7 @@ class Engines_Intento extends Engines_AbstractEngine
 
                 } elseif (isset($result->done) AND $result->done == false)
                 {
-                    sleep(5);
+                    sleep(2);
                     $cnf = array('async' => true, 'id' => $id);
 
                     return $this->_curl_async($cnf, $parameters, $function);
@@ -156,14 +156,15 @@ class Engines_Intento extends Engines_AbstractEngine
         $parameters['context']['to']   = $_config['target'];
         $parameters['context']['text'] = $_config['segment'];
         $provider                      = $this->provider;
-        $provider                      = "ai.text.translate.microsoft.translator_text_api.2-0";
         if ($provider != null AND $provider != '')
         {
             $parameters['service']['async']    = true;
+            $parameters['service']['trace']    = true;
             $parameters['service']['provider'] = $provider;
-            if ($this->providerauth != null AND $this->providerauth != '')
+            if ($this->providerkey != null AND $this->providerkey != '')
             {
-                $parameters['service']['auth'][$provider] = array($this->providerauth);
+                $providerkey                              = json_decode($this->providerkey);
+                $parameters['service']['auth'][$provider] = array($providerkey);
             }
             if ($this->providercategory != null AND $this->providercategory != '')
             {
@@ -252,7 +253,7 @@ class Engines_Intento extends Engines_AbstractEngine
         $result       = $conn->get('IntentoProviders');
         if ($result)
         {
-           // return json_decode($result);
+            // return json_decode($result);
         }
 
         $_api_url = self::INTENTO_API_URL . '/ai/text/translate?fields=auth&integrated=true&published=true';
@@ -275,8 +276,8 @@ class Engines_Intento extends Engines_AbstractEngine
         {
             foreach ($result as $value)
             {
-                $example = (array)$value->auth;
-                $example = json_encode($example);
+                $example                = (array)$value->auth;
+                $example                = json_encode($example);
                 $_providers[$value->id] = array('id' => $value->id, 'name' => $value->name, 'vendor' => $value->vendor, 'auth_example' => $example);
             }
             ksort($_providers);
