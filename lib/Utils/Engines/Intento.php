@@ -159,7 +159,6 @@ class Engines_Intento extends Engines_AbstractEngine
         if ($provider != null AND $provider != '')
         {
             $parameters['service']['async']    = true;
-            $parameters['service']['trace']    = true;
             $parameters['service']['provider'] = $provider;
             if ($this->providerkey != null AND $this->providerkey != '')
             {
