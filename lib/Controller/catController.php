@@ -521,9 +521,6 @@ class catController extends viewController
         $this->decorator = new CatDecorator($this, $this->template);
         $this->decorator->decorate();
 
-        var_dump($this->template);
-        exit;
-
         $this->featureSet->appendDecorators(
             'CatDecorator',
             $this,

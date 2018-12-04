@@ -252,7 +252,7 @@ class Engines_Intento extends Engines_AbstractEngine
         $result       = $conn->get('IntentoProviders');
         if ($result)
         {
-            // return json_decode($result);
+             return json_decode($result);
         }
 
         $_api_url = self::INTENTO_API_URL . '/ai/text/translate?fields=auth&integrated=true&published=true';
